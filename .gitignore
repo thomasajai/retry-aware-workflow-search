@@ -1,0 +1,7 @@
+.asr/
+.uvcache/
+.models/
+.hf/
+.scratch/
+__pycache__/
+notes/transcripts/*.log
