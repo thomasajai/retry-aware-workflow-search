@@ -4,6 +4,32 @@ Course project for [COMS 6113: Topics in Agentic Systems, Fall 2026](https://dap
 
 The [full project description](PROJECT.md) is the canonical statement of the topic, motivation, problem, proposed approach, and suggested reading. Check the [course schedule](https://daplab.cs.columbia.edu/agentic-systems/) for upcoming requirements. The five requested papers are stored in the [local paper collection](papers/README.md).
 
+## OpenRouter key check
+
+Fill in `OPENROUTER_API_KEY` in the local `.env` file (or copy `.env.example`
+to `.env` if setting up a fresh checkout). Keep the real key out of
+`.env.example`. Run from the repository root:
+
+```powershell
+python scripts/test_openrouter.py
+```
+
+To also check the account credit balance and the key's remaining spending limit:
+
+```powershell
+python scripts/test_openrouter.py --credits
+```
+
+The spending limit is a cap, not funded credit. If the credits endpoint denies
+access, account balance lookup may require a management key.
+
+This uses Python's standard library; no packages need to be installed. It checks
+authentication using [OpenRouter's current-key endpoint](https://openrouter.ai/docs/api/api-reference/api-keys/get-current-api-key)
+without generating tokens. It does not print the key or API response. Success
+confirms authentication, not model access or available credit. Failures return
+a nonzero exit code. `.env` and `.env.*` are ignored by Git, except for the
+placeholder `.env.example`. The local file stores the key as plain text.
+
 ## Research question
 
 How can we profile and search model assignments for multi-stage agent workflows with retries under a limited evaluation budget? The search should account for success, deployment cost, and latency, including failed attempts and execution paths that terminate early. It should also report the cost of *finding* a configuration, separate from the cost of *running* it.
