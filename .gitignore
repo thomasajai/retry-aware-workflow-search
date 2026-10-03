@@ -11,3 +11,10 @@ agentopt/
 .env
 .env.*
 !.env.example
+
+# Keep account identifiers and credit balances out of version control.
+/results/openrouter-checks/
+/results/openrouter-current-check.json
+/results/openrouter-diagnostic.json
+/results/archive/*/openrouter-current-check.json
+/results/archive/*/openrouter-diagnostic.json
