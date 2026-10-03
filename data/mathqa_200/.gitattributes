@@ -1,0 +1,2 @@
+# Preserve dataset bytes so the manifest checksums remain valid after checkout.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
