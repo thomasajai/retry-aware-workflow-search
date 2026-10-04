@@ -18,5 +18,10 @@ agentopt/
 /results/openrouter-current-check.json
 /results/openrouter-diagnostic.json
 /results/mathqa_calls.jsonl
+/results/mathqa_runs.sqlite3
+/results/mathqa_runs.sqlite3-journal
+/results/mathqa_runs.sqlite3-wal
+/results/mathqa_runs.sqlite3-shm
+/results/mathqa_tables/
 /results/archive/*/openrouter-current-check.json
 /results/archive/*/openrouter-diagnostic.json

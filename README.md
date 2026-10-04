@@ -51,6 +51,74 @@ The direct dependencies in `pyproject.toml` are `langgraph` for the workflow,
 `.python-version` selects Python 3.12. uv's cache is configured as `.uvcache`
 inside this repository; both that cache and `.venv` are ignored by Git.
 
+## MathQA batch experiment
+
+`scripts/mathqa_batch.py` selects the first 50 records in the downloaded
+200-question subset. Save a prepared run without making API calls:
+
+```powershell
+uv run python scripts/mathqa_batch.py
+```
+
+To create and execute a new paid batch of 150 requests:
+
+```powershell
+uv run python scripts/mathqa_batch.py --run
+```
+
+For a small paid test with one question per model (three requests total):
+
+```powershell
+uv run python scripts/mathqa_batch.py --run --questions 1
+```
+
+`--questions` defaults to 50 and must be between 1 and the dataset's record count.
+It also works without `--run` to prepare a smaller run without API requests.
+Set `OPENROUTER_API_KEY` in `.env` first. The script finishes all selected attempts
+for each model before starting the next model. `MAX_CONCURRENT_REQUESTS` in
+the script defaults to 5; it limits overlapping requests within that model.
+The model order is Qwen 2.5 7B, Qwen3 32B, then DeepSeek V3.2.
+
+Run settings and individual call outcomes are stored in the Git-ignored
+`results/mathqa_runs.sqlite3`. Calls retain answer text, full response JSON,
+raw response text, reported usage and cost, elapsed seconds, and errors.
+Missing measurements stay `NULL`. Expected API failures are recorded and
+the remaining attempts continue; there are no automatic retries. Unexpected
+errors stop the batch, cancel pending tasks, and mark the run interrupted.
+Ctrl+C also records interruption when the process can finish its cleanup.
+
+Every invocation creates a new run; resume is not implemented. A completed
+call means a nonempty answer was returned without a detected generation error.
+Response-template compliance and mathematical correctness are not yet validated.
+See [the batch experiment note](notes/mathqa-batch-experiment.md) for the live-run
+results, reasoning/format issues, and proposed next steps.
+Exit codes are 0 for setup or an entirely successful batch,
+1 for a batch with failed calls, 2 for invalid arguments or a missing key,
+and 130 for Ctrl+C.
+
+The separate `scripts/mathqa_table.py` script reads SQLite without changing it
+and writes a standalone HTML answer table. The batch command also calls this
+exporter after execution finishes or Ctrl+C cleanup completes. Export the most
+recently created run independently:
+
+```powershell
+uv run python scripts/mathqa_table.py
+```
+
+Or select a specific run using the ID printed by the batch script:
+
+```powershell
+uv run python scripts/mathqa_table.py --run-id YOUR_RUN_ID
+```
+
+Open the printed HTML file path in a browser. Output defaults to
+`results/mathqa_tables/mathqa_<run-id>.html` and is ignored by Git. Use `--output`
+to choose another HTML path or `--database` to read another SQLite database.
+The table follows the run's saved question and model order. Missing answers are
+blank, failed and unfinished attempts are tinted, and partial answers remain
+visible. If multiple attempts exist, the highest attempt number is shown.
+Exporting makes no API requests. Setup-only runs therefore produce blank tables.
+
 ## OpenRouter key check
 
 Fill in `OPENROUTER_API_KEY` in the local `.env` file (or copy `.env.example`
