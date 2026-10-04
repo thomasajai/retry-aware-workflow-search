@@ -1,5 +1,6 @@
 .asr/
 .uvcache/
+.venv/
 .models/
 .hf/
 .scratch/

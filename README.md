@@ -4,6 +4,23 @@ Course project for [COMS 6113: Topics in Agentic Systems, Fall 2026](https://dap
 
 The [full project description](PROJECT.md) is the canonical statement of the topic, motivation, problem, proposed approach, and suggested reading. Check the [course schedule](https://daplab.cs.columbia.edu/agentic-systems/) for upcoming requirements. The five requested papers are stored in the [local paper collection](papers/README.md).
 
+## Python setup
+
+This repository uses uv with Python 3.12. From the repository root:
+
+```powershell
+uv sync
+uv run python --version
+```
+
+`uv sync` installs the dependency versions recorded in `uv.lock` into `.venv`.
+`uv run` uses that environment without requiring manual activation.
+
+The direct dependencies in `pyproject.toml` are `langgraph` for the workflow,
+`httpx` for OpenRouter HTTP requests, and `python-dotenv` for loading `.env`.
+`.python-version` selects Python 3.12. uv's cache is configured as `.uvcache`
+inside this repository; both that cache and `.venv` are ignored by Git.
+
 ## OpenRouter key check
 
 Fill in `OPENROUTER_API_KEY` in the local `.env` file (or copy `.env.example`
