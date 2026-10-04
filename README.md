@@ -4,17 +4,33 @@ Course project for [COMS 6113: Topics in Agentic Systems, Fall 2026](https://dap
 
 The [full project description](PROJECT.md) is the canonical statement of the topic, motivation, problem, proposed approach, and suggested reading. Check the [course schedule](https://daplab.cs.columbia.edu/agentic-systems/) for upcoming requirements. The five requested papers are stored in the [local paper collection](papers/README.md).
 
-## Python setup
+## Python setup and MathQA solver
 
 This repository uses uv with Python 3.12. From the repository root:
 
 ```powershell
 uv sync
-uv run python --version
+uv run python scripts/mathqa_solver.py
 ```
 
 `uv sync` installs the dependency versions recorded in `uv.lock` into `.venv`.
-`uv run` uses that environment without requiring manual activation.
+`uv run` uses that environment without requiring manual activation. Set
+`OPENROUTER_API_KEY` in the repository's `.env` before running the solver.
+Each run makes one paid OpenRouter request using `qwen/qwen-2.5-7b-instruct`
+for the fixed question `mathqa_test_0002`. Change `SELECTED_MODEL` in the script
+to select another model from `MODELS`.
+
+The LangGraph workflow is `START -> solver -> END`. It prints the answer with
+reasoning and calculation, input and output token counts, and the total cost
+for that run. OpenRouter's reported usage is appended to
+`results/mathqa_calls.jsonl`, which is ignored by Git. Failed requests are also
+logged; unavailable usage is recorded as `null`, not zero. The log preserves
+additional usage fields, such as reasoning and cached token counts.
+
+Requests use temperature 0, a 512-token output limit, a 60-second HTTP timeout,
+and no automatic client retries. The correct answer and dataset rationale are
+excluded from the solver's prompt. With one call per workflow, the call cost
+is also the total run cost; totals are not accumulated across previous runs.
 
 The direct dependencies in `pyproject.toml` are `langgraph` for the workflow,
 `httpx` for OpenRouter HTTP requests, and `python-dotenv` for loading `.env`.
