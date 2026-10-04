@@ -16,7 +16,7 @@ uv run python scripts/mathqa_solver.py
 `uv sync` installs the dependency versions recorded in `uv.lock` into `.venv`.
 `uv run` uses that environment without requiring manual activation. Set
 `OPENROUTER_API_KEY` in the repository's `.env` before running the solver.
-Each run makes one paid OpenRouter request using `qwen/qwen-2.5-7b-instruct`
+Each run makes one paid OpenRouter request using `qwen/qwen3-32b`
 for the fixed question `mathqa_test_0002`. Change `SELECTED_MODEL` in the script
 to select another model from `MODELS`.
 
@@ -34,10 +34,14 @@ connection setup and network time. It excludes response JSON parsing, answer
 validation, and writing the call log. Failed requests retain their duration.
 This is a local measurement, separate from OpenRouter's server timing fields.
 
-Requests use temperature 0, a 512-token output limit, a 60-second HTTP timeout,
+Requests use temperature 0, a 2,048-token output limit, a 60-second HTTP timeout,
 and no automatic client retries. The correct answer and dataset rationale are
 excluded from the solver's prompt. With one call per workflow, the call cost
 is also the total run cost; totals are not accumulated across previous runs.
+
+`MAX_OUTPUT_TOKENS` sets the output limit, which includes reasoning tokens
+as well as the visible answer on most providers. A `length` finish reason
+is reported as a token-limit error even when no answer text is returned.
 
 The direct dependencies in `pyproject.toml` are `langgraph` for the workflow,
 `httpx` for OpenRouter HTTP requests, and `python-dotenv` for loading `.env`.

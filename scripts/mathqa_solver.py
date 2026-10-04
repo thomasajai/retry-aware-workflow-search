@@ -17,7 +17,8 @@ MODELS = [
     "qwen/qwen3-32b",
     "deepseek/deepseek-v3.2",
 ]
-SELECTED_MODEL = MODELS[0]
+SELECTED_MODEL = MODELS[1]
+MAX_OUTPUT_TOKENS = 2048
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_PATH = PROJECT_ROOT / "data" / "mathqa_200" / "mathqa_200.json"
@@ -61,7 +62,7 @@ def build_prompt(question: dict[str, str]) -> str:
     """Ask for an explanation, calculation, and the chosen option."""
     return (
         "Solve this multiple-choice math problem.\n"
-        "Explain the reasoning and show the calculation supporting your answer.\n"
+        "Succinctly explain the reasoning while showing the calculation supporting your answer.\n"
         "Finish with: Final answer: <option letter>) <option value>.\n\n"
         f"Problem: {question['problem']}\n"
         f"Options: {question['options']}"
@@ -102,7 +103,7 @@ def call_openrouter(
                         "model": model,
                         "messages": [{"role": "user", "content": build_prompt(question)}],
                         "temperature": 0,
-                        "max_tokens": 512,
+                        "max_tokens": MAX_OUTPUT_TOKENS,
                         "stream": False,
                     },
                     timeout=60.0,
@@ -130,11 +131,14 @@ def call_openrouter(
                 raise RuntimeError("OpenRouter returned an API error; see the call log.")
             choice = payload["choices"][0]
             record["finish_reason"] = choice.get("finish_reason")
+            if choice.get("finish_reason") == "length":
+                raise RuntimeError(
+                    f"The response reached the {MAX_OUTPUT_TOKENS}-token limit; "
+                    "reasoning may have used the budget before the answer. See the call log."
+                )
             answer = choice["message"].get("content")
             if not isinstance(answer, str) or not answer.strip():
                 raise RuntimeError("OpenRouter returned no answer text; see the call log.")
-            if choice.get("finish_reason") == "length":
-                raise RuntimeError("The response reached the token limit; see the call log.")
 
             record["status"] = "completed"
             return answer, usage, elapsed_seconds
