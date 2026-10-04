@@ -15,6 +15,7 @@ import httpx
 from dotenv import load_dotenv
 
 from mathqa_table import export_table
+from mathqa_response import CONTRACTS, validate_answer
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -44,7 +45,7 @@ PROMPT_TEMPLATE = (
 
 
 def initialize_database(database_path: Path = DATABASE_PATH) -> None:
-    """Create the two tables if absent; do not insert experiment records yet."""
+    """Create tables additively; do not insert experiment records yet."""
     database_path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(database_path)
     try:
@@ -102,6 +103,14 @@ def initialize_database(database_path: Path = DATABASE_PATH) -> None:
                 error_message TEXT,
                 UNIQUE (run_id, question_id, requested_model, attempt_number)
             );
+
+            CREATE TABLE IF NOT EXISTS call_validations (
+                call_id TEXT PRIMARY KEY NOT NULL REFERENCES calls(call_id),
+                response_contract TEXT NOT NULL,
+                format_valid INTEGER NOT NULL CHECK (format_valid IN (0, 1)),
+                parsed_fields_json TEXT,
+                validation_errors_json TEXT NOT NULL
+            );
             """
         )
         # Earlier steps created this database before raw response text was added.
@@ -141,7 +150,8 @@ def build_prompt(question: dict[str, str]) -> str:
 
 
 def create_run(
-    questions: list[dict[str, str]], database_path: Path = DATABASE_PATH
+    questions: list[dict[str, str]], database_path: Path = DATABASE_PATH,
+    *, model_configs: dict[str, dict] | None = None,
 ) -> str:
     """Save the experiment settings and return its new run ID."""
     run_id = str(uuid4())
@@ -159,6 +169,20 @@ def create_run(
         "automatic_retries": 0,
         "execution_mode": "parallel_within_model_sequential_between_models",
     }
+    # Experiments supply explicit settings and prompts without changing old runs.
+    if model_configs is not None:
+        if not model_configs:
+            raise ValueError("At least one model configuration is required.")
+        for config in model_configs.values():
+            if config.get("response_contract") not in (None, *CONTRACTS):
+                raise ValueError("Unknown response contract in model configuration.")
+            if not isinstance(config.get("body_settings"), dict):
+                raise ValueError("Each model needs explicit body_settings.")
+            for question in questions:
+                config["prompt_template"].format(problem=question["problem"], options=question["options"])
+        request_settings.pop("body_settings")
+        request_settings["model_configs"] = model_configs
+    models = list(model_configs) if model_configs is not None else MODELS
 
     connection = sqlite3.connect(database_path)
     try:
@@ -177,11 +201,12 @@ def create_run(
                     run_id,
                     created_at_utc,
                     "prepared",
-                    json.dumps(MODELS),
+                    json.dumps(models),
                     json.dumps([question["id"] for question in questions]),
                     DATASET_PATH.relative_to(PROJECT_ROOT).as_posix(),
                     dataset_sha256,
-                    PROMPT_TEMPLATE,
+                    next(iter(model_configs.values()))["prompt_template"]
+                    if model_configs is not None and len(model_configs) == 1 else PROMPT_TEMPLATE,
                     json.dumps(request_settings),
                     MAX_CONCURRENT_REQUESTS,
                 ),
@@ -245,6 +270,8 @@ def finish_call(
     http_status: int | None = None,
     error_type: str | None = None,
     error_message: str | None = None,
+    response_contract: str | None = None,
+    options: str = "",
     database_path: Path = DATABASE_PATH,
 ) -> None:
     """Save a call's final outcome, preserving any answer, usage, and full JSON."""
@@ -304,6 +331,15 @@ def finish_call(
             )
             if cursor.rowcount != 1:
                 raise ValueError(f"Call {call_id!r} does not exist or is already finished.")
+            if response_contract is not None:
+                validation = validate_answer(answer_text, response_contract, options)
+                connection.execute(
+                    "INSERT INTO call_validations VALUES (?, ?, ?, ?, ?)",
+                    (call_id, response_contract, int(validation["valid"]),
+                     json.dumps(validation["parsed_fields"], ensure_ascii=False)
+                     if validation["parsed_fields"] is not None else None,
+                     json.dumps(validation["errors"], ensure_ascii=False)),
+                )
     finally:
         connection.close()
 
@@ -335,9 +371,12 @@ async def call_model(
         raise ValueError(f"Run {run_id!r} does not exist.")
 
     settings = json.loads(run["request_settings_json"])
-    prompt = run["prompt_template"].format(**question)
+    model_config = settings.get("model_configs", {}).get(model)
+    prompt_template = model_config["prompt_template"] if model_config is not None else run["prompt_template"]
+    body_settings = model_config["body_settings"] if model_config is not None else settings["body_settings"]
+    prompt = prompt_template.format(problem=question["problem"], options=question["options"])
     request_body = {
-        **settings["body_settings"],
+        **body_settings,
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
     }
@@ -424,6 +463,8 @@ async def call_model(
             http_status=http_status,
             error_type=error_type,
             error_message=error_message,
+            response_contract=model_config.get("response_contract") if model_config is not None else None,
+            options=question["options"],
             database_path=database_path,
         )
 

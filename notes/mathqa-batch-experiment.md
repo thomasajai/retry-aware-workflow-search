@@ -1,7 +1,17 @@
 # MathQA batch baseline and open issues
 
-Reviewed on 2026-10-04. This records the implemented baseline and observations
-from the saved API responses. The proposed fixes below are not implemented.
+Reviewed on 2026-10-04. This records baseline commit `c723cdf` and observations
+from its saved API responses. The formatting trial harness is implemented;
+authorized paid trials and their observations are recorded at the end.
+
+Current state: the formatting experiment harness, per-model settings, local
+response validation, additive storage and offline tests are implemented.
+The selected defaults in `mathqa_experiments.py` are Qwen2.5 `json-prompt`,
+Qwen3 `json-schema-no-think`, and DeepSeek `json-prompt`. Integration of these
+settings into the original batch CLI and post-batch accuracy grading remain
+future steps. Generated JSON diagnostics, HTML tables and SQLite runs are local
+artifacts excluded from Git; this note records the reviewable trial evidence.
+The sections below describe the baseline and the trials in chronological order.
 
 ## What we built
 
@@ -100,7 +110,7 @@ Reviewed checkout: `08b2d2c7fe370c884d956afbe540a09abc163c27`, from
 Adding a critic or retries is unnecessary for the immediate formatting fix
 and would change the current one-attempt baseline and its cost.
 
-## Proposed next steps, not yet implemented
+## Baseline proposed next steps, before formatting trials
 
 1. Use settings per model and a fixed provider endpoint for reproducibility.
    Check endpoint support before requiring parameters, disable provider
@@ -148,3 +158,563 @@ and would change the current one-attempt baseline and its cost.
 
 Endpoint availability and supported parameters can change; recheck before
 choosing the settings for the next run.
+
+## Stage 1 implemented: formatting trials, before accuracy grading
+
+`scripts/mathqa_experiments.py` previews one model/experiment without HTTP calls
+or database changes. `--run` creates and executes a new run, defaulting to the
+first five questions. It reuses the existing scheduler: up to five concurrent
+requests, one attempt per question, no automatic retries. The original batch
+command remains the baseline until trials identify settings to adopt.
+
+Each model has explicit candidate settings, checked against public endpoint
+metadata on 2026-10-04 (Qwen2.5 metadata was cached four days earlier):
+
+| Alias | Model | Fixed endpoint | Initial controls |
+| --- | --- | --- | --- |
+| `qwen25` | Qwen2.5 7B Instruct | `phala` | temperature 0; omit unsupported reasoning control |
+| `qwen3` | Qwen3 32B | `siliconflow/fp8` | reasoning enabled=false; temperature 0.7, top_p 0.8, top_k 20 |
+| `deepseek` | DeepSeek V3.2 | `deepinfra/fp4` | reasoning enabled=false; temperature 0 |
+
+All candidates use max_tokens=256, stream=false, provider.only, disabled
+fallbacks, and require_parameters=true. This is an initial bounded trial, not
+a claim that 256 tokens or these sampling settings are optimal. Qwen3 sampling
+follows its official non-thinking guidance for the advertised controls;
+SiliconFlow does not advertise min_p. DeepInfra was selected for DeepSeek
+because it advertises both reasoning and structured outputs and was healthy
+in the checked metadata; SiliconFlow's DeepSeek endpoint reported status -2.
+Provider restrictions can fail when the endpoint is unavailable; there is no
+silent switch to another provider. Recheck metadata before paid trials.
+
+The gateway reasoning-off request remains a hypothesis to test by inspecting
+returned usage. No native enable_thinking or thinking parameter is assumed to
+pass through OpenRouter. Qwen3-only `/no_think` variants test the documented
+soft prompt switch separately. We do not use reasoning.exclude to hide evidence.
+
+Available experiments:
+
+- `line-example`: concrete unrelated example `6*7=42; b) 42`.
+- `json-prompt`: the same fields as JSON, enforced only by prompt and local validation.
+- `json-schema`: exactly the same JSON prompt, adding strict API JSON schema.
+- Qwen3 only: `line-no-think` and `json-schema-no-think`, adding `/no_think`
+  to the corresponding prompt while retaining the other settings.
+
+The local contracts are `line-v1` and `json-v1`. Both require a nonempty compact
+calculation (at most 160 characters), one lowercase option letter a-e, and a
+nonempty value (at most 120 characters). Values must match the chosen option
+text, ignoring whitespace. Calculations must contain a digit and a math
+operation; multi-letter words are restricted to the named math functions in
+the prompt. This is a lexical formatting check, not expression evaluation or
+proof of mathematical correctness. Fields cannot contain newlines, markup,
+placeholders, or LaTeX. Outer whitespace is accepted; JSON may be pretty-printed,
+but field values must be single-line strings. Duplicate JSON fields, extra
+fields, missing fields, Markdown fences, and surrounding commentary are invalid.
+The API schema constrains fields/types/option enumeration; local validation
+additionally enforces brevity and option/value agreement. No answer key,
+rationale, or correct-option field is sent to the model. The example avoids
+the earlier suggested 30*29=870, which would reveal the first question's answer.
+
+New runs snapshot configurations in request_settings_json.model_configs;
+each call continues to save its exact request and untouched answer, full API
+JSON and raw response body. The additive call_validations table stores contract,
+parsed fields, validity and errors separately. Legacy calls have no inferred
+validation results. Existing generation statuses keep their original meaning.
+No automatic backfill, recovery, retry, or mathematical grading is introduced.
+
+The JSON diagnostic report records each call's answer, parsed fields, errors,
+generation status, finish reason, returned provider, reported reasoning tokens,
+cost and latency. Unknown reasoning counts remain null. Summaries separate
+generation failures from invalid completed responses. Format success requires
+both a completed generation and valid format, divided by all selected questions;
+even syntactically valid truncated responses are unsuccessful. This is a format
+score, not accuracy. The existing HTML exporter still shows original answers.
+The CLI returns 1 if any selected question lacks a completed, valid response.
+The read-only report command also handles databases that have not been migrated;
+legacy validation stays unknown and the latest saved attempt is shown.
+
+```powershell
+# Read-only catalog and preview; neither makes API requests.
+uv run python scripts/mathqa_experiments.py --list
+uv run python scripts/mathqa_experiments.py --model qwen25 --experiment line-example
+
+# Only after explicitly deciding to make this five-call paid trial:
+uv run python scripts/mathqa_experiments.py --model qwen25 --experiment line-example --run
+
+# Inspect a saved trial without making new API requests:
+uv run python scripts/mathqa_experiments.py --report-run YOUR_RUN_ID
+```
+
+Start with Qwen2.5's line example, inspect all five original answers and
+validation diagnostics, then try JSON prompt/schema on that same model if
+needed. Continue to Qwen3 and DeepSeek in the existing model order, one trial
+at a time. Five questions are a quick diagnostic, not a reliable accuracy
+estimate. After reviewing formatting trials, choose settings before implementing
+post-batch accuracy grading with all selected questions as its denominator.
+
+Offline validation: 16 tests pass, including all ten baseline tests and six
+focused tests for contract parsing, settings, safe previews, raw preservation,
+separate outcomes, and additive migration/legacy export. No paid calls were
+made to validate this implementation.
+
+## First authorized formatting trial: Qwen2.5 line-example
+
+Executed on 2026-10-04 after explicit user authorization, run
+`9fae80a9-1d2e-40b5-978e-dda3691522c1`. Exactly five calls were made, with
+concurrency five and no retries. The fixed Phala endpoint was rechecked before
+execution and returned status 0 with the requested sampling controls advertised.
+Settings: temperature=0, max_tokens=256, stream=false, Phala only, no fallbacks,
+require_parameters=true, and no unsupported reasoning parameter.
+
+All five calls returned HTTP 200 and finish_reason=stop. Generation completed
+5/5; strict local formatting passed 3/5 (60%). There were two invalid completed
+responses, no missing calls, and no truncations. All five returned provider Phala
+and reported zero reasoning tokens. Reported cost totaled USD 0.0001702;
+completion tokens totaled 178. Individual request latency ranged from 0.499
+to 1.054 seconds; saved batch start-to-finish duration was about 1.175 seconds.
+
+Original answers, without corrections:
+
+| Question ID | Original answer | Format valid |
+| --- | --- | --- |
+| mathqa_test_0002 | `28*(28-1)/2=392; c) 870` | Yes |
+| mathqa_test_0013 | `sum(floor(1000/pow(10, i)) - floor(999/pow(10, i-1))) for i in (1,2,3)=192;c) 192` | No |
+| mathqa_test_0026 | `(0.3*60000+0.4*72000)/(60000+72000)=0.344;b) 34.4%` | No |
+| mathqa_test_0047 | `gcd(1345,775)=85; b) 10` | Yes |
+| mathqa_test_0079 | `1638 * (1/2) / (1/2 + 1/3 + 1/4) = 756; c) 756` | Yes |
+
+Both rejected answers failed the line parser because the required space after
+the semicolon was absent. The parser stops there and preserves no parsed fields
+for these answers; the saved error is "Expected one line: calculation; a-e) value."
+Inspection also shows the zero-count expression uses sum, pow, for and in,
+outside the allowed function/word list, and the tax answer does not copy the
+option's internal percent spacing. These are observations, not additional saved
+validator errors. Format-valid answers for questions 0002 and 0047 contain
+incorrect/inconsistent calculations. No mathematical accuracy score was computed
+or persisted. The prompt, contract and settings were not altered after the trial.
+
+Full diagnostic report:
+`results/mathqa_experiments/9fae80a9-1d2e-40b5-978e-dda3691522c1.json`.
+Original-answer HTML:
+`results/mathqa_tables/mathqa_9fae80a9-1d2e-40b5-978e-dda3691522c1.html`.
+Original responses and raw bodies remain in SQLite. The script returned exit
+code 1 because two responses were format-invalid, despite the generation run
+status being completed.
+
+The proposed next trial was Qwen2.5 json-schema on the same five questions, retaining
+provider and sampling settings. This tests whether API structure constraints
+improve compliance; local expression/value validation is still required. That
+trial was subsequently executed as recorded in the next section.
+
+## Second authorized formatting trial: Qwen2.5 json-schema
+
+Executed on 2026-10-04 after explicit user authorization, run
+`b28a220b-e65e-490e-998d-9f4ba62e03d1`. The same first five questions, Phala
+endpoint, temperature 0, max_tokens 256, concurrency five, disabled fallbacks
+and zero retries were retained. Phala metadata was rechecked before execution
+and advertised response_format and structured_outputs with status 0. This
+trial changed the prompt to JSON and supplied response_format.type=json_schema,
+strict=true, with the three required string fields and the a-e option enum.
+
+All five calls returned HTTP 200, finish_reason=stop, provider Phala, and zero
+reported reasoning tokens. Generation completed 5/5 without truncation. JSON
+parsing succeeded 4/5; the full local response contract passed 3/5 (60%), the
+same full-format score as the first line-example trial. Two completed responses
+were invalid. Total reported cost was USD 0.000198, with 262 completion tokens.
+Individual latency ranged from 0.852 to 1.401 seconds; saved batch duration
+was 1.515946 seconds. Exit code 1 reflects format failures, while the saved
+generation run status is completed.
+
+Original answers, without corrections:
+
+| Question ID | Original answer | Format valid |
+| --- | --- | --- |
+| mathqa_test_0002 | `{"calculation": "28*27/2=378", "option": "d", "value": "352"}` | Yes |
+| mathqa_test_0013 | `{"calculation": "sum(floor(1000/pow(10,i))/10+floor(1000/10/(pow(10,i)))*9 for i in range(3))+sum(1 for j in range(1,1001) if '0' in str(j))", "option": "b", "value": "191"}` | No |
+| mathqa_test_0026 | `{"calculation": "(0.3*60000+0.4*72000)/(60000+72000)*100=35.6%\",\"option\":\"d\",\"value\":\"35.6 %\"}<tool_call>\n` | No |
+| mathqa_test_0047 | `{"calculation": "gcd(1345, 775)", "option": "b", "value": "10"}` | Yes |
+| mathqa_test_0079 | `{"calculation": "1638 * (1/2) / (1/2 + 1/3 + 1/4)=756", "option": "c", "value": "756"}` | Yes |
+
+The zero-count answer parsed and had the required fields but failed the local
+calculation lexical rule (sum, pow, for, in, range, if and str are outside its
+allowed function/word list). The tax answer was not valid JSON: broken escaping
+left a string unterminated and included a literal tool-call marker. It was not
+truncated, refused, or returned as an API error. This demonstrates that the
+strict schema request did not reliably produce schema-conforming answers on
+this endpoint in this trial. Saved responses do not establish why enforcement
+failed, nor isolate the effect of schema from the changed JSON prompt.
+
+Format-valid responses still contain mathematical errors or inconsistencies:
+the tickets calculation ends at 378 but selects 352, and the distribution answer
+selects 10 while gcd(1345,775) is 5. No accuracy score was computed or persisted.
+No prompts, settings, schemas or validators were altered after observing results.
+
+Full diagnostic report:
+`results/mathqa_experiments/b28a220b-e65e-490e-998d-9f4ba62e03d1.json`.
+Original-answer HTML:
+`results/mathqa_tables/mathqa_b28a220b-e65e-490e-998d-9f4ba62e03d1.html`.
+Untouched original answers, entire API responses and raw bodies remain in SQLite.
+Exactly this five-call trial was executed; no further paid calls were made.
+
+## Third authorized formatting trial: Qwen2.5 json-prompt
+
+Executed on 2026-10-04 after explicit user authorization, run
+`b2415bae-c4a4-4c33-9fd5-20a3ca986bee`. The same JSON prompt as the schema
+trial was used, omitting response_format entirely. The same first five questions,
+Phala endpoint, temperature 0, max_tokens 256, concurrency five, disabled
+fallbacks and zero retries were retained. Phala metadata was rechecked before
+execution and reported status 0 with the requested sampling controls advertised.
+
+All five calls returned HTTP 200, finish_reason=stop, provider Phala, and zero
+reported reasoning tokens. Generation completed 5/5 with no truncations or
+missing calls. All five answers parsed as JSON; full format compliance was
+4/5 (80%), with one invalid completed response. Total reported cost was
+USD 0.0001878, with 211 completion tokens. Individual latency ranged from
+2.898 to 4.787 seconds; saved batch duration was 4.889133 seconds. Exit code 1
+reflects the format failure; the saved generation run status is completed.
+
+Original answers, without corrections:
+
+| Question ID | Original answer | Format valid |
+| --- | --- | --- |
+| mathqa_test_0002 | `{"calculation":"28*(28-1)/2=380","option":"e","value":"380"}` | Yes |
+| mathqa_test_0013 | `{"calculation":"sum(floor(1000/pow(10,i))-floor(999/pow(10,i)) for i in range(3))+100+10=192","option":"c","value":"192"}` | No |
+| mathqa_test_0026 | `{"calculation":"(0.3*60000+0.4*72000)/(60000+72000)*100","option":"b","value":"34.4 %"}` | Yes |
+| mathqa_test_0047 | `{"calculation":"gcd(1345,775)=91","option":"a","value":"91"}` | Yes |
+| mathqa_test_0079 | `{"calculation":"1638 * (1/2) / (1/2 + 1/3 + 1/4)","option":"c","value":"756"}` | Yes |
+
+The zero-count answer parsed and had the required fields but failed the local
+calculation lexical rule (sum, pow, for, in and range are outside the allowed
+function/word list). The saved error is "calculation must be a compact math
+expression, not prose." Format-valid responses still contain mathematical
+errors: the tickets expression does not evaluate to 380; the tax expression
+does not yield the selected 34.4%; and gcd(1345,775) is 5 rather than 91.
+No accuracy score was computed or persisted. No prompt, settings, schema or
+validator changes were made after observing results.
+
+Full diagnostic report:
+`results/mathqa_experiments/b2415bae-c4a4-4c33-9fd5-20a3ca986bee.json`.
+Original-answer HTML:
+`results/mathqa_tables/mathqa_b2415bae-c4a4-4c33-9fd5-20a3ca986bee.html`.
+Original answers, entire responses and raw bodies remain in SQLite. Exactly
+five paid calls were made for this trial; no further trials were executed.
+
+All three configured Qwen2.5 experiments have now been executed once:
+
+| Experiment | Generation completed | Valid JSON | Full format compliance | Reported cost (USD) | Batch seconds |
+| --- | --- | --- | --- | --- | --- |
+| line-example | 5/5 | Not applicable | 3/5 (60%) | 0.0001702 | 1.175215 |
+| json-schema | 5/5 | 4/5 | 3/5 (60%) | 0.0001980 | 1.515946 |
+| json-prompt | 5/5 | 5/5 | 4/5 (80%) | 0.0001878 | 4.889133 |
+
+Prompt-only JSON had the highest observed format score in these three
+five-question trials. One run per variant is insufficient to establish a
+reliable advantage, and this comparison is not mathematical accuracy grading.
+
+## Selected Qwen2.5 configuration
+
+On 2026-10-04 the user selected prompt-only JSON (`json-prompt`) for Qwen2.5.
+The experiment CLI now uses it when `--model qwen25` is supplied without an
+explicit `--experiment`. The selected configuration retains the tested JSON
+prompt, Phala endpoint, temperature 0, max_tokens 256, local `json-v1` validation,
+concurrency five and zero retries. It omits API response_format and unsupported
+reasoning controls. This choice does not relax the validator or assert
+mathematical correctness. Explicit experiment overrides remain available;
+Qwen3 and DeepSeek retain their initial `line-example` defaults pending trials.
+The original batch command remains the baseline; saved runs are unchanged.
+No paid calls were made when recording this selection.
+
+```powershell
+# Preview the selected Qwen2.5 configuration without making API requests.
+uv run python scripts/mathqa_experiments.py --model qwen25
+```
+
+## Qwen3 formatting experiment suite, 2026-10-04
+
+All five configured variants were executed after explicit user authorization, with exactly 25 paid calls. Trials ran sequentially, with five concurrent calls within each trial and no retries.
+
+Settings retained: SiliconFlow `siliconflow/fp8`, temperature 0.7, top_p 0.8, top_k 20, max_tokens 256, stream=false, reasoning.enabled=false, provider.only, allow_fallbacks=false, require_parameters=true. The endpoint was rechecked before execution: status 0, with reasoning, sampling and structured-output controls advertised. All trials used the same first five questions, without answer keys or rationales in requests.
+
+All 25 calls returned HTTP 200, finish_reason=stop, provider SiliconFlow and zero reported reasoning tokens. There were no generation failures, truncations, missing responses or missing reported costs. Reported zero reasoning is an accounting observation, not proof about every internal computation.
+
+Full local format compliance totaled 19/25; reported suite cost was USD 0.00151790. These are formatting results, not mathematical accuracy. No accuracy score was computed or stored.
+
+| Experiment | Generation | Valid JSON | Full format | Invalid completed | Reported USD | Batch seconds |
+| --- | --- | --- | --- | --- | --- | --- |
+| line-example | 5/5 | Not applicable | 4/5 (80%) | 1 | 0.00027002 | 6.004450 |
+| json-prompt | 5/5 | 5/5 | 4/5 (80%) | 1 | 0.00032475 | 3.802731 |
+| json-schema | 5/5 | 5/5 | 4/5 (80%) | 1 | 0.00030765 | 3.620711 |
+| line-no-think | 5/5 | Not applicable | 3/5 (60%) | 2 | 0.00028636 | 3.175482 |
+| json-schema-no-think | 5/5 | 5/5 | 4/5 (80%) | 1 | 0.00032912 | 3.067371 |
+
+All three JSON variants produced five parseable JSON objects with the required fields. The zero-count answer failed the calculation lexical rule in each JSON trial because its calculation included prose. The schema constrains types, fields and option enumeration; its descriptions do not constrain calculation text to an arithmetic expression.
+
+The line-example tax answer used `34.4%` where the supplied option text is `34.4 %`, so exact option-text validation rejected it. The validator collapses whitespace runs but does not remove spaces between tokens. In line-no-think, the tickets answer contained extra semicolons and the tax answer used `b )` instead of `b)`, both failing the line parser. These strict contract results were retained without repair or retroactive rule changes.
+
+Adding /no_think did not increase format compliance in these single trials. All variants already reported zero reasoning tokens. Temperature 0.7 and only five questions per variant limit conclusions about relative performance or causality. Four variants tied at 80%; there is no established format winner.
+
+Some format-valid answers have incorrect calculations or disagree with their selected value. For example, the json-schema-no-think tickets answer asserts `(28+2)*(28+1)/2=870`, although the expression evaluates to 435. Format compliance remains separate from mathematical correctness. No prompts, settings, validators or selected defaults were changed after observing results.
+
+Original answers below are preserved verbatim. Full API JSON, raw bodies, requests, usage, timings and errors remain in SQLite; per-run JSON diagnostics and HTML exports are also saved. All runs have generation status completed; each CLI returned 1 because at least one answer was format-invalid.
+
+### line-example
+
+Run ID: `23ddc195-5220-4a3f-a9b4-1d6c0ccca4f5`. [Diagnostic JSON](../results/mathqa_experiments/23ddc195-5220-4a3f-a9b4-1d6c0ccca4f5.json); [original-answer HTML](../results/mathqa_tables/mathqa_23ddc195-5220-4a3f-a9b4-1d6c0ccca4f5.html). Individual request latency: 1.792-5.872 seconds. Completion tokens: 164.
+
+| Question ID | Original answer | Format valid | Saved validation errors |
+| --- | --- | --- | --- |
+| mathqa_test_0002 | `(28+2)*(28+1)/2=380; e) 380` | Yes | None |
+| mathqa_test_0013 | `1000//10*1 + 1000//100*2 + 1000//1000*3; a) 190` | Yes | None |
+| mathqa_test_0026 | `(60000*0.3 + 72000*0.4) / (60000 + 72000) = 0.344; b) 34.4%` | No | value must match the selected option text (ignoring whitespace). |
+| mathqa_test_0047 | `gcd(1345,775)=5; d) 5` | Yes | None |
+| mathqa_test_0079 | `1638/( (1/2)+(1/3)+(1/4) )*(1/2); c) 756` | Yes | None |
+
+### json-prompt
+
+Run ID: `78aec3a1-d554-4e54-861a-71a52a457481`. [Diagnostic JSON](../results/mathqa_experiments/78aec3a1-d554-4e54-861a-71a52a457481.json); [original-answer HTML](../results/mathqa_tables/mathqa_78aec3a1-d554-4e54-861a-71a52a457481.html). Individual request latency: 1.800-3.669 seconds. Completion tokens: 233.
+
+| Question ID | Original answer | Format valid | Saved validation errors |
+| --- | --- | --- | --- |
+| mathqa_test_0002 | `{"calculation":"(28+2)*(28+1)/2=380","option":"e","value":"380"}` | Yes | None |
+| mathqa_test_0013 | `{"calculation":"count zeros in 1-999 and add for 1000: 9*10^2*1 + 9*10*1 + 9*1 = 192","option":"c","value":"192"}` | No | calculation must be a compact math expression, not prose. |
+| mathqa_test_0026 | `{"calculation":"(0.3*60000 + 0.4*72000)/(60000 + 72000)=35.6","option":"d","value":"35.6 %"}` | Yes | None |
+| mathqa_test_0047 | `{"calculation":"gcd(1345,775)=5","option":"d","value":"5"}` | Yes | None |
+| mathqa_test_0079 | `{"calculation":"1/2 + 1/3 + 1/4 = 13/12; a = 1638 * (1/2 / 13/12) = 756","option":"c","value":"756"}` | Yes | None |
+
+### json-schema
+
+Run ID: `c12bdeff-56bf-44c7-94d8-32f367637a4a`. [Diagnostic JSON](../results/mathqa_experiments/c12bdeff-56bf-44c7-94d8-32f367637a4a.json); [original-answer HTML](../results/mathqa_tables/mathqa_c12bdeff-56bf-44c7-94d8-32f367637a4a.html). Individual request latency: 2.289-3.465 seconds. Completion tokens: 203.
+
+| Question ID | Original answer | Format valid | Saved validation errors |
+| --- | --- | --- | --- |
+| mathqa_test_0002 | `{"calculation":"(28+2)*(28+1)/2=435","option":"e","value":"380"}` | Yes | None |
+| mathqa_test_0013 | `{"calculation":"count zeros in 1-999 and add for 1000","option":"c","value":"192"}` | No | calculation must be a compact math expression, not prose. |
+| mathqa_test_0026 | `{"calculation":"(0.3*60000 + 0.4*72000)/(60000 + 72000)=35.6","option":"d","value":"35.6 %"}` | Yes | None |
+| mathqa_test_0047 | `{"calculation":"gcd(1345,775)=5","option":"d","value":"5"}` | Yes | None |
+| mathqa_test_0079 | `{"calculation":"1/2 + 1/3 + 1/4 = 13/12; 1638 * (1/2 / 13/12) = 756","option":"c","value":"756"}` | Yes | None |
+
+### line-no-think
+
+Run ID: `6890c5da-1166-4879-b022-2ad653c36abf`. [Diagnostic JSON](../results/mathqa_experiments/6890c5da-1166-4879-b022-2ad653c36abf.json); [original-answer HTML](../results/mathqa_tables/mathqa_6890c5da-1166-4879-b022-2ad653c36abf.html). Individual request latency: 1.599-3.058 seconds. Completion tokens: 188.
+
+| Question ID | Original answer | Format valid | Saved validation errors |
+| --- | --- | --- | --- |
+| mathqa_test_0002 | `n=28+2; t=n*(n-1); t=380; e) 380` | No | Expected one line: calculation; a-e) value. |
+| mathqa_test_0013 | `(999 // 10 % 10) * 1 + (999 // 100 % 10) * 2 + (999 // 1000 % 10) * 3; c) 192` | Yes | None |
+| mathqa_test_0026 | `(60000*0.3 + 72000*0.4) / (60000 + 72000) = 0.344; b ) 34.4 %` | No | Expected one line: calculation; a-e) value. |
+| mathqa_test_0047 | `gcd(1345, 775) = 5; d) 5` | Yes | None |
+| mathqa_test_0079 | `1638 / (6 + 4 + 3) * 6 = 756; c) 756` | Yes | None |
+
+### json-schema-no-think
+
+Run ID: `df394bc2-b92f-4b73-9e44-dfc71c6dd9ef`. [Diagnostic JSON](../results/mathqa_experiments/df394bc2-b92f-4b73-9e44-dfc71c6dd9ef.json); [original-answer HTML](../results/mathqa_tables/mathqa_df394bc2-b92f-4b73-9e44-dfc71c6dd9ef.html). Individual request latency: 2.165-2.957 seconds. Completion tokens: 236.
+
+| Question ID | Original answer | Format valid | Saved validation errors |
+| --- | --- | --- | --- |
+| mathqa_test_0002 | `{"calculation":"(28+2)*(28+1)/2=870","option":"c","value":"870"}` | Yes | None |
+| mathqa_test_0013 | `{"calculation":"count zeros in numbers 1 to 1000: 9 (1-99) + 100 (100-999) + 3 (1000) = 192","option":"c","value":"192"}` | No | calculation must be a compact math expression, not prose. |
+| mathqa_test_0026 | `{"calculation":"(0.3*60000 + 0.4*72000)/(60000 + 72000)=35.6","option":"d","value":"35.6 %"}` | Yes | None |
+| mathqa_test_0047 | `{"calculation":"gcd(1345,775)=5","option":"d","value":"5"}` | Yes | None |
+| mathqa_test_0079 | `{"calculation":"1/2 : 1/3 : 1/4 = 6 : 4 : 3; a = 1638 * 6 / (6+4+3)= 756","option":"c","value":"756"}` | Yes | None |
+
+All five Qwen3 experiments are complete. Qwen3 retains its prior line-example default pending the user's selection. No DeepSeek experiments or other paid trials were run as part of this suite.
+
+## Selected Qwen3 configuration
+
+On 2026-10-04 the user selected `json-schema-no-think` for Qwen3. The experiment
+CLI now selects it when `--model qwen3` is supplied without `--experiment`.
+This retains the tested JSON prompt with `/no_think`, strict JSON schema,
+SiliconFlow `siliconflow/fp8`, temperature 0.7, top_p 0.8, top_k 20,
+max_tokens 256, reasoning.enabled=false, local json-v1 validation, concurrency
+five and zero retries. Explicit overrides remain available. The selection
+does not relax the response contract or change previous saved runs. Qwen2.5's
+selected prompt-only JSON configuration remains in place. No paid Qwen3 calls
+were made while recording this choice.
+
+## Selected DeepSeek configuration
+
+The user selected `json-prompt` for DeepSeek on 2026-10-04 after reviewing its
+three trials. The experiment CLI now chooses it when `--model deepseek` is
+supplied without `--experiment`. This retains the tested JSON prompt, DeepInfra
+`deepinfra/fp4`, temperature 0, max_tokens 256, reasoning.enabled=false, local
+json-v1 validation, concurrency five and zero retries. API response_format is
+omitted. The validator and saved runs are unchanged; explicit experiment
+overrides remain available. No paid calls were made to record this selection.
+
+All three model defaults have now been selected:
+
+| Model | Selected experiment |
+| --- | --- |
+| Qwen2.5 | json-prompt |
+| Qwen3 | json-schema-no-think |
+| DeepSeek V3.2 | json-prompt |
+
+These defaults apply to mathqa_experiments.py. The original mathqa_batch.py CLI
+remains the baseline pending integration of the selected configurations.
+
+## DeepSeek formatting experiment suite, 2026-10-04
+
+All three configured DeepSeek variants were attempted after explicit user authorization, with exactly 15 requests. The preceding interruption happened after the Qwen3 default change and endpoint preflight, before any DeepSeek trial was created or sent. SQLite was checked before continuation to avoid duplicate calls. Trials ran sequentially with five concurrent requests each, one attempt per question and no retries.
+
+Settings retained: DeepInfra `deepinfra/fp4`, temperature 0, max_tokens 256, stream=false, reasoning.enabled=false, provider.only, allow_fallbacks=false and require_parameters=true. Endpoint preflight reported status 0 with reasoning, sampling and structured-output controls advertised. All trials used the same first five questions, without answer keys or rationales in the model prompts.
+
+Nine requests returned HTTP 200, provider DeepInfra, finish_reason=stop and zero reported reasoning tokens. Six were rejected with HTTP 429, provider_error_code=engine_overloaded, limit_source=upstream_provider_shared_pool. Those six have no answer, reasoning-token count or reported cost. Unknown usage remains unknown. There were no truncated generations or missing call records. No retries or provider changes were attempted.
+
+Primary format success was 2/15, using all selected questions across the three trials. Seven completed responses were format-invalid, separately from the six API failures. Reported costs sum to USD 0.00066530, with cost unknown for six rejected requests; this is the sum of reported costs, not a complete measured total for every attempt. No mathematical accuracy score was computed or stored.
+
+| Experiment | Generation completed | API failures | Invalid completed | Valid JSON (all selected) | Full format | Reported USD | Missing costs | Batch seconds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| line-example | 3/5 | 2 | 2 | Not applicable | 1/5 (20%) | 0.00018324 | 2 | 14.753746 |
+| json-prompt | 5/5 | 0 | 4 | 5/5 | 1/5 (20%) | 0.00042212 | 0 | 5.913966 |
+| json-schema | 1/5 | 4 | 1 | 1/5 | 0/5 (0%) | 0.00005994 | 4 | 7.779783 |
+
+All five returned prompt-only JSON answers parsed successfully. The only returned schema answer also parsed successfully; four other schema calls were rate-limited and returned no answer. This prevents a clean comparison of schema versus prompt-only reliability.
+
+Line-example: tickets and tax received HTTP 429. The zero-count calculation used count0, rejected by the rule allowing only single-letter variables and named math functions. The shares answer had additional semicolons, rejected by the line parser. The distribution answer passed format validation but selected e) none of these despite stating gcd=5.
+
+Json-prompt: four calculation fields used multi-letter variable labels (stations_between, total_stations, tickets, zeros, john_tax, ingrid_tax, total_income, total_tax, combined_rate, total, ratio, sum or a_share), which the contract disallows. The tax calculation also exceeded 160 characters. Pretty-printed JSON was accepted; line breaks around fields were not the failure. The distribution calculation passed local validation.
+
+Json-schema: the tickets answer parsed as JSON but used stations and tickets as variable labels, failing the local lexical rule. The other four requests received HTTP 429. The JSON schema constrains fields/types/option enumeration; its descriptions do not enforce the calculation vocabulary.
+
+These observed low format scores partly reflect the deliberately narrow calculation vocabulary rather than JSON parsing failure. No prompts, schemas, settings or validators were altered after observing results. No DeepSeek variant was selected automatically. Qwen2.5 remains json-prompt and Qwen3 is now the user-selected json-schema-no-think; DeepSeek retains its initial line-example default pending selection.
+
+Original answers and errors are preserved below. JSON blocks preserve the original formatting and field order. Full API JSON, raw bodies, requests and usage remain in SQLite; per-run diagnostic JSON and HTML exports are saved. No additional paid calls were made.
+
+### DeepSeek line-example
+
+Run ID: `23f31503-c642-4617-88c2-dfb1864fa1ef`. [Diagnostic JSON](../results/mathqa_experiments/23f31503-c642-4617-88c2-dfb1864fa1ef.json); [original-answer HTML](../results/mathqa_tables/mathqa_23f31503-c642-4617-88c2-dfb1864fa1ef.html). All-request latency: 0.323-14.632 seconds. Reported completion tokens: 71 (excluding unknown usage).
+
+**mathqa_test_0002**: generation failed; format invalid.
+
+No answer returned. OpenRouter returned HTTP 429.
+
+Saved validation errors: Missing answer text.
+
+**mathqa_test_0013**: generation completed; format invalid.
+
+```text
+count0=9*10+9*10+100+1; c) 192
+```
+
+Saved validation errors: calculation must be a compact math expression, not prose.
+
+**mathqa_test_0026**: generation failed; format invalid.
+
+No answer returned. OpenRouter returned HTTP 429.
+
+Saved validation errors: Missing answer text.
+
+**mathqa_test_0047**: generation completed; format valid.
+
+```text
+gcd(1345,775)=5; e) none of these
+```
+
+Saved validation errors: None
+
+**mathqa_test_0079**: generation completed; format invalid.
+
+```text
+1/2:1/3:1/4=6:4:3;1638/(6+4+3)*6=756; c) 756
+```
+
+Saved validation errors: Expected one line: calculation; a-e) value.
+
+### DeepSeek json-prompt
+
+Run ID: `b7c8ec54-d98e-4f19-88b5-feb81334efac`. [Diagnostic JSON](../results/mathqa_experiments/b7c8ec54-d98e-4f19-88b5-feb81334efac.json); [original-answer HTML](../results/mathqa_tables/mathqa_b7c8ec54-d98e-4f19-88b5-feb81334efac.html). All-request latency: 5.557-5.797 seconds. Reported completion tokens: 363 (excluding unknown usage).
+
+**mathqa_test_0002**: generation completed; format invalid.
+
+```json
+{
+  "calculation": "stations_between=28, total_stations=28+2=30, tickets=30*29=870",
+  "option": "c",
+  "value": "870"
+}
+```
+
+Saved validation errors: calculation must be a compact math expression, not prose.
+
+**mathqa_test_0013**: generation completed; format invalid.
+
+```json
+{
+  "calculation": "zeros=floor(1000/10)+floor(1000/100)*9+floor(1000/1000)*99+1=100+90+99+1=192",
+  "option": "c",
+  "value": "192"
+}
+```
+
+Saved validation errors: calculation must be a compact math expression, not prose.
+
+**mathqa_test_0026**: generation completed; format invalid.
+
+```json
+{"calculation":"john_tax=60000*0.3=18000; ingrid_tax=72000*0.4=28800; total_income=60000+72000=132000; total_tax=18000+28800=46800; combined_rate=46800/132000=0.354545...=35.4545%","option":"d","value":"35.6 %"}
+```
+
+Saved validation errors: calculation must be a single line of at most 160 characters without markup or placeholders. calculation must be a compact math expression, not prose.
+
+**mathqa_test_0047**: generation completed; format valid.
+
+```json
+{
+  "calculation": "gcd(1345,775)=gcd(775,570)=gcd(570,205)=gcd(205,160)=gcd(160,45)=gcd(45,25)=gcd(25,20)=gcd(20,5)=gcd(5,0)=5",
+  "option": "d",
+  "value": "5"
+}
+```
+
+Saved validation errors: None
+
+**mathqa_test_0079**: generation completed; format invalid.
+
+```json
+{
+  "calculation": "total=1638; ratio=1/2:1/3:1/4; lcm(2,3,4)=12; a:b:c=6:4:3; sum=6+4+3=13; a_share=1638*6/13=756",
+  "option": "c",
+  "value": "756"
+}
+```
+
+Saved validation errors: calculation must be a compact math expression, not prose.
+
+### DeepSeek json-schema
+
+Run ID: `ef6406e6-f5a2-4900-bdba-2be543494ee0`. [Diagnostic JSON](../results/mathqa_experiments/ef6406e6-f5a2-4900-bdba-2be543494ee0.json); [original-answer HTML](../results/mathqa_tables/mathqa_ef6406e6-f5a2-4900-bdba-2be543494ee0.html). All-request latency: 0.238-7.696 seconds. Reported completion tokens: 38 (excluding unknown usage).
+
+**mathqa_test_0002**: generation completed; format invalid.
+
+```json
+{
+  "calculation": "stations=28+2=30, tickets=30*29=870",
+  "option": "c",
+  "value": "870"
+}
+```
+
+Saved validation errors: calculation must be a compact math expression, not prose.
+
+**mathqa_test_0013**: generation failed; format invalid.
+
+No answer returned. OpenRouter returned HTTP 429.
+
+Saved validation errors: Missing answer text.
+
+**mathqa_test_0026**: generation failed; format invalid.
+
+No answer returned. OpenRouter returned HTTP 429.
+
+Saved validation errors: Missing answer text.
+
+**mathqa_test_0047**: generation failed; format invalid.
+
+No answer returned. OpenRouter returned HTTP 429.
+
+Saved validation errors: Missing answer text.
+
+**mathqa_test_0079**: generation failed; format invalid.
+
+No answer returned. OpenRouter returned HTTP 429.
+
+Saved validation errors: Missing answer text.

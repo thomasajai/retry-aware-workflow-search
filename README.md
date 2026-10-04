@@ -72,6 +72,27 @@ For a small paid test with one question per model (three requests total):
 uv run python scripts/mathqa_batch.py --run --questions 1
 ```
 
+For the new formatting trials, preview one model's candidate settings and prompt
+against the first five questions without API calls or database changes:
+
+```powershell
+uv run python scripts/mathqa_experiments.py --list
+uv run python scripts/mathqa_experiments.py --model qwen25
+```
+
+Add `--run` only when ready for that paid five-call trial. Available model aliases
+are `qwen25`, `qwen3`, and `deepseek`; experiments compare a concrete line example,
+prompt-only JSON, and API JSON schema, with additional Qwen3 `/no_think` variants.
+Qwen2.5 and DeepSeek default to the selected `json-prompt` variant; Qwen3 defaults
+to the selected `json-schema-no-think` variant. Use `--experiment` to select
+another variant explicitly.
+Generation status and local format validity are saved separately, preserving
+original answers and complete responses. A diagnostic JSON report includes
+validation, provider, reasoning usage, cost, and timing; HTML shows original
+answers. Mathematical accuracy grading is deferred until after formatting trials.
+See [the experiment notes](notes/mathqa-batch-experiment.md#stage-1-implemented-formatting-trials-before-accuracy-grading)
+for the response contract, candidate settings, and trial sequence.
+
 `--questions` defaults to 50 and must be between 1 and the dataset's record count.
 It also works without `--run` to prepare a smaller run without API requests.
 Set `OPENROUTER_API_KEY` in `.env` first. The script finishes all selected attempts
