@@ -27,6 +27,13 @@ for that run. OpenRouter's reported usage is appended to
 logged; unavailable usage is recorded as `null`, not zero. The log preserves
 additional usage fields, such as reasoning and cached token counts.
 
+The script also prints and logs `elapsed_seconds`, measured with
+`time.perf_counter()` around the HTTP request. It includes waiting for the
+complete response (requests use `stream=False`) or a request error, including
+connection setup and network time. It excludes response JSON parsing, answer
+validation, and writing the call log. Failed requests retain their duration.
+This is a local measurement, separate from OpenRouter's server timing fields.
+
 Requests use temperature 0, a 512-token output limit, a 60-second HTTP timeout,
 and no automatic client retries. The correct answer and dataset rationale are
 excluded from the solver's prompt. With one call per workflow, the call cost

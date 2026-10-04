@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
 from typing import NotRequired, TypedDict
 
 import httpx
@@ -36,6 +37,7 @@ class SolverState(TypedDict):
     model: str
     answer: NotRequired[str]
     usage: NotRequired[CallUsage]
+    elapsed_seconds: NotRequired[float]
 
 
 def load_question() -> dict[str, str]:
@@ -68,7 +70,7 @@ def build_prompt(question: dict[str, str]) -> str:
 
 def call_openrouter(
     question: dict[str, str], model: str
-) -> tuple[str, CallUsage]:
+) -> tuple[str, CallUsage, float]:
     """Make one request and log its reported usage, even if the answer is invalid."""
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
@@ -91,18 +93,24 @@ def call_openrouter(
     CALL_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with CALL_LOG_PATH.open("a", encoding="utf-8") as log_file:
         try:
-            response = httpx.post(
-                OPENROUTER_URL,
-                headers={"Authorization": f"Bearer {api_key}"},
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": build_prompt(question)}],
-                    "temperature": 0,
-                    "max_tokens": 512,
-                    "stream": False,
-                },
-                timeout=60.0,
-            )
+            started = perf_counter()
+            try:
+                response = httpx.post(
+                    OPENROUTER_URL,
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json={
+                        "model": model,
+                        "messages": [{"role": "user", "content": build_prompt(question)}],
+                        "temperature": 0,
+                        "max_tokens": 512,
+                        "stream": False,
+                    },
+                    timeout=60.0,
+                )
+            finally:
+                # With stream=False, post() reads the complete response body.
+                elapsed_seconds = perf_counter() - started
+                record["elapsed_seconds"] = elapsed_seconds
             record["http_status"] = response.status_code
             response.raise_for_status()
             payload = response.json()
@@ -129,7 +137,7 @@ def call_openrouter(
                 raise RuntimeError("The response reached the token limit; see the call log.")
 
             record["status"] = "completed"
-            return answer, usage
+            return answer, usage, elapsed_seconds
         except Exception as error:
             # Store the exception type, without logging credentials or headers.
             record["error_type"] = type(error).__name__
@@ -140,8 +148,8 @@ def call_openrouter(
 
 def solver(state: SolverState) -> dict:
     """Read the graph state and return updates for its answer and usage."""
-    answer, usage = call_openrouter(state["question"], state["model"])
-    return {"answer": answer, "usage": usage}
+    answer, usage, elapsed_seconds = call_openrouter(state["question"], state["model"])
+    return {"answer": answer, "usage": usage, "elapsed_seconds": elapsed_seconds}
 
 
 def build_workflow():
@@ -171,6 +179,7 @@ def main() -> None:
     cost_text = f"${cost:.8f}" if cost is not None else "unavailable"
     # This workflow makes one call, so its call cost is also the run's total.
     print(f"Total cost this run: {cost_text}")
+    print(f"Elapsed seconds: {result['elapsed_seconds']:.3f}")
     print(f"Call log: {CALL_LOG_PATH}")
 
 
