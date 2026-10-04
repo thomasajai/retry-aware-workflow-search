@@ -17,8 +17,8 @@ MODELS = [
     "qwen/qwen3-32b",
     "deepseek/deepseek-v3.2",
 ]
-SELECTED_MODEL = MODELS[1]
-MAX_OUTPUT_TOKENS = 2048
+SELECTED_MODEL = MODELS[2]
+MAX_OUTPUT_TOKENS = 1024
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_PATH = PROJECT_ROOT / "data" / "mathqa_200" / "mathqa_200.json"
@@ -59,11 +59,11 @@ def load_question() -> dict[str, str]:
 
 
 def build_prompt(question: dict[str, str]) -> str:
-    """Ask for an explanation, calculation, and the chosen option."""
+    """Ask for only a short calculation and the chosen option."""
     return (
         "Solve this multiple-choice math problem.\n"
-        "Succinctly explain the reasoning while showing the calculation supporting your answer.\n"
-        "Finish with: Final answer: <option letter>) <option value>.\n\n"
+        "Return one line only: <calculation>; <option letter>) <option value>.\n"
+        "Use the fewest tokens possible. No prose, headings, or LaTeX.\n\n"
         f"Problem: {question['problem']}\n"
         f"Options: {question['options']}"
     )
@@ -104,6 +104,8 @@ def call_openrouter(
                         "messages": [{"role": "user", "content": build_prompt(question)}],
                         "temperature": 0,
                         "max_tokens": MAX_OUTPUT_TOKENS,
+                        # Request no internal thinking; the prompt still asks for a calculation.
+                        "reasoning": {"enabled": False},
                         "stream": False,
                     },
                     timeout=60.0,
