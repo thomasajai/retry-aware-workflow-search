@@ -254,6 +254,9 @@ class BatchSchedulerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual({item["requested_model"] for item in saved}, {self.models[0]})
         self.assertEqual(self.run_record()["status"], "interrupted")
         self.assertIsNotNone(self.run_record()["finished_at_utc"])
+        with closing(sqlite3.connect(self.database_path)) as connection:
+            self.assertEqual(connection.execute("SELECT COUNT(*) FROM run_gradings").fetchone()[0], 0)
+            self.assertEqual(connection.execute("SELECT COUNT(*) FROM call_gradings").fetchone()[0], 0)
 
     async def test_unexpected_error_cancels_other_tasks(self):
         all_started = asyncio.Event()

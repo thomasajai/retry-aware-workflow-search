@@ -21,11 +21,17 @@ class ParsedTable(HTMLParser):
         self.rows = []
         self.tags = []
         self.cell = None
+        self.tables = {}
+        self.current_table = None
 
     def handle_starttag(self, tag, attrs):
         self.tags.append(tag)
-        if tag == "tr":
+        if tag == "table":
+            self.current_table = dict(attrs)["id"]
+            self.tables[self.current_table] = []
+        elif tag == "tr":
             self.rows.append([])
+            self.tables[self.current_table].append(self.rows[-1])
         elif tag in ("td", "th"):
             self.cell = {"tag": tag, "attrs": dict(attrs), "text": ""}
 
@@ -84,18 +90,25 @@ class TableExportTests(unittest.TestCase):
         document = result.read_text(encoding="utf-8")
         parsed = ParsedTable()
         parsed.feed(document)
-        self.assertEqual(len(parsed.rows), 51)  # One header and 50 question rows.
-        self.assertEqual([cell["text"] for cell in parsed.rows[0][1:]], self.models)
-        self.assertEqual(sum(cell["tag"] == "td" for row in parsed.rows for cell in row), 150)
-        self.assertTrue(all(len(row) == 4 for row in parsed.rows))  # Row label + three answers.
-        for row, question in zip(parsed.rows[1:], self.questions):
+        self.assertEqual(list(parsed.tables), ["final-answers", "scores", "accuracy"])
+        answers = parsed.tables["final-answers"]
+        scores = parsed.tables["scores"]
+        self.assertEqual(len(answers), 51)
+        self.assertEqual(len(scores), 51)
+        self.assertEqual(len(parsed.tables["accuracy"]), 4)
+        self.assertEqual([cell["text"] for cell in answers[0][1:]], self.models)
+        self.assertEqual(sum(cell["tag"] == "td" for row in answers for cell in row), 150)
+        self.assertTrue(all(len(row) == 4 for row in answers))
+        self.assertTrue(all(cell["text"] == "Ungraded" for row in scores[1:] for cell in row[1:]))
+        for row, question in zip(answers[1:], self.questions):
             self.assertTrue(row[0]["text"].endswith(question["id"]))
-        self.assertEqual(parsed.rows[1][1]["text"], "Latest partial answer")
-        self.assertEqual(parsed.rows[1][1]["attrs"]["class"], "failed")
-        self.assertEqual(parsed.rows[1][2]["text"], malicious_text)
-        self.assertEqual(parsed.rows[1][3]["text"], "")
-        self.assertEqual(parsed.rows[2][3]["text"], "Interrupted partial")
-        self.assertEqual(parsed.rows[2][3]["attrs"]["class"], "unfinished")
+        self.assertIn("Latest partial answer", answers[1][1]["text"])
+        self.assertEqual(answers[1][1]["attrs"]["class"], "failed")
+        self.assertIn(malicious_text, answers[1][2]["text"])
+        self.assertIn("[No answer text saved]", answers[1][3]["text"])
+        self.assertIn("Interrupted partial", answers[2][3]["text"])
+        self.assertEqual(answers[2][3]["attrs"]["class"], "unfinished")
+        self.assertEqual(parsed.tags.count("details"), 150)
         self.assertNotIn("script", parsed.tags)
         self.assertNotIn("b", parsed.tags)
         self.assertIn("white-space: pre-wrap", document)
@@ -128,6 +141,19 @@ class TableExportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             table.export_table(self.run_id, database_path=self.database_path, output_path=self.database_path)
         self.assertEqual(self.database_snapshot(), before)
+
+    def test_unmigrated_database_exports_as_ungraded_without_creating_tables(self):
+        self.save_answer(1, 0, "Legacy reply")
+        with closing(sqlite3.connect(self.database_path)) as connection, connection:
+            for name in ("call_gradings", "model_gradings", "run_gradings", "call_validations"):
+                connection.execute(f"DROP TABLE {name}")
+        before = self.database_snapshot()
+        path = table.export_table(self.run_id, database_path=self.database_path, output_path=self.output_path)
+        document = path.read_text(encoding="utf-8")
+        self.assertIn("Legacy reply", document)
+        self.assertIn("Ungraded; no complete batch grading saved", document)
+        self.assertNotIn("Fully graded", document)
+        self.assertEqual(before, self.database_snapshot())
 
 
 if __name__ == "__main__":

@@ -35,13 +35,29 @@ def export_table(
             ).fetchone()
         if run is None:
             raise ValueError("No matching run was found in the database.")
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        grading_columns = (
+            "g.score, g.option_letter, g.returned_value, g.gradable, g.value_conflict, g.diagnostics_json"
+            if "call_gradings" in tables else
+            "NULL AS score, NULL AS option_letter, NULL AS returned_value, NULL AS gradable, "
+            "NULL AS value_conflict, NULL AS diagnostics_json"
+        )
+        grading_join = " LEFT JOIN call_gradings g USING (call_id)" if "call_gradings" in tables else ""
+        validation_column = "v.format_valid" if "call_validations" in tables else "NULL AS format_valid"
+        validation_join = " LEFT JOIN call_validations v USING (call_id)" if "call_validations" in tables else ""
         calls = connection.execute(
+            f"SELECT c.*, {grading_columns}, {validation_column} FROM calls c{grading_join}{validation_join} "
+            "WHERE c.run_id = ? ORDER BY attempt_number", (run["run_id"],),
+        ).fetchall()
+        grading = connection.execute(
+            "SELECT * FROM run_gradings WHERE run_id = ?", (run["run_id"],)
+        ).fetchone() if "run_gradings" in tables else None
+        summaries = connection.execute(
             """
-            SELECT question_id, requested_model, attempt_number, answer_text, status
-            FROM calls WHERE run_id = ? ORDER BY attempt_number
+            SELECT * FROM model_gradings WHERE run_id = ?
             """,
             (run["run_id"],),
-        ).fetchall()
+        ).fetchall() if "model_gradings" in tables else []
     finally:
         connection.close()
 
@@ -53,8 +69,10 @@ def export_table(
     }
     headers = "".join(f'<th scope="col">{escape(model)}</th>' for model in models)
     rows = []
+    score_rows = []
     for row_number, question_id in enumerate(question_ids, start=1):
         cells = []
+        score_cells = []
         for model in models:
             call = latest_calls.get((question_id, model))
             answer = call["answer_text"] if call is not None else None
@@ -65,14 +83,45 @@ def export_table(
                 "interrupted": "unfinished",
                 "running": "unfinished",
             }.get(status, "")
+            if call is None or call["score"] is None:
+                final = "Ungraded"
+                diagnostics = ""
+                score = "Ungraded"
+            else:
+                option, value = call["option_letter"], call["returned_value"]
+                final = escape(f"{option}) {value if value is not None else '[value missing]'}" if option else
+                               f"No usable final option; returned value: {value if value is not None else '[missing]'}")
+                score = str(call["score"])
+                diagnostics = "<br><span class=\"note\">" + escape(" ".join(json.loads(call["diagnostics_json"])["errors"])) + "</span>"
+            format_status = ("unvalidated" if call is None or call["format_valid"] is None else
+                             "valid" if call["format_valid"] else "invalid")
             cells.append(
                 f'<td class="{cell_class}" title="{escape(status)}">'
-                f'{escape(answer if answer is not None else "")}</td>'
+                f'{final}{diagnostics}<br><span class="note">Generation: {escape(status)}; '
+                f'format: {format_status}.</span><details><summary>Original reply</summary>'
+                f'<pre>{escape(answer if answer is not None else "[No answer text saved]")}</pre></details></td>'
             )
+            score_cells.append(f'<td class="{cell_class}">{score}</td>')
+        label = (f'<th scope="row"><span class="row-number">{row_number:02}</span>'
+                 f'{escape(question_id)}</th>')
         rows.append(
-            f'<tr><th scope="row"><span class="row-number">{row_number:02}</span>'
-            f'{escape(question_id)}</th>{"".join(cells)}</tr>'
+            f'<tr>{label}{"".join(cells)}</tr>'
         )
+        score_rows.append(f'<tr>{label}{"".join(score_cells)}</tr>')
+
+    by_model = {s["model"]: s for s in summaries}
+    accuracy_rows = []
+    for model in models:
+        summary = by_model.get(model)
+        values = ([str(summary["correct_count"]), str(summary["denominator"]),
+                   f'{summary["accuracy_percent"]:.2f}%', str(summary["generation_failures"]),
+                   str(summary["ungradable_completed"]), str(summary["format_invalid_completed"]),
+                   str(summary["format_unvalidated_completed"])] if summary is not None else
+                  ["Ungraded", str(len(question_ids)), "Ungraded", "—", "—", "—", "—"])
+        accuracy_rows.append(f'<tr><th scope="row">{escape(model)}</th>' +
+                             "".join(f'<td>{value}</td>' for value in values) + '</tr>')
+    grading_status = (f"Fully graded ({grading['grader_version']})" if grading is not None else
+                      "Ungraded; no complete batch grading saved")
 
     html = f"""<!doctype html>
 <html lang="en">
@@ -92,7 +141,7 @@ def export_table(
     .swatch {{ display: inline-block; width: 12px; height: 12px; margin-right: 5px;
                border: 1px solid #cad3e0; border-radius: 3px; vertical-align: middle; }}
     .table-wrap {{ overflow: auto; max-height: 75vh; border: 1px solid #dbe2ed;
-                   border-radius: 10px; background: white; }}
+                   border-radius: 10px; background: white; margin-bottom: 24px; }}
     table {{ width: 100%; min-width: 960px; table-layout: fixed;
              border-collapse: separate; border-spacing: 0; }}
     caption {{ text-align: left; padding: 14px 16px; color: #526078; }}
@@ -106,6 +155,9 @@ def export_table(
     tbody th {{ position: sticky; left: 0; z-index: 1; background: #f8fafd;
                 font-size: 12px; font-weight: 500; }}
     td {{ white-space: pre-wrap; }}
+    pre {{ white-space: pre-wrap; margin: 8px 0; font: 13px/1.5 monospace; }}
+    details {{ margin-top: 8px; }}
+    summary {{ cursor: pointer; color: #243f64; }}
     .row-number {{ display: inline-block; min-width: 28px; color: #7b879b; }}
     .failed {{ background: #fff0f0; }}
     .unfinished {{ background: #fff6df; }}
@@ -117,21 +169,41 @@ def export_table(
   <main>
     <h1>MathQA answer table</h1>
     <p class="metadata">Run: {escape(run["run_id"])}<br>
-      Status: {escape(run["status"].replace("_", " "))}</p>
+      Status: {escape(run["status"].replace("_", " "))}<br>
+      Grading: {escape(grading_status)}</p>
     <div class="legend">
       <span><span class="swatch failed"></span>Failed attempt</span>
       <span><span class="swatch unfinished"></span>Running or interrupted</span>
-      <span>Blank cell: no answer text saved</span>
+      <span>Ungraded: no saved score; generation and format are separate from correctness</span>
     </div>
     <div class="table-wrap">
-      <table>
-        <caption>{len(question_ids)} questions × {len(models)} model answer columns</caption>
+      <table id="final-answers">
+        <caption>Final answers: {len(question_ids)} questions × {len(models)} models</caption>
         <thead><tr><th scope="col">Question ID</th>{headers}</tr></thead>
         <tbody>{"".join(rows)}</tbody>
       </table>
     </div>
-    <p class="note">Cells contain saved answer text, including partial answers from failed attempts.
-      The latest attempt is shown. Response JSON, usage, cost, timing, and error details remain in SQLite.</p>
+    <div class="table-wrap">
+      <table id="scores">
+        <caption>Scores: option-letter correctness (1 or 0)</caption>
+        <thead><tr><th scope="col">Question ID</th>{headers}</tr></thead>
+        <tbody>{"".join(score_rows)}</tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table id="accuracy">
+        <caption>Accuracy: all selected questions are included in each denominator</caption>
+        <thead><tr><th scope="col">Model</th><th scope="col">Correct</th>
+          <th scope="col">Denominator</th><th scope="col">Accuracy</th>
+          <th scope="col">Generation failures</th><th scope="col">Ungradable completed</th>
+          <th scope="col">Format-invalid completed</th><th scope="col">Format-unvalidated completed</th></tr></thead>
+        <tbody>{"".join(accuracy_rows)}</tbody>
+      </table>
+    </div>
+    <p class="note">The latest attempt is shown. Failed/truncated generations score 0, including partial replies.
+      Calculations are not evaluated. Value conflicts use option text with whitespace runs collapsed;
+      they do not affect the option-letter score. Expand Original reply to see saved text unchanged.
+      Response JSON, usage, cost, timing, and error details remain in SQLite.</p>
   </main>
 </body>
 </html>

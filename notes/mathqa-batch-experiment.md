@@ -8,10 +8,112 @@ Current state: the formatting experiment harness, per-model settings, local
 response validation, additive storage and offline tests are implemented.
 The shared profiles in `mathqa_models.py` select Qwen2.5 `json-prompt`,
 Qwen3 `json-schema-no-think`, and DeepSeek `json-prompt`. Both the original batch
-CLI and experiment CLI now use these definitions. Post-batch accuracy grading
-remains a future step. Generated JSON diagnostics, HTML tables and SQLite runs are local
+CLI and experiment CLI now use these definitions. Automatic answer-only grading
+now follows all model batches; the implementation and offline check are recorded below.
+Generated JSON diagnostics, HTML tables and SQLite runs are local
 artifacts excluded from Git; this note records the reviewable trial evidence.
 The sections below describe the baseline and the trials in chronological order.
+
+## Automatic answer-only grading, 2026-10-05
+
+`mathqa_grading.py` extracts final answer fields independently of the calculation
+format validator. JSON profiles require one complete JSON object with unique
+fields and an explicit lowercase `a`–`e` option. No JSON repair, Markdown removal,
+case correction, value-to-option inference, or calculation evaluation is done.
+Missing/non-string values receive diagnostics but a usable option still controls
+the primary score. Line profiles require one unambiguous terminal `; letter) value`
+segment; segment spacing and semicolons in the calculation are allowed. Multiple
+option segments, trailing lines, malformed JSON and unusable options score 0.
+Failed/truncated generations score 0 even if their partial text has final fields.
+
+Returned values are preserved separately and compared with the selected option's
+text after collapsing whitespace runs only. Mismatches (including punctuation or
+internal spacing differences) are flagged independently of the option score.
+The existing format validator and saved validation results are unchanged.
+
+The scheduler retains sequential model batches, five concurrent requests within
+each model, and zero retries. After the entire model loop finishes and the run's
+generation status is saved, grading verifies the saved dataset path/checksum and
+every selected question/model pair's final outcomes. Missing calls, running or
+interrupted attempts, and interrupted runs are refused. All scores, diagnostics,
+and model summaries are saved in one transaction in additive `run_gradings`,
+`call_gradings`, and `model_gradings` tables. Original run/call/validation records
+are untouched. Accuracy uses all selected questions; legacy runs remain ungraded
+until explicitly graded. For legacy runs with multiple attempts, every attempt
+must have a final outcome and the latest attempt supplies the accuracy score.
+
+Future `mathqa_batch.py --run --questions N` and `mathqa_experiments.py --run`
+commands automatically grade after all calls finish, print model accuracy,
+generation failures, ungradable completed answers and separate format-invalid
+completed counts, then export HTML. The batch exit code still describes generation
+success; the experiment exit code also requires format success. Neither exit code
+is an accuracy threshold. Setup/preview commands do not make API calls or grade.
+
+The HTML exporter remains read-only and produces three tables: extracted final
+answers with expandable original replies, per-question/model scores, and per-model
+accuracy with diagnostic counts. Older ungraded and incomplete runs display
+“Ungraded,” never an inferred zero. Generation status and format validity appear
+separately in the final-answer cells.
+
+The existing run `fbc7011d-0c77-49d7-9c0c-e0979ae2c6cd` was graded offline,
+without API requests. Its dataset checksum matched; all 60 final attempts received
+saved scores and three model summaries. Before/after fingerprints of every row in
+`runs`, `calls`, and `call_validations` matched exactly.
+
+| Model | Correct / selected | Accuracy | Generation failures | Ungradable completed | Format-invalid completed |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Qwen2.5 | 6 / 20 | 30% | 0 | 1 | 6 |
+| Qwen3 | 11 / 20 | 55% | 0 | 0 | 7 |
+| DeepSeek V3.2 | 14 / 20 | 70% | 2 | 0 | 12 |
+
+The ungradable Qwen2.5 option on question 0102 is `"none"`. Three value text
+mismatches were flagged: Qwen2.5 question 0122 (`b`, `432` versus option b's
+`428 .`), Qwen2.5 question 0292 (`6.7 kg.` versus `6.7 kg .`), and Qwen3
+question 0229 (`58%` versus `58 %`). These do not alter primary scores.
+The two DeepSeek output-limit failures remain zero-scoring selected questions.
+
+The regenerated HTML has 20 question rows in each of the first two tables, 60
+expandable original replies, 60 scores, and three accuracy rows. Its score-column
+sums match the stored summaries. To repeat this offline operation:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/mathqa_grading.py --run-id fbc7011d-0c77-49d7-9c0c-e0979ae2c6cd
+```
+
+Offline tests cover extraction, calculation-format independence, wrong/missing/
+ambiguous/malformed final answers, value conflicts, failed/truncated generations,
+checksum/completion guards, post-all-model timing, the full denominator, a fourth
+configured model, original preservation, repeat grading, legacy export, HTML
+ordering/escaping and read-only export. No paid calls or commits were made.
+
+### Authorized live batch: first 100 questions, 2026-10-05
+
+Run `6e8ba4fd-3f6d-41f9-9522-23c84e0d332d` made exactly 300 requests using
+the three selected profiles, sequential model batches, concurrency five within
+each model, and zero retries. All requests returned HTTP 200 from the configured
+providers (Phala, SiliconFlow, DeepInfra). Generation finished in 165.06 seconds
+with status `completed_with_errors` and exit code 1.
+
+| Model | Correct / selected | Accuracy | Generation failures | Ungradable completed | Format-invalid completed | Reported USD |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Qwen2.5 | 51 / 100 | 51% | 0 | 1 | 20 | 0.00364060 |
+| Qwen3 | 65 / 100 | 65% | 0 | 0 | 31 | 0.00641422 |
+| DeepSeek V3.2 | 81 / 100 | 81% | 6 | 0 | 58 | 0.00858156 |
+
+All six DeepSeek failures reached the 256-token output limit: questions 0108,
+0187, 0237, 0396, 0419, and 1085. They score 0 and remain in the denominator.
+All 300 attempts reported costs, totaling USD 0.01863638 including failures.
+
+Automatic grading occurred after the final generation finished. Verification
+confirmed the dataset checksum, 300 saved scores, 300 expandable original replies,
+100 question rows in each of the final-answer and score tables, three accuracy
+rows, and agreement between HTML score totals and saved summaries. A read-only
+check while Qwen3 was running found no grading records for this run.
+
+HTML: `results/mathqa_tables/mathqa_6e8ba4fd-3f6d-41f9-9522-23c84e0d332d.html`.
+Diagnostics, including saved grading metadata/summaries:
+`results/mathqa_experiments/6e8ba4fd-3f6d-41f9-9522-23c84e0d332d.json`.
+Original responses and grading records remain in SQLite; no changes were committed.
 
 ## Batch integration after the formatting trials
 

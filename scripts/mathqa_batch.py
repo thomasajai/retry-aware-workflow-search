@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from mathqa_table import export_table
 from mathqa_response import CONTRACTS, validate_answer
 from mathqa_models import default_model_configs
+from mathqa_grading import initialize_grading_tables, grade_run, print_summaries
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -105,6 +106,7 @@ def initialize_database(database_path: Path = DATABASE_PATH) -> None:
         if "response_body_text" not in call_columns:
             with connection:
                 connection.execute("ALTER TABLE calls ADD COLUMN response_body_text TEXT")
+        initialize_grading_tables(connection)
     finally:
         connection.close()
 
@@ -574,13 +576,16 @@ async def run_batch(
         print(
             f"Completed generations: format valid: {valid or 0}; "
             f"invalid: {invalid or 0}; unvalidated: {unvalidated or 0}. "
-            "Mathematical correctness has not been graded.",
+            "Answer grading follows after all model batches finish.",
             flush=True,
         )
     finally:
         # TaskGroup has finished or cancelled its children before this update.
         set_run_status(run_id, final_status, database_path)
 
+    # This is outside the model loop and after every planned final outcome.
+    # Exceptions/cancellation skip this step and leave the batch ungraded.
+    print_summaries(grade_run(run_id, database_path))
     return final_status
 
 
