@@ -63,11 +63,11 @@ class ResponseContractTests(unittest.TestCase):
 class ExperimentConfigurationTests(unittest.TestCase):
     def test_controls_variants_and_no_answer_key_in_prompts(self):
         first = batch.load_questions(1)[0]
-        for alias in experiments.MODEL_SETTINGS:
+        for alias in experiments.MODEL_PROFILES:
             for variant in experiments.EXPERIMENTS[:3]:
                 model, config = experiments.experiment_config(alias, variant)
                 body = config["body_settings"]
-                self.assertEqual(model, experiments.MODEL_SETTINGS[alias]["model"])
+                self.assertEqual(model, experiments.MODEL_PROFILES[alias].model)
                 self.assertFalse(body["provider"]["allow_fallbacks"])
                 self.assertTrue(body["provider"]["require_parameters"])
                 self.assertEqual(len(body["provider"]["only"]), 1)
@@ -157,7 +157,7 @@ class SavedTrialTests(unittest.IsolatedAsyncioTestCase):
             return httpx.Response(200, text=raw)
 
         # Execution uses the saved configuration, even if live defaults change.
-        with patch.dict(experiments.MODEL_SETTINGS, {}, clear=True), redirect_stdout(io.StringIO()):
+        with patch.dict(experiments.MODEL_PROFILES, {}, clear=True), redirect_stdout(io.StringIO()):
             status = await batch.run_batch(self.run_id, self.questions, "fake-key", database_path=self.database_path,
                                            transport=httpx.MockTransport(handler))
         self.assertEqual(status, "completed_with_errors")

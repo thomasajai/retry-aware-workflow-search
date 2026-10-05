@@ -16,32 +16,19 @@ from dotenv import load_dotenv
 
 from mathqa_table import export_table
 from mathqa_response import CONTRACTS, validate_answer
+from mathqa_models import default_model_configs
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_PATH = PROJECT_ROOT / "data" / "mathqa_200" / "mathqa_200.json"
 DATABASE_PATH = PROJECT_ROOT / "results" / "mathqa_runs.sqlite3"
 
-MODELS = [
-    "qwen/qwen-2.5-7b-instruct",
-    "qwen/qwen3-32b",
-    "deepseek/deepseek-v3.2",
-]
+MODELS = list(default_model_configs())
 QUESTION_COUNT = 50
 # Limit the number of simultaneous requests within each model's batch.
 MAX_CONCURRENT_REQUESTS = 5
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MAX_OUTPUT_TOKENS = 1024
 REQUEST_TIMEOUT_SECONDS = 60.0
-
-# Match the existing single-question solver's instructions.
-PROMPT_TEMPLATE = (
-    "Solve this multiple-choice math problem.\n"
-    "Return one line only: <calculation>; <option letter>) <option value>.\n"
-    "Use the fewest tokens possible. No prose, headings, or LaTeX.\n\n"
-    "Problem: {problem}\n"
-    "Options: {options}"
-)
 
 
 def initialize_database(database_path: Path = DATABASE_PATH) -> None:
@@ -142,9 +129,11 @@ def load_questions(question_count: int = QUESTION_COUNT) -> list[dict[str, str]]
     ]
 
 
-def build_prompt(question: dict[str, str]) -> str:
-    """Fill the saved template with the question's problem and options."""
-    return PROMPT_TEMPLATE.format(
+def build_prompt(question: dict[str, str], model: str | None = None) -> str:
+    """Preview a current model profile (execution uses the saved run instead)."""
+    configs = default_model_configs()
+    config = configs[next(iter(configs)) if model is None else model]
+    return config["prompt_template"].format(
         problem=question["problem"], options=question["options"]
     )
 
@@ -159,30 +148,22 @@ def create_run(
     dataset_sha256 = hashlib.sha256(DATASET_PATH.read_bytes()).hexdigest()
     request_settings = {
         "api_url": OPENROUTER_URL,
-        "body_settings": {
-            "temperature": 0,
-            "max_tokens": MAX_OUTPUT_TOKENS,
-            "reasoning": {"enabled": False},
-            "stream": False,
-        },
         "timeout_seconds": REQUEST_TIMEOUT_SECONDS,
         "automatic_retries": 0,
         "execution_mode": "parallel_within_model_sequential_between_models",
     }
-    # Experiments supply explicit settings and prompts without changing old runs.
-    if model_configs is not None:
-        if not model_configs:
-            raise ValueError("At least one model configuration is required.")
-        for config in model_configs.values():
-            if config.get("response_contract") not in (None, *CONTRACTS):
-                raise ValueError("Unknown response contract in model configuration.")
-            if not isinstance(config.get("body_settings"), dict):
-                raise ValueError("Each model needs explicit body_settings.")
-            for question in questions:
-                config["prompt_template"].format(problem=question["problem"], options=question["options"])
-        request_settings.pop("body_settings")
-        request_settings["model_configs"] = model_configs
-    models = list(model_configs) if model_configs is not None else MODELS
+    model_configs = default_model_configs() if model_configs is None else model_configs
+    if not model_configs:
+        raise ValueError("At least one model configuration is required.")
+    for config in model_configs.values():
+        if config.get("response_contract") not in CONTRACTS:
+            raise ValueError("Each model needs a known response contract.")
+        if not isinstance(config.get("body_settings"), dict):
+            raise ValueError("Each model needs explicit body_settings.")
+        for question in questions:
+            config["prompt_template"].format(problem=question["problem"], options=question["options"])
+    request_settings["model_configs"] = model_configs
+    models = list(model_configs)
 
     connection = sqlite3.connect(database_path)
     try:
@@ -205,8 +186,8 @@ def create_run(
                     json.dumps([question["id"] for question in questions]),
                     DATASET_PATH.relative_to(PROJECT_ROOT).as_posix(),
                     dataset_sha256,
-                    next(iter(model_configs.values()))["prompt_template"]
-                    if model_configs is not None and len(model_configs) == 1 else PROMPT_TEMPLATE,
+                    # Legacy column remains readable; model_configs holds every template.
+                    next(iter(model_configs.values()))["prompt_template"],
                     json.dumps(request_settings),
                     MAX_CONCURRENT_REQUESTS,
                 ),
@@ -371,7 +352,11 @@ async def call_model(
         raise ValueError(f"Run {run_id!r} does not exist.")
 
     settings = json.loads(run["request_settings_json"])
-    model_config = settings.get("model_configs", {}).get(model)
+    if "model_configs" in settings:
+        # A missing profile is a setup error, never a fallback to shared controls.
+        model_config = settings["model_configs"][model]
+    else:
+        model_config = None  # Compatibility with saved baseline runs.
     prompt_template = model_config["prompt_template"] if model_config is not None else run["prompt_template"]
     body_settings = model_config["body_settings"] if model_config is not None else settings["body_settings"]
     prompt = prompt_template.format(problem=question["problem"], options=question["options"])
@@ -570,6 +555,13 @@ async def run_batch(
                 "SELECT status, COUNT(*) FROM calls WHERE run_id = ? GROUP BY status",
                 (run_id,),
             ).fetchall())
+            format_counts = connection.execute(
+                "SELECT SUM(v.format_valid = 1), SUM(v.format_valid = 0), "
+                "SUM(v.call_id IS NULL) FROM calls c "
+                "LEFT JOIN call_validations v ON v.call_id = c.call_id "
+                "WHERE c.run_id = ? AND c.status = 'completed'",
+                (run_id,),
+            ).fetchone()
         finally:
             connection.close()
         completed = counts.get("completed", 0)
@@ -578,6 +570,13 @@ async def run_batch(
             raise RuntimeError("The batch ended without all planned call outcomes recorded.")
         final_status = "completed_with_errors" if failed else "completed"
         print(f"\nCalls completed: {completed}; failed: {failed}.", flush=True)
+        valid, invalid, unvalidated = format_counts
+        print(
+            f"Completed generations: format valid: {valid or 0}; "
+            f"invalid: {invalid or 0}; unvalidated: {unvalidated or 0}. "
+            "Mathematical correctness has not been graded.",
+            flush=True,
+        )
     finally:
         # TaskGroup has finished or cancelled its children before this update.
         set_run_status(run_id, final_status, database_path)
@@ -608,20 +607,24 @@ def main() -> int:
             parser.error("Set OPENROUTER_API_KEY in the repository's .env file.")
 
     initialize_database()
-    run_id = create_run(questions)
+    model_configs = default_model_configs()
+    run_id = create_run(questions, model_configs=model_configs)
     if not args.run:
         print("Setup only: a prepared run was saved; no API requests.")
     print(f"Database: {DATABASE_PATH}")
     print(f"Run ID: {run_id}")
     print("Run status: prepared.")
     print(f"Questions per model: {len(questions)}")
-    print(f"Planned API calls: {len(questions) * len(MODELS)}")
+    print(f"Planned API calls: {len(questions) * len(model_configs)}")
     print(f"Planned concurrency per model: {MAX_CONCURRENT_REQUESTS}")
     print("Finish all questions for each model before starting the next model.")
 
     print("\nModel order:")
-    for position, model in enumerate(MODELS, start=1):
-        print(f"{position}. {model}")
+    for position, (model, config) in enumerate(model_configs.items(), start=1):
+        body = config["body_settings"]
+        provider = ", ".join(body["provider"]["only"])
+        print(f"{position}. {model}: {config['experiment']}; provider: {provider}; "
+              f"max_tokens: {body['max_tokens']}; contract: {config['response_contract']}.")
 
     print("\nSelected question IDs in table row order:")
     for row_number, question in enumerate(questions, start=1):

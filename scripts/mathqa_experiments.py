@@ -2,7 +2,6 @@
 
 import argparse
 import asyncio
-from copy import deepcopy
 import json
 import os
 from pathlib import Path
@@ -12,86 +11,8 @@ from uuid import UUID
 from dotenv import load_dotenv
 
 import mathqa_batch as batch
-from mathqa_response import ANSWER_SCHEMA
 from mathqa_table import export_table
-
-
-MODEL_SETTINGS = {
-    "qwen25": {
-        "model": "qwen/qwen-2.5-7b-instruct",
-        "body_settings": {
-            "temperature": 0, "max_tokens": 256, "stream": False,
-            "provider": {"only": ["phala"], "allow_fallbacks": False, "require_parameters": True},
-        },
-        "control_notes": "No reasoning parameter: Phala does not advertise it for Qwen2.5.",
-    },
-    "qwen3": {
-        "model": "qwen/qwen3-32b",
-        "body_settings": {
-            "temperature": 0.7, "top_p": 0.8, "top_k": 20,
-            "max_tokens": 256, "stream": False, "reasoning": {"enabled": False},
-            "provider": {"only": ["siliconflow/fp8"], "allow_fallbacks": False, "require_parameters": True},
-        },
-        "control_notes": "Gateway reasoning-off is a trial request, not a guarantee. /no_think is tested separately. Sampling follows Qwen's non-thinking recommendation.",
-    },
-    "deepseek": {
-        "model": "deepseek/deepseek-v3.2",
-        "body_settings": {
-            "temperature": 0, "max_tokens": 256, "stream": False,
-            "reasoning": {"enabled": False},
-            "provider": {"only": ["deepinfra/fp4"], "allow_fallbacks": False, "require_parameters": True},
-        },
-        "control_notes": "DeepInfra advertises reasoning and structured outputs. Inspect returned reasoning usage and visible verbosity separately.",
-    },
-}
-DEFAULT_EXPERIMENTS = {
-    "qwen25": "json-prompt",
-    "qwen3": "json-schema-no-think",
-    "deepseek": "json-prompt",
-}
-EXPERIMENTS = ("line-example", "json-prompt", "json-schema", "line-no-think", "json-schema-no-think")
-LINE_PROMPT = (
-    "Solve this multiple-choice math problem.\n"
-    "Return only one line: a compact calculation; the lowercase option letter) the option value.\n"
-    "Unrelated example: for 6 times 7 with options a) 40, b) 42, c) 44, d) 46, e) 48, return:\n"
-    "6*7=42; b) 42\n"
-    "Calculation: at most 160 characters; numbers, arithmetic, single-letter variables or math functions "
-    "(gcd, lcm, sqrt, abs, floor, ceil, log, ln, min, max, round). No prose or units in calculation.\n"
-    "Copy the selected option value exactly, at most 120 characters. No headings, Markdown, LaTeX, or extra lines.\n\n"
-    "Problem: {problem}\nOptions: {options}"
-)
-JSON_PROMPT = (
-    "Solve this multiple-choice math problem.\n"
-    "Return only a JSON object with exactly three string fields: calculation, option, value.\n"
-    'Unrelated example: for 6 times 7 with options a) 40, b) 42, c) 44, d) 46, e) 48, return:\n'
-    '{{"calculation":"6*7=42","option":"b","value":"42"}}\n'
-    "Calculation: at most 160 characters; numbers, arithmetic, single-letter variables or math functions "
-    "(gcd, lcm, sqrt, abs, floor, ceil, log, ln, min, max, round). No prose or units in calculation.\n"
-    "Option: one lowercase letter a-e. Value: copy the selected option text exactly, at most 120 characters.\n"
-    "No Markdown, LaTeX, commentary, extra fields, or line breaks inside field values.\n\n"
-    "Problem: {problem}\nOptions: {options}"
-)
-
-
-def experiment_config(model_alias: str, experiment: str) -> tuple[str, dict]:
-    """Keep model controls fixed across output variants to isolate formatting."""
-    if experiment not in EXPERIMENTS:
-        raise ValueError(f"Unknown experiment: {experiment}.")
-    if experiment.endswith("no-think") and model_alias != "qwen3":
-        raise ValueError("/no_think experiments apply only to Qwen3.")
-    settings = deepcopy(MODEL_SETTINGS[model_alias])
-    model = settings.pop("model")
-    settings["experiment"] = experiment
-    settings["response_contract"] = "json-v1" if experiment.startswith("json") else "line-v1"
-    settings["prompt_template"] = JSON_PROMPT if experiment.startswith("json") else LINE_PROMPT
-    if experiment.endswith("no-think"):
-        settings["prompt_template"] += "\n/no_think"
-    if experiment.startswith("json-schema"):
-        settings["body_settings"]["response_format"] = {
-            "type": "json_schema",
-            "json_schema": {"name": "mathqa_answer", "strict": True, "schema": deepcopy(ANSWER_SCHEMA)},
-        }
-    return model, settings
+from mathqa_models import MODEL_PROFILES, EXPERIMENTS, experiment_config
 
 
 def build_report(run_id: str, database_path: Path) -> dict:
@@ -165,7 +86,7 @@ def build_report(run_id: str, database_path: Path) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--list", action="store_true", help="List candidate experiments without requests or database changes.")
-    parser.add_argument("--model", choices=MODEL_SETTINGS, help="Select one model for a reviewable trial.")
+    parser.add_argument("--model", choices=MODEL_PROFILES, help="Select one model for a reviewable trial.")
     parser.add_argument("--experiment", choices=EXPERIMENTS,
                         help="Override the model default: qwen25/deepseek=json-prompt; qwen3=json-schema-no-think.")
     parser.add_argument("--questions", type=int, default=5)
@@ -181,13 +102,13 @@ def main() -> int:
     if args.list:
         if args.run:
             parser.error("--list cannot be combined with --run.")
-        for alias, settings in MODEL_SETTINGS.items():
+        for alias, profile in MODEL_PROFILES.items():
             variants = EXPERIMENTS if alias == "qwen3" else EXPERIMENTS[:3]
-            print(f"{alias} ({settings['model']}): {', '.join(variants)} (default: {DEFAULT_EXPERIMENTS[alias]})")
+            print(f"{alias} ({profile.model}): {', '.join(variants)} (default: {profile.default_experiment})")
         return 0
     if not args.model:
         parser.error("Choose --model, or use --list or --report-run.")
-    args.experiment = args.experiment or DEFAULT_EXPERIMENTS[args.model]
+    args.experiment = args.experiment or MODEL_PROFILES[args.model].default_experiment
     try:
         model, config = experiment_config(args.model, args.experiment)
         questions = batch.load_questions(args.questions)

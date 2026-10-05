@@ -54,7 +54,31 @@ inside this repository; both that cache and `.venv` are ignored by Git.
 ## MathQA batch experiment
 
 `scripts/mathqa_batch.py` selects the first 50 records in the downloaded
-200-question subset. Save a prepared run without making API calls:
+200-question subset. Both batch runs and formatting trials use the model
+profiles in `scripts/mathqa_models.py`:
+
+| Model | Selected variant | Fixed provider |
+| --- | --- | --- |
+| Qwen2.5 7B | `json-prompt` | `phala` |
+| Qwen3 32B | `json-schema-no-think` | `siliconflow/fp8` |
+| DeepSeek V3.2 | `json-prompt` | `deepinfra/fp4` |
+
+Each profile groups the model ID, API controls, selected variant, and control
+notes. The variant determines the concrete prompt and local response contract;
+Qwen3 also requests a strict JSON schema and appends `/no_think`. All three use
+a 256-token output limit, fixed providers, and disabled provider fallbacks.
+These are the selected trial settings; they do not guarantee valid output.
+
+To add a model, add a `ModelProfile` entry to `MODEL_PROFILES` in that module,
+after verifying its provider's applicable controls. Its position in the registry
+sets its execution order. The batch includes it automatically; the trial CLI
+also accepts its alias. Preview its prompt and controls with the trial script
+before authorizing a paid test. Returned configurations are independent copies.
+
+New runs save each model's prompt, settings, variant, and contract in SQLite.
+Execution reads this saved snapshot rather than current profile definitions.
+Existing runs retain their original settings and remain readable.
+Save a prepared run without making API calls:
 
 ```powershell
 uv run python scripts/mathqa_batch.py
@@ -110,11 +134,18 @@ Ctrl+C also records interruption when the process can finish its cleanup.
 
 Every invocation creates a new run; resume is not implemented. A completed
 call means a nonempty answer was returned without a detected generation error.
-Response-template compliance and mathematical correctness are not yet validated.
+New batch runs validate the JSON response locally and store parsed fields and
+validation errors separately, preserving the original answer and full response.
+The batch prints format-valid, invalid, and unvalidated counts among completed
+generations separately from generation failures. A nonempty answer can be invalid;
+valid JSON can still come from a truncated generation. Mathematical correctness
+is not yet graded, and format validation never uses the dataset answer key.
 See [the batch experiment note](notes/mathqa-batch-experiment.md) for the live-run
 results, reasoning/format issues, and proposed next steps.
-Exit codes are 0 for setup or an entirely successful batch,
-1 for a batch with failed calls, 2 for invalid arguments or a missing key,
+Batch run status and exit codes continue to describe generation outcomes.
+Exit codes are 0 for setup or a batch without generation failures (even if some
+responses are format-invalid), 1 for a batch with failed generations,
+2 for invalid arguments or a missing key,
 and 130 for Ctrl+C.
 
 The separate `scripts/mathqa_table.py` script reads SQLite without changing it

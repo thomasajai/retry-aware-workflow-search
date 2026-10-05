@@ -50,8 +50,9 @@ class TableExportTests(unittest.TestCase):
         self.questions = batch.load_questions()
         self.questions[0], self.questions[1] = self.questions[1], self.questions[0]
         self.models = list(reversed(batch.MODELS))
-        with patch.object(batch, "MODELS", self.models):
-            self.run_id = batch.create_run(self.questions, self.database_path)
+        configs = batch.default_model_configs()
+        self.run_id = batch.create_run(self.questions, self.database_path,
+                                       model_configs={model: configs[model] for model in self.models})
 
     def save_answer(self, row, model_index, answer, *, status="completed", attempt=1):
         call_id = batch.create_call(

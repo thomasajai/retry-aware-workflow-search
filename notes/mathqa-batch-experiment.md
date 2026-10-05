@@ -6,12 +6,73 @@ authorized paid trials and their observations are recorded at the end.
 
 Current state: the formatting experiment harness, per-model settings, local
 response validation, additive storage and offline tests are implemented.
-The selected defaults in `mathqa_experiments.py` are Qwen2.5 `json-prompt`,
-Qwen3 `json-schema-no-think`, and DeepSeek `json-prompt`. Integration of these
-settings into the original batch CLI and post-batch accuracy grading remain
-future steps. Generated JSON diagnostics, HTML tables and SQLite runs are local
+The shared profiles in `mathqa_models.py` select Qwen2.5 `json-prompt`,
+Qwen3 `json-schema-no-think`, and DeepSeek `json-prompt`. Both the original batch
+CLI and experiment CLI now use these definitions. Post-batch accuracy grading
+remains a future step. Generated JSON diagnostics, HTML tables and SQLite runs are local
 artifacts excluded from Git; this note records the reviewable trial evidence.
 The sections below describe the baseline and the trials in chronological order.
+
+## Batch integration after the formatting trials
+
+- `mathqa_models.py` contains a `ModelProfile` per model in an ordered registry.
+  Each groups model ID, explicit API body settings, selected experiment, and
+  control notes. One shared builder supplies the concrete prompt, response
+  contract, and optional strict JSON schema to both scripts.
+- New `mathqa_batch.py` runs use these selected profiles by default. Qwen2.5 uses
+  Phala and omits the unsupported reasoning control; Qwen3 uses SiliconFlow FP8,
+  reasoning-off, strict JSON schema, and `/no_think`; DeepSeek uses DeepInfra FP4
+  and reasoning-off with prompt-only JSON. The exact prompts and settings from
+  the trials are retained, including the 256-token limits and disabled provider
+  fallbacks. No additional provider controls were assumed or introduced.
+- Adding a registry entry includes that model in new batches and makes its alias
+  available in the trial CLI. Its provider controls must be verified before a
+  paid trial; available format variants share the existing line/JSON contracts.
+- Every run saves all per-model settings and templates. Execution uses that
+  snapshot, including when current profiles change. Legacy shared-settings runs
+  remain readable and can still execute if prepared; no resume was added.
+- Existing local validation now applies to normal new batches. Answers and full
+  responses remain unchanged; parsed fields/errors stay in `call_validations`.
+  Generation status, format validity, and mathematical correctness remain separate.
+  The console reports generation failures and separate format counts among
+  completed generations. Run status and batch exit code still describe generation
+  success only; the trial CLI continues to fail for format errors too.
+- Model order, concurrency of five within each model, no automatic retries,
+  first-N question selection, and answer-key exclusion remain unchanged.
+- Nineteen offline tests pass, including exact batch/trial request matching,
+  adding a model, independent configuration copies, saved-setting execution,
+  legacy execution/export, valid/invalid/truncated responses, raw preservation,
+  concurrency and model order. Implementation verification used mocked responses;
+  the subsequently authorized live check is recorded below.
+
+### Integrated batch: first 20 questions
+
+The authorized run `fbc7011d-0c77-49d7-9c0c-e0979ae2c6cd` used the selected
+profiles for 20 questions per model (60 calls). It finished in approximately
+43.32 seconds with status `completed_with_errors` and exit code 1.
+
+| Model | Completed generations | Generation failures | Format-valid completed replies | Format-invalid completed replies | Reported cost (USD) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Qwen2.5 / Phala | 20 | 0 | 14 | 6 | 0.00073020 |
+| Qwen3 / SiliconFlow | 20 | 0 | 13 | 7 | 0.00136616 |
+| DeepSeek / DeepInfra | 18 | 2 | 6 | 12 | 0.00187360 |
+
+Total reported cost was USD 0.00396996, including failed generations. All 60
+responses reported zero reasoning tokens. This records reported usage rather
+than proving anything about all internal computation. DeepSeek reached the
+256-token output limit on `mathqa_test_0108` and `mathqa_test_0237`.
+Among the 58 completed generations, 33 passed the existing format contract and
+25 failed it. Mathematical accuracy has not been graded.
+
+The first invocation, run `2aed44a8-1d7d-4a15-878b-c800cc4d9b0b`, recorded
+60 connection failures with no HTTP responses in the restricted environment.
+The live run above was a separate invocation with network access enabled;
+automatic retries remain disabled. Both runs remain in the local database.
+
+The batch generated `results/mathqa_tables/mathqa_fbc7011d-0c77-49d7-9c0c-e0979ae2c6cd.html`.
+Diagnostics are in `results/mathqa_experiments/fbc7011d-0c77-49d7-9c0c-e0979ae2c6cd.json`.
+These generated artifacts remain excluded from Git. The HTML table shows original
+answers and highlights generation failures; it does not yet highlight format errors.
 
 ## What we built
 
