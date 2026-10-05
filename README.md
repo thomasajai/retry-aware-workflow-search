@@ -4,6 +4,17 @@ Course project for [COMS 6113: Topics in Agentic Systems, Fall 2026](https://dap
 
 The [full project description](PROJECT.md) is the canonical statement of the topic, motivation, problem, proposed approach, and suggested reading. Check the [course schedule](https://daplab.cs.columbia.edu/agentic-systems/) for upcoming requirements. The five requested papers are stored in the [local paper collection](papers/README.md).
 
+## Working agreement
+
+Always follow these instructions when working in this repository:
+
+- Explain proposed changes before editing.
+- Keep the user informed as work progresses.
+- Make small, reviewable changes.
+- Ask the user if anything important is ambiguous.
+
+This agreement applies to code, documentation, and experiments.
+
 ## Python setup and MathQA solver
 
 This repository uses uv with Python 3.12. From the repository root:
