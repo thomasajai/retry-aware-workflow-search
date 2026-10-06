@@ -2,6 +2,19 @@
 
 Last reviewed: 2026-09-25. This records the current plan, not experimental results. Sources are the team's [project description](../PROJECT.md), our design discussion, and the team slides appended to [Related Work + First Experiment.pptx](../Related%20Work%20%2B%20First%20Experiment.pptx) (slides 11–18). A statement appearing in the deck is marked separately from a choice the user made explicitly in conversation.
 
+## October 6 planning update
+
+The user requested an explicit [solver-verifier implementation and experiment
+plan](solver-verifier-plan.md). It records the newly agreed rules: fresh solver
+requests with small non-zero temperature, acceptance requiring correct reasoning
+and option, local rejection only for unusable output, and score zero after three
+rejected attempts. Verifier approval remains separate from offline correctness.
+The plan includes verifier experiments before configuration comparison and uses
+LangGraph with additive SQLite storage and numbered migrations. Creating this
+plan does not authorize paid calls or implement the workflow. Earlier deck
+choices and open decisions below retain their historical context; use the new
+plan for the current workflow milestones and unresolved live-stage settings.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)

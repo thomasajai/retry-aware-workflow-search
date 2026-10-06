@@ -12,8 +12,41 @@ Always follow these instructions when working in this repository:
 - Keep the user informed as work progresses.
 - Make small, reviewable changes.
 - Ask the user if anything important is ambiguous.
+- Before running anything that consumes OpenRouter credits, explain why it is
+  needed, what will run, its estimated total cost, and a small cost breakdown.
 
 This agreement applies to code, documentation, and experiments.
+
+### OpenRouter spending rule
+
+Apply this rule to every paid workflow or script, including live tests,
+diagnostics, verifier trials, batches, reruns, and retries. Before execution:
+
+- State the purpose and expected learning/result, and whether saved responses or
+  an offline check can answer the question first.
+- Identify the script/workflow, models/providers, question and repetition counts,
+  expected calls, and maximum calls including solver and transport retries.
+- Give an estimated total in USD and a small breakdown by model/role: call count,
+  estimated input tokens, total billed output tokens including reasoning, current
+  provider rates, and estimated subtotal. State assumptions and uncertainty.
+- Distinguish the expected estimate from the configured spending limit and a
+  conservative upper estimate where available. Do not call an estimate a
+  guaranteed maximum. If pricing or reasoning usage is uncertain, disclose it
+  before execution rather than assuming the calls are free or negligible.
+- Execute only within the user-authorized scope and spending limit. Give a new
+  notice before a new paid run or rerun; obtain authorization before increasing
+  scope or spend beyond existing authorization.
+
+Afterward, report actual known cost, any missing cost measurements, request
+counts, and what the run established. Offline work does not need a paid-run
+notice. A saved paid response reused offline does not consume credits again.
+
+## Solver-verifier workflow plan
+
+The [solver-verifier plan](notes/solver-verifier-plan.md) records the agreed retry
+rules, verifier screening experiment, LangGraph workflow, SQLite storage design,
+and staged completion criteria. It is a plan; the new workflow is not implemented
+yet. Paid stages require explicit execution with a defined budget.
 
 ## Python setup and MathQA solver
 
