@@ -24,5 +24,7 @@ agentopt/
 /results/mathqa_runs.sqlite3-shm
 /results/mathqa_tables/
 /results/mathqa_experiments/
+/results/workflow_previews/
+/results/backups/
 /results/archive/*/openrouter-current-check.json
 /results/archive/*/openrouter-diagnostic.json

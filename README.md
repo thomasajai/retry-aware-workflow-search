@@ -45,8 +45,40 @@ notice. A saved paid response reused offline does not consume credits again.
 
 The [solver-verifier plan](notes/solver-verifier-plan.md) records the agreed retry
 rules, verifier screening experiment, LangGraph workflow, SQLite storage design,
-and staged completion criteria. It is a plan; the new workflow is not implemented
-yet. Paid stages require explicit execution with a defined budget.
+and staged completion criteria. [Milestone 1 is complete](notes/solver-verifier-milestone-1.md):
+offline storage, screening previews, and reviewed diagnostic fixtures are available.
+The LangGraph retry loop and paid verifier runner are later milestones. Paid
+stages require advance cost disclosure and explicit execution with a defined budget.
+
+Preview the first 20 questions of the saved 100-question batch against all three
+proposed verifier candidates, with the independently reviewed synthetic diagnostics:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/mathqa_verifier_trials.py --include-reviewed --output results/workflow_previews/milestone-1.json
+```
+
+This command is offline and reads the source database without modifying it. The
+preview includes exact proposed prompts/settings, unusable-answer diagnostics,
+coverage, and request counts. It has no paid execution option. Candidate provider
+controls and current prices are marked pending review, so estimated future costs
+remain unknown rather than being presented as zero. Natural-answer labels and
+synthetic diagnostic labels remain separate and never enter verifier requests.
+
+Apply workflow storage upgrades explicitly, without model calls:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/mathqa_workflow_store.py --migrate
+```
+
+An existing database is backed up under `results/backups/` before a pending
+upgrade. Numbered migrations are applied transactionally with checksum checks;
+an already up-to-date database is unchanged. Existing batch records are retained.
+Backups and generated previews are local Git-ignored artifacts. To test the
+offline implementation and existing behavior, run:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
 
 ## Python setup and MathQA solver
 

@@ -1,0 +1,284 @@
+{
+  "schema_version": "verifier-review-v1",
+  "review_scope": "Synthetic diagnostics, reviewed by the assistant. Not human annotations or proof of natural-answer verifier reliability.",
+  "separation": "Labels and explanations are offline-only and excluded from verifier requests.",
+  "cases": [
+    {
+      "id": "valid_concise",
+      "kind": "valid_reasoning",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"6*7=42\", \"option\": \"b\", \"value\": \"42\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Six groups of seven are 42; option b is 42."
+      }
+    },
+    {
+      "id": "valid_shortcut",
+      "kind": "valid_shortcut",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"6*(5+2)=30+12=42\", \"option\": \"b\", \"value\": \"42\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Distributivity: 6*5+6*2=30+12=42."
+      }
+    },
+    {
+      "id": "readable_old_format_invalid",
+      "kind": "cosmetic_format",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"Six groups of seven give 6*7=42. Therefore choose b.\", \"option\": \"b\", \"value\": \"42\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Prose is readable and mathematically sound, although legacy calculation-format rules reject it."
+      }
+    },
+    {
+      "id": "fenced_uppercase",
+      "kind": "cosmetic_format",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "```json\n{\"calculation\": \"6*7=42\", \"option\": \" B \", \"value\": \"42\"}\n```",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "A single enclosing code fence and option case/outer whitespace do not make the unique choice ambiguous."
+      }
+    },
+    {
+      "id": "wrong_option",
+      "kind": "wrong_option",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"6*7=42\", \"option\": \"a\", \"value\": \"40\"}",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Arithmetic is valid but the selected option is 40, inconsistent with the derived 42; the full reasoning-to-choice contract fails."
+      }
+    },
+    {
+      "id": "lucky_option_bad_arithmetic",
+      "kind": "correct_option_invalid_reasoning",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"6*7=40\", \"option\": \"b\", \"value\": \"42\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "The option is 42 but the calculation claims 6*7=40, a false equation."
+      }
+    },
+    {
+      "id": "wrong_setup",
+      "kind": "correct_arithmetic_wrong_interpretation",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_pens",
+        "problem": "Three pens cost 2 dollars each. A notebook costs 5 dollars. What is the total cost of the three pens and one notebook?",
+        "options": "a) 7, b) 11, c) 10, d) 13, e) 15"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"3+2+5=10\", \"option\": \"c\", \"value\": \"10\"}",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "3+2+5=10 is arithmetically true but pen cost is 3*2; total is 3*2+5=11, option b."
+      }
+    },
+    {
+      "id": "value_conflict",
+      "kind": "option_value_conflict",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"6*7=42\", \"option\": \"b\", \"value\": \"44\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Option b is 42. The supplied value 44 contradicts both the choice and calculation; usable but reject."
+      }
+    },
+    {
+      "id": "duplicate_option",
+      "kind": "unusable_ambiguous",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\":\"6*7=42\",\"option\":\"b\",\"option\":\"a\",\"value\":\"42\"}",
+      "labels": {
+        "option_correct": null,
+        "reasoning_valid": null,
+        "expected_accept": null
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Two conflicting option fields make JSON ambiguous; do not send a verifier call."
+      }
+    },
+    {
+      "id": "missing_calculation",
+      "kind": "unusable_missing_work",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"option\":\"b\",\"value\":\"42\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": null,
+        "expected_accept": null
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "The explicit option matches the key, but there is no calculation to verify; skip as unusable."
+      }
+    },
+    {
+      "id": "truncated_generation",
+      "kind": "unusable_truncation",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_times",
+        "problem": "What is 6 times 7?",
+        "options": "a) 40, b) 42, c) 44, d) 46, e) 48"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"6*7=42\", \"option\": \"b\", \"value\": \"42\"}",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": null,
+        "expected_accept": null
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Even parseable partial fields do not establish a completed generation; skip the verifier."
+      },
+      "finish_reason": "length"
+    },
+    {
+      "id": "uncertain_rounding",
+      "kind": "uncertain_annotation",
+      "source": "hand-authored synthetic diagnostic, not a natural saved response",
+      "question": {
+        "id": "synthetic_rounding",
+        "problem": "Round 1.25 to one decimal place.",
+        "options": "a) 1.2, b) 1.3, c) 1.25, d) 1.0, e) 2.0"
+      },
+      "contract": "json-v1",
+      "answer": "{\"calculation\": \"round(1.25,1)=1.2\", \"option\": \"a\", \"value\": \"1.2\"}",
+      "labels": {
+        "option_correct": null,
+        "reasoning_valid": null,
+        "expected_accept": null
+      },
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-06",
+        "method": "Independent hand review of explicit arithmetic and question interpretation; no candidate verifier used",
+        "explanation": "Ties-to-even gives 1.2; half-up gives 1.3. The question does not specify convention. Exclude from binary reasoning-quality denominators."
+      }
+    }
+  ]
+}

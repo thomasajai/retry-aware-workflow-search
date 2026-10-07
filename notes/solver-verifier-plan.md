@@ -1,6 +1,6 @@
 # Solver-verifier workflow implementation and experiment plan
 
-Created: 2026-10-06. Status: planned; no workflow implementation or paid calls are authorized by this document alone.
+Created: 2026-10-06. Status: Milestone 1 completed offline; see the [milestone report](solver-verifier-milestone-1.md). Later stages remain planned, and this document alone does not authorize paid calls.
 
 This plan records the design agreed in the October 5-6 discussion. It covers choosing a verifier, implementing a bounded retry workflow, and evaluating solver sequences. It complements the broader [project description](../PROJECT.md) and [decision log](decision-log.md). Suggested settings and sample sizes below are proposals, not measured results or already agreed experimental choices.
 
@@ -240,7 +240,7 @@ These are implementation/experiment choices to resolve at the relevant milestone
 ## Progress checklist
 
 - [x] Record agreed rules and explicit implementation/experiment plan.
-- [ ] Milestone 1: storage, offline screening preview, and reviewed fixtures.
+- [x] Milestone 1: storage, offline screening preview, and reviewed fixtures (2026-10-06; 53 offline tests passed, zero OpenRouter requests).
 - [ ] Milestone 2: run budgeted verifier experiments and freeze a verifier.
 - [ ] Milestone 3: implement/test the loop and finish a small live pilot.
 - [ ] Milestone 4: evaluate sequences and held-out finalists.

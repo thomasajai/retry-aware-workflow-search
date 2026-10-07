@@ -15,6 +15,12 @@ plan does not authorize paid calls or implement the workflow. Earlier deck
 choices and open decisions below retain their historical context; use the new
 plan for the current workflow milestones and unresolved live-stage settings.
 
+Following the user's authorization to begin, [Milestone 1](solver-verifier-milestone-1.md)
+was completed offline on October 6. The plan was committed first as `5bcac0e`.
+Storage, read-only verifier previews, and synthetic reviewed cases are available;
+the paid runner, verifier selection, and LangGraph retry loop are still pending.
+No OpenRouter credits were consumed. Work stops at this milestone boundary for review.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)
