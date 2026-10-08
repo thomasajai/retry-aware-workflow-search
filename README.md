@@ -139,6 +139,18 @@ our request cap. No broad evaluation follows automatically.
 All **165 offline tests pass**; legacy profiles and pinned configuration builders
 match the prior commit, and the frozen routed plan validates.
 
+The user approved that single routed check. It
+[completed all six executions](notes/solver-verifier-routing-results.md) in
+37.25 seconds with fourteen requests and **$0.00199989274 reported cost**, with
+no new unresolved charges or technical errors. DeepSeek used AtlasCloud,
+DigitalOcean, Venice and GMICloud. One mathematical retry received the exact
+original input; all final options match the independent keys. Assistant review
+found the initially rejected calculation valid, recording a false rejection
+despite successful recovery. Storage/request/grade/budget audits pass, and
+prior rows are preserved. This is availability evidence on two repeated pilot
+questions. The broad development comparison still requires a new cost proposal
+and approval; Milestone 4 remains open.
+
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
 

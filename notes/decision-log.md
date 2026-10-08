@@ -22,6 +22,17 @@ All 165 offline tests pass. Legacy profiles/pinned configuration snapshots match
 the prior commit, the frozen routed plan validates, and read-only database
 integrity checks pass. The main database was not modified during preparation.
 
+The user approved this single $0.07 / 36-request check. Its
+[routing results](solver-verifier-routing-results.md) show six completed
+executions, fourteen requests, four DeepSeek providers, and $0.00199989274
+reported cost with no new unknown billing. All six final options match the
+independent keys; one first answer was rejected and the exact original solver
+request was repeated. Assistant review finds that rejected calculation valid,
+so record a false rejection rather than claiming a perfect verifier. The
+read-only historical-row/request/grade/budget audit passes. No broad run
+followed. Keep DeepSeek routing and Gemini provisionally; prepare a separate
+frozen development plan and cost notice before further paid work.
+
 Latest implementation checkpoint on October 8: the user requested bounded
 cooldown/retry handling and a small provider diagnostic. The
 [availability proposal](solver-verifier-availability-proposal.md) records the

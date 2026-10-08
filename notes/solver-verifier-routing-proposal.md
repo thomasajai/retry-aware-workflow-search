@@ -1,10 +1,13 @@
 # DeepSeek automatic routing check — October 8, 2026
 
-Status: implementation and offline preparation authorized by the user. This
-single paid check awaits approval of its **$0.07 / 36-request limits** under the
-[OpenRouter spending rule](../README.md#openrouter-spending-rule). No generation
-requests were made during preparation. Completing this check does not authorize
-the broad evaluation, a rerun, or another provider/model change.
+Status: the user approved this single check's **$0.07 / 36-request limits** under
+the [OpenRouter spending rule](../README.md#openrouter-spending-rule). It
+[completed](solver-verifier-routing-results.md) with fourteen requests,
+$0.00199989274 reported cost, six completed independently key-matching final
+answers, and no newly unresolved charges. No generation requests were made
+during preparation. Completion does not authorize the broad evaluation, a rerun,
+or another provider/model change. The remaining proposal records its frozen
+pre-run scope and estimate.
 
 ## Purpose and routing policy
 

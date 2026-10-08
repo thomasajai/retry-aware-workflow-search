@@ -14,6 +14,15 @@ and 36 maximum gateway HTTP requests, with zero client network retries.
 Paid approval is pending. Milestone 4 remains open; provider variability is
 reported under a frozen routing policy and does not change the 27 model triples.
 
+The user subsequently approved the routed check. It
+[completed](solver-verifier-routing-results.md): six executions, fourteen
+requests, $0.00199989274 reported cost and no newly unknown charges. All final
+options match their independent keys. One live mathematical retry recovered
+after an assistant-reviewed false rejection. Provider/usage/spending/grade
+audits pass and historical rows remain intact. Keep the routed DeepSeek model
+and fixed provisional Gemini verifier; a broad development comparison requires
+a separate frozen plan, advance cost notice and approval. Milestone 4 stays open.
+
 This plan records the design agreed in the October 5-6 discussion. It covers choosing a verifier, implementing a bounded retry workflow, and evaluating solver sequences. It complements the broader [project description](../PROJECT.md) and [decision log](decision-log.md). Suggested settings and sample sizes below are proposals, not measured results or already agreed experimental choices.
 
 ## Objective and scope
