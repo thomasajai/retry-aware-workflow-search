@@ -30,6 +30,8 @@ SELECTED_VERIFIER = "flashlite25__reasoning"
 def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
     if type(rate_limit_retries) is not bool:
         raise ValueError("Rate-limit recovery must be explicitly enabled or disabled.")
+    if deepseek_provider == "auto" and rate_limit_retries:
+        raise ValueError("Automatic provider routing uses no client transport retries.")
     if len(sequence) != 3 or any(alias not in MODEL_PROFILES for alias in sequence):
         raise ValueError("A sequence has exactly three declared solver aliases, with repetitions allowed.")
     models = workflow_model_configs(temperature=temperature, max_tokens=max_tokens, deepseek_provider=deepseek_provider)
@@ -46,6 +48,9 @@ def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provide
         result.update(version="solver-verifier-config-v3",deepseek_provider=deepseek_provider,transport_policy=retry_policy())
         result["policy"]["transport_retries"] = 2
         result["policy"]["technical_failure"] = "bounded upstream 429 recovery; stop if unresolved or exhausted"
+    if deepseek_provider == "auto":
+        result["version"] = "solver-verifier-config-v4"
+        result["policy"]["technical_failure"] = "stop on gateway failures; no client transport retries"
     return result
 
 
@@ -108,6 +113,21 @@ class Runner:
         self.retry_policy = deepcopy(config.get("transport_policy"))
         self.waiter = waiter or sleep
         self.price_limits = deepcopy(price_limits)
+        if config.get("deepseek_provider") == "auto" and self.price_limits is None:
+            raise ValueError("Automatic routing requires explicit price ceilings.")
+        active_profiles = {p["model"]: p for p in self.config["solvers"] + [self.config["verifier"]]}
+        for model, active_profile in active_profiles.items():
+            expected_providers = self.providers.get(model)
+            routed = model == MODEL_PROFILES["deepseek"].model and config.get("deepseek_provider") == "auto"
+            if routed:
+                if (not isinstance(expected_providers, list) or not expected_providers
+                        or any(not isinstance(p, str) or not p for p in expected_providers)
+                        or len(set(expected_providers)) != len(expected_providers)):
+                    raise ValueError("Automatic routing needs frozen eligible provider names.")
+                if self.price_limits.get(model) != active_profile["body_settings"]["provider"]["max_price"]:
+                    raise ValueError("Automatic routing price ceilings differ from the profile.")
+            elif not isinstance(expected_providers, str) or not expected_providers:
+                raise ValueError("Pinned models require one provider expectation.")
         if self.price_limits is not None:
             for model in {p["model"] for p in self.config["solvers"] + [self.config["verifier"]]}:
                 ceiling = self.price_limits.get(model, {})
@@ -130,12 +150,16 @@ class Runner:
             request["provider"]["max_price"] = deepcopy(self.price_limits[request["model"]])
         return request
 
+    def provider_matches(self, model, provider):
+        expected = self.providers[model]
+        return isinstance(provider, str) and (provider in expected if isinstance(expected, list) else provider == expected)
+
     def gate(self, request, *, ignore_unstarted_call=None):
         reserve = Decimal(str(self.reservations(deepcopy(request))))
         if not reserve.is_finite() or reserve <= 0:
             raise ValueError("A finite positive per-call reservation is required.")
         if request["model"] not in self.providers:
-            raise ValueError("Missing pinned provider expectation.")
+            raise ValueError("Missing provider expectation.")
         with closing(store.connect(self.db)) as c:
             running = c.execute("SELECT w.call_id FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
                 "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=? AND w.status='running'",(self.run_id,)).fetchall()
@@ -165,7 +189,7 @@ class Runner:
                 status, error = "failed", "InvalidResponse"
             elif http_status != 200 or "error" in payload:
                 status, error = "failed", "ProviderError"
-            elif payload.get("model") != request["model"] or payload.get("provider") != self.providers[request["model"]]:
+            elif payload.get("model") != request["model"] or not self.provider_matches(request["model"], payload.get("provider")):
                 status, error = "failed", "ProviderOrModelMismatch"
             else:
                 choices = payload.get("choices")
@@ -190,15 +214,21 @@ class Runner:
             halt, reason = "interrupted", "cancelled_billing_may_be_unknown"
         elif row["cost_usd"] is None:
             halt, reason = "budget_stopped", "unknown_cost"
-        elif row["returned_model"] != request["model"] or row["provider"] != self.providers[request["model"]]:
+        elif row["returned_model"] != request["model"] or not self.provider_matches(request["model"], row["provider"]):
             halt, reason = "budget_stopped", "provider_or_model_mismatch"
         elif row["input_tokens"] is None or row["output_tokens"] is None:
             halt, reason = "budget_stopped", "unknown_token_usage"
         elif row["reasoning_tokens"] is not None and row["reasoning_tokens"] > row["output_tokens"]:
             halt, reason = "budget_stopped", "inconsistent_reasoning_usage"
+        elif (isinstance(self.providers[request["model"]], list) and
+              Decimal(str(row["cost_usd"])) > (Decimal(str(self.price_limits[request["model"]]["prompt"]))*row["input_tokens"]
+              + Decimal(str(self.price_limits[request["model"]]["completion"]))*row["output_tokens"])/1_000_000 + Decimal("0.000000000001")):
+            halt, reason = "budget_stopped", "price_ceiling_exceeded"
         elif (row["input_tokens"] > input_token_reservation(request) or row["output_tokens"] > request["max_tokens"]
               or Decimal(str(row["cost_usd"])) > reservation or Decimal(str(spent)) > Decimal(str(self.limits.budget_usd))):
             halt, reason = "budget_stopped", "reservation_exceeded"
+        elif self.config.get("deepseek_provider") == "auto" and status != "completed":
+            halt, reason = "budget_stopped", "gateway_failure"
         return row, halt, reason
 
     def retry_decision(self, physical, request, headers):

@@ -41,13 +41,20 @@ def _reject_nonfinite(value):
 
 def endpoint(metadata, model, settings):
     data = metadata["models"][model]["data"]
+    if "only" not in settings["provider"]:
+        return routed_endpoint(data, model, settings)
     matches = [e for e in data["endpoints"] if e.get("tag") == settings["provider"]["only"][0] and e.get("status") == 0]
     if data["id"] != model or len(matches) != 1:
         raise ValueError("Expected one active pinned endpoint for " + model)
     selected = matches[0]
+    validate_endpoint(selected, settings)
+    return selected
+
+
+def validate_endpoint(selected, settings):
     required = set(settings) - {"provider", "stream"}
     if not required <= set(selected["supported_parameters"]):
-        raise ValueError("Pinned provider lacks requested controls for " + model)
+        raise ValueError("Provider lacks requested controls.")
     if selected.get("max_completion_tokens") is not None and selected["max_completion_tokens"] < settings["max_tokens"]:
         raise ValueError("Output cap exceeds endpoint capability.")
     for kind in ("prompt", "completion", "internal_reasoning"):
@@ -58,7 +65,46 @@ def endpoint(metadata, model, settings):
             raise ValueError("Token prices must be finite and positive.")
     if Decimal(str(selected["pricing"].get("request", 0))) != 0:
         raise ValueError("Per-request charges are unsupported.")
-    return selected
+
+
+def routed_endpoint(data, model, settings):
+    """Freeze eligible identities and reserve at ceilings, not cheapest prices.
+
+    The returned pricing object is a budget envelope, not a real endpoint.
+    OpenRouter can try providers internally; our request cap counts gateway HTTP
+    requests and never claims to bound or observe its individual upstream tries.
+    """
+    from mathqa_models import MODEL_PROFILES, WORKFLOW_DEEPSEEK_PRICE_LIMITS
+    policy = {"allow_fallbacks": True, "require_parameters": True,
+              "max_price": deepcopy(WORKFLOW_DEEPSEEK_PRICE_LIMITS)}
+    if model != MODEL_PROFILES["deepseek"].model or data["id"] != model or settings["provider"] != policy:
+        raise ValueError("Undeclared automatic routing policy/model.")
+    ceilings = policy["max_price"]
+    eligible = []
+    for candidate in data["endpoints"]:
+        if candidate.get("status") != 0:
+            continue
+        try:
+            validate_endpoint(candidate, settings)
+            if (not isinstance(candidate.get("provider_name"), str) or not candidate["provider_name"]
+                    or not isinstance(candidate.get("tag"), str) or not candidate["tag"]):
+                continue
+            if any(Decimal(candidate["pricing"][k])*1_000_000 > Decimal(str(ceilings[k]))
+                   for k in ("prompt", "completion")):
+                continue
+            if Decimal(candidate["pricing"].get("internal_reasoning", candidate["pricing"]["completion"]))*1_000_000 > Decimal(str(ceilings["completion"])):
+                continue
+        except (ValueError, KeyError, TypeError, ArithmeticError):
+            continue
+        eligible.append(deepcopy(candidate))
+    if not eligible:
+        raise ValueError("No active providers satisfy controls and price ceilings.")
+    eligible.sort(key=lambda e: e["tag"])
+    return {"provider_name": "OpenRouter automatic routing", "tag": "auto", "status": 0,
+            "provider_names": sorted({e["provider_name"] for e in eligible}),
+            "eligible_endpoints": eligible, "routing_policy": policy,
+            "pricing": {"prompt": str(Decimal(str(ceilings["prompt"]))/1_000_000),
+                        "completion": str(Decimal(str(ceilings["completion"]))/1_000_000), "request": "0"}}
 
 
 def prepare_plan(metadata, *, dataset_path=DATASET_PATH, created_at=None):
@@ -162,7 +208,7 @@ def summary(run_id, *, database_path):
             "input_tokens":sum(r["input_tokens"] or 0 for r in rows),"output_tokens_including_reasoning":sum(r["output_tokens"] or 0 for r in rows),
             "reasoning_tokens_subset":sum(r["reasoning_tokens"] or 0 for r in rows)})
     scored = [r for r in executions if r["workflow_score"] is not None]
-    return {"run_id":run_id,"status":run["status"],"stop_reason":run["stop_reason"],"plan_sha256":plan["sha256"],
+    result = {"run_id":run_id,"status":run["status"],"stop_reason":run["stop_reason"],"plan_sha256":plan["sha256"],
         "held_unknown_cost_usd":totals["held_unknown_cost_usd"],"accounted_exposure_usd":totals["accounted_exposure_usd"],
         "transport_retry_requests":len(calls)-len({r["logical_call_id"] for r in calls}),
         "planned_executions":len(plan["schedule"]),"reached_executions":len(executions),"scored_executions":len(scored),
@@ -174,6 +220,16 @@ def summary(run_id, *, database_path):
         "attempts_per_execution":dict(Counter(a["execution_id"] for a in attempts)),
         "wall_elapsed_seconds":(datetime.fromisoformat(run["finished_at_utc"])-datetime.fromisoformat(run["started_at_utc"])).total_seconds(),
         "note":"Small development integration pilot, not a 27-sequence accuracy comparison. Reasoning validity remains a separate review measure."}
+    if any("provider_names" in e for e in plan["endpoints"].values()):
+        provider_groups = defaultdict(list)
+        for row in calls:
+            provider_groups[(row["role"],row["requested_model"],row["provider"])].append(row)
+        result["provider_costs"] = [{"role":role,"model":model,"provider":provider,"requests":len(rows),
+            "known_cost_usd":str(sum((Decimal(str(r["cost_usd"])) for r in rows if r["cost_usd"] is not None),Decimal(0))),
+            "unknown_cost_calls":sum(r["cost_usd"] is None for r in rows)}
+            for (role,model,provider),rows in provider_groups.items()]
+        result["request_count_scope"] = "Client HTTP requests to OpenRouter; individual internal provider tries are unobserved."
+    return result
 
 
 def run_pilot(plan, *, database_path, budget_usd, max_requests, api_key, client):

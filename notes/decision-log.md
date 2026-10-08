@@ -4,6 +4,24 @@ Last reviewed: 2026-09-25. This records the current plan, not experimental resul
 
 ## October 6 planning update
 
+Latest October 8 checkpoint: the user proposed keeping DeepSeek without a
+provider pin and authorized implementation, offline tests, a commit, and a
+fresh small-check proposal. The
+[routing proposal](solver-verifier-routing-proposal.md) replaces the earlier
+recommendation to find another solver. The `auto` workflow profile uses default
+OpenRouter routing, provider fallbacks, required parameter support, and fixed
+$0.60/$1.70 per-million input/output price ceilings. Freeze eligible identities
+for response audits and record actual providers; reserve at ceiling prices.
+No client network retries or unknown-billing exception in this profile. The
+small check is six executions, expected $0.0079968, $0.07 cap, at most 36 gateway
+HTTP requests. Internal provider attempts are unobserved. Implementation and
+free metadata preparation consumed no credits; this paid scope awaits approval.
+Keep Gemini, original-only mathematical retries, independent grading, the
+twenty-question development selection, and all 27 model sequences fixed.
+All 165 offline tests pass. Legacy profiles/pinned configuration snapshots match
+the prior commit, the frozen routed plan validates, and read-only database
+integrity checks pass. The main database was not modified during preparation.
+
 Latest implementation checkpoint on October 8: the user requested bounded
 cooldown/retry handling and a small provider diagnostic. The
 [availability proposal](solver-verifier-availability-proposal.md) records the

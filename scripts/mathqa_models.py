@@ -113,7 +113,8 @@ def experiment_config(model_alias: str, experiment: str) -> tuple[str, dict]:
     return profile.model, profile.config(experiment)
 
 
-WORKFLOW_DEEPSEEK_PROVIDERS = ("deepinfra/fp4", "venice")
+WORKFLOW_DEEPSEEK_PROVIDERS = ("deepinfra/fp4", "venice", "auto")
+WORKFLOW_DEEPSEEK_PRICE_LIMITS = {"prompt": 0.60, "completion": 1.70, "request": 0}
 
 
 def workflow_model_configs(*, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4"):
@@ -128,7 +129,13 @@ def workflow_model_configs(*, temperature=0.2, max_tokens=512, deepseek_provider
     for alias, model_profile in MODEL_PROFILES.items():
         config = model_profile.config()
         config["body_settings"].update(temperature=temperature, max_tokens=max_tokens)
-        if alias == "deepseek" and deepseek_provider != "deepinfra/fp4":
+        if alias == "deepseek" and deepseek_provider == "auto":
+            config["body_settings"]["provider"] = {
+                "allow_fallbacks": True, "require_parameters": True,
+                "max_price": deepcopy(WORKFLOW_DEEPSEEK_PRICE_LIMITS),
+            }
+            config["control_notes"] = "OpenRouter default routing within fixed price ceilings; provider/quantization may vary. Audit returned provider, usage and reasoning."
+        elif alias == "deepseek" and deepseek_provider != "deepinfra/fp4":
             config["body_settings"]["provider"]["only"] = [deepseek_provider]
             config["control_notes"] = "Venice advertises reasoning controls. Inspect returned reasoning usage and visible verbosity separately."
         configs[alias] = {"model": model_profile.model, **config}

@@ -126,6 +126,19 @@ holds total $0.00120554892. Migration and runtime audits pass, old rows are
 preserved, and no automatic continuation occurred. A free account check found
 the key spending cap unexhausted; the errors identify upstream throttling.
 
+The user then chose to keep DeepSeek and requested
+[automatic provider routing](notes/solver-verifier-routing-proposal.md).
+The new opt-in workflow profile allows provider fallbacks with fixed price
+ceilings, freezes eligible provider identities for response audits, records
+provider-level spend, and uses ceiling-priced reservations. The next two-question,
+three-repetition availability check proposes approximately **$0.008**, a **$0.07
+cap**, and **36 maximum gateway HTTP requests**, with no client network retries
+or unknown-billing continuation. Preparation consumed no credits; paid approval
+is pending. Internal OpenRouter provider tries are not individually counted by
+our request cap. No broad evaluation follows automatically.
+All **165 offline tests pass**; legacy profiles and pinned configuration builders
+match the prior commit, and the frozen routed plan validates.
+
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
 

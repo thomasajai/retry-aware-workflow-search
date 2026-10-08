@@ -1,8 +1,18 @@
 # Solver-verifier workflow implementation and experiment plan
 
-Created: 2026-10-06. Updated: 2026-10-07. Status: Milestones 1–3 completed,
+Created: 2026-10-06. Updated: 2026-10-08. Status: Milestones 1–3 completed,
 with a user-selected provisional verifier and a successful live integration pilot.
 Milestone 4 remains. This document alone does not authorize paid calls.
+
+October 8 checkpoint: after pinned DeepSeek development runs and bounded
+cooldown recovery encountered upstream throttling, the user chose to keep
+DeepSeek and authorize an opt-in routing implementation. The
+[automatic routing proposal](solver-verifier-routing-proposal.md) records the
+fixed price ceilings, provider/cost audits, offline validation, and the next
+six-execution diagnostic. It proposes $0.0079968 estimated spend, a $0.07 cap,
+and 36 maximum gateway HTTP requests, with zero client network retries.
+Paid approval is pending. Milestone 4 remains open; provider variability is
+reported under a frozen routing policy and does not change the 27 model triples.
 
 This plan records the design agreed in the October 5-6 discussion. It covers choosing a verifier, implementing a bounded retry workflow, and evaluating solver sequences. It complements the broader [project description](../PROJECT.md) and [decision log](decision-log.md). Suggested settings and sample sizes below are proposals, not measured results or already agreed experimental choices.
 

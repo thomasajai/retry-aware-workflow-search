@@ -155,12 +155,17 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
         plan["execution_policy"].update(transport_retries=2,transport_policy=retry_policy(),maximum_requests=len(schedule)*6+extra)
         plan["cost_preview"].update(maximum_calls=len(schedule)*6+extra,maximum_retry_requests=extra,
                                     extra_retry_reservation_usd=str(maximum_reservation*extra))
+    if deepseek_provider == "auto":
+        plan["version"] = "workflow-evaluation-plan-v4"
+        plan["execution_policy"]["request_count_scope"] = "Client HTTP requests; OpenRouter internal provider tries unobserved."
+        plan["analysis_policy"]["routing"] = "DeepSeek under a fixed price-bounded routing policy; report observed providers, not a fixed endpoint comparison."
+        plan["cost_preview"]["assumptions"] += " DeepSeek estimated costs and reservations use routing price ceilings, not cheapest endpoint rates."
     plan["sha256"] = pilot.digest(plan)
     return plan
 
 
 def validate_plan(plan):
-    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2", "workflow-evaluation-plan-v3") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
+    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2", "workflow-evaluation-plan-v3", "workflow-evaluation-plan-v4") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
         raise ValueError("Evaluation checksum/version failed.")
     age = (datetime.now(timezone.utc)-datetime.fromisoformat(plan["metadata"]["fetched_at_utc"])).total_seconds()
     if age < -300 or age > 24*3600:
@@ -318,7 +323,7 @@ def _run_schedule(plan, *, database_path, budget_usd, max_requests, api_key, cli
             database_path=database_path,budget_usd=budget_usd,max_requests=max_requests,plan_sha256=plan["sha256"])
     except sqlite3.IntegrityError as error:
         raise ValueError("This plan already has a run; no automatic retry/rerun/resume.") from error
-    providers = {m:e["provider_name"] for m,e in plan["endpoints"].items()}
+    providers = {m:e.get("provider_names",e["provider_name"]) for m,e in plan["endpoints"].items()}
     def sender(request):
         response = client.post(OPENROUTER_URL,json=request,headers={"Authorization":"Bearer "+api_key},timeout=60)
         return decode_response(response,pilot._reject_nonfinite)

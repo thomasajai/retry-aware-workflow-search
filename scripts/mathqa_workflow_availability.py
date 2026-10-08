@@ -25,7 +25,10 @@ from mathqa_transport import retry_policy
 SOURCE_FILES = evaluation.SOURCE_FILES+("mathqa_workflow_availability.py",)
 
 
-def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None):
+def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None, deepseek_provider="venice"):
+    if deepseek_provider not in ("venice", "auto"):
+        raise ValueError("Availability check supports Venice or automatic DeepSeek routing.")
+    retries = deepseek_provider == "venice"
     raw = Path(dataset_path).read_bytes()
     records = json.loads(raw)
     if len(records)!=200 or len({r["id"] for r in records})!=200:
@@ -37,7 +40,7 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
     if any(r.get("correct") not in list("abcde") for r in chosen):
         raise ValueError("Questions need independent option keys.")
     questions = [{"id":r["id"],"problem":r["Problem"],"options":r["options"]} for r in chosen]
-    config = workflow.configuration(["deepseek"]*3,deepseek_provider="venice",rate_limit_retries=True)
+    config = workflow.configuration(["deepseek"]*3,deepseek_provider=deepseek_provider,rate_limit_retries=retries)
     endpoints,ceilings = {},{}
     for p in [config["solvers"][0],config["verifier"]]:
         model,settings = p["model"],p.get("body_settings",p.get("settings"))
@@ -68,7 +71,8 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
             "estimated_output_tokens_including_reasoning":12*output,"input_usd_per_million":ceilings[model]["prompt"],
             "output_usd_per_million":ceilings[model]["completion"],"estimated_input_cost_usd":str(input_cost),
             "estimated_output_cost_usd":str(expected-input_cost),"estimated_cost_usd":str(expected),"conservative_reservation_usd":str(reserve)})
-    retry_reserve = 2*max(max_reservations)
+    extra_requests = 2 if retries else 0
+    retry_reserve = extra_requests*max(max_reservations)
     reserve_total = sum((Decimal(r["conservative_reservation_usd"]) for r in costs),Decimal(0))+retry_reserve
     cap = (reserve_total*Decimal("1.10")*100).to_integral_value(rounding=ROUND_CEILING)/100
     plan = {"version":"workflow-availability-plan-v1","created_at_utc":created_at or store.now(),
@@ -87,17 +91,24 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
             "extra_retry_reservation_usd":str(retry_reserve),"conservative_reservation_total_usd":str(reserve_total),
             "assumptions":"Two solver attempts/execution, 96 solver and 512 verifier output tokens including reasoning once, chars/3+96 input, no cache discount. Stress uses full UTF-8 request+256, full caps and 8192-character calculation. Two extra physical requests shared across roles; not two extra per role."},
         "analysis_policy":"Availability/integration evidence only; no configuration ranking or automatic broad evaluation."}
+    if not retries:
+        plan.update(version="workflow-availability-plan-v2",deepseek_provider=deepseek_provider)
+        plan["execution_policy"].pop("transport_policy")
+        plan["execution_policy"].update(transport_retries=0,maximum_requests=36,
+            request_count_scope="Client HTTP requests to OpenRouter; internal provider tries are unobserved.")
+        plan["cost_preview"].update(maximum_retry_requests=0,maximum_calls=36,
+            assumptions="Two mathematical attempts/execution; 96 solver and 512 verifier output tokens including reasoning once; chars/3+96 inputs; no cache discount. DeepSeek estimates/reservations use routing price ceilings, not cheapest provider. Stress uses full UTF-8 request+256 framing, full output caps and 8192-character verifier calculation input. No client retries; OpenRouter internal attempts are unobserved.")
     plan["sha256"] = pilot.digest(plan)
     return plan
 
 
 def validate_plan(plan):
-    if plan.get("version")!="workflow-availability-plan-v1" or plan.get("sha256")!=pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
+    if plan.get("version") not in ("workflow-availability-plan-v1", "workflow-availability-plan-v2") or plan.get("sha256")!=pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
         raise ValueError("Availability plan checksum/version failed.")
     age = (datetime.now(timezone.utc)-datetime.fromisoformat(plan["metadata"]["fetched_at_utc"])).total_seconds()
     if age < -300 or age > 24*3600:
         raise ValueError("Refresh free metadata and re-disclose the plan.")
-    rebuilt = prepare_plan(plan["metadata"],plan["split"]["exposure_snapshot"],dataset_path=plan["dataset"]["path"],created_at=plan["created_at_utc"])
+    rebuilt = prepare_plan(plan["metadata"],plan["split"]["exposure_snapshot"],dataset_path=plan["dataset"]["path"],created_at=plan["created_at_utc"],deepseek_provider=plan.get("deepseek_provider","venice"))
     if plan!=rebuilt:
         raise ValueError("Availability scope, controls, prices, sources or migrations changed.")
 
@@ -121,6 +132,7 @@ def run_check(plan, *, database_path, budget_usd, max_requests, api_key, client,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metadata",type=Path)
+    parser.add_argument("--deepseek-provider",choices=("venice","auto"),help="Offline preparation only; paid execution uses frozen routing.")
     parser.add_argument("--plan",type=Path,required=True)
     parser.add_argument("--database",type=Path,default=DATABASE_PATH)
     parser.add_argument("--run",action="store_true")
@@ -139,13 +151,13 @@ def main():
                 parser.error("Offline preparation needs only --metadata and --plan (optional --database).")
             if args.plan.exists():
                 raise ValueError("Plan already exists; choose a new filename.")
-            plan = prepare_plan(json.loads(args.metadata.read_text(encoding="utf-8")),evaluation.exposure_snapshot(args.database))
+            plan = prepare_plan(json.loads(args.metadata.read_text(encoding="utf-8")),evaluation.exposure_snapshot(args.database),deepseek_provider=args.deepseek_provider or "venice")
             validate_plan(plan)
             args.plan.parent.mkdir(parents=True,exist_ok=True)
             args.plan.write_text(json.dumps(plan,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
             print(json.dumps({"mode":"offline","sha256":plan["sha256"],"execution_policy":plan["execution_policy"],"cost_preview":plan["cost_preview"],"generation_requests":0},indent=2))
         else:
-            if args.metadata or args.budget_usd is None or args.max_requests is None or not args.report:
+            if args.metadata or args.deepseek_provider or args.budget_usd is None or args.max_requests is None or not args.report:
                 parser.error("Paid execution requires frozen --plan, --budget-usd, --max-requests and --report.")
             if args.report.exists():
                 raise ValueError("Report exists; choose a new filename.")
