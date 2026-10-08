@@ -1,0 +1,25 @@
+{
+  "file": "mathqa_runs.sqlite3",
+  "created_at_utc": "2026-10-08T22:18:37.527901+00:00",
+  "sha256": "85a779dd74b6dd51772d1131ccae03c3e7002c3f52c12cfa2f2056d42f7599e9",
+  "size_bytes": 24641536,
+  "tables": {
+    "call_gradings": 360,
+    "call_validations": 475,
+    "calls": 538,
+    "model_gradings": 6,
+    "run_gradings": 2,
+    "runs": 17,
+    "schema_migrations": 3,
+    "workflow_attempts": 1383,
+    "workflow_calls": 2611,
+    "workflow_configs": 133,
+    "workflow_executions": 722,
+    "workflow_grades": 2013,
+    "workflow_runs": 10,
+    "workflow_transport_calls": 7
+  },
+  "integrity_check": "ok",
+  "foreign_key_violations": 0,
+  "schema_and_rows_match_source": true
+}

@@ -5,7 +5,20 @@
 .hf/
 .scratch/
 __pycache__/
-notes/transcripts/*.log
+# Local media and transcription artifacts.
+*.mp3
+*.mp4
+*.m4a
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+*.webm
+*.mov
+/notes/transcripts/
+/notes/recording-*-meeting-notes.md
+/scripts/transcribe*.py
 agentopt/
 
 # Local secrets; commit only the placeholder template.

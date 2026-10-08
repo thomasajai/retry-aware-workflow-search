@@ -43,6 +43,23 @@ notice. A saved paid response reused offline does not consume credits again.
 
 ## Offline experiment tree
 
+The repository includes a frozen [experiment database](data/experiments/README.md).
+On a fresh checkout, restore a working copy before using the default commands:
+
+```powershell
+New-Item -ItemType Directory -Force results | Out-Null
+if (Test-Path results/mathqa_runs.sqlite3) {
+    throw "A working database already exists; preserve it before restoring."
+}
+Copy-Item data/experiments/mathqa_runs.sqlite3 results/mathqa_runs.sqlite3
+```
+
+Run this copy step only when the working database is absent; overwriting it
+would discard any experiments performed since the snapshot. Saved results can
+also be read directly with `--database data/experiments/mathqa_runs.sqlite3`.
+No API key or paid calls are needed to inspect the saved experiments. Future
+paid runs still require their own scope, budget, and authorization.
+
 Export the completed 27-configuration, 20-question comparison as an interactive,
 self-contained HTML page:
 
@@ -515,11 +532,13 @@ The [course schedule](https://daplab.cs.columbia.edu/agentic-systems/) asks each
 
 The full experiment plot is due October 9. This is a tracking list from the course website, not a record of completed work.
 
-## Source material
+## Project notes
 
-- `references/2026-09-21/` — whiteboard and notebook photos supplied with the September 21 meeting.
-- `notes/` — meeting summaries and action items.
+- `references/2026-09-21/` — whiteboard and notebook photos from the September 21 meeting.
+- `notes/` — research plans, experiment reports, meeting summaries, and open items.
 
-Meeting summary: [September 21 discussion](notes/2026-09-21-meeting-notes.md).
+Meeting summaries: [pre-pitch discussion](notes/pre-pitch-meeting-notes.md) and
+[September 21 discussion](notes/2026-09-21-meeting-notes.md).
 
-The meeting notes summarize discussion and tentative ideas. They do not automatically turn every suggestion in the discussion or photos into an agreed team decision.
+The meeting notes summarize discussion and tentative ideas. Suggestions and
+supporting photos do not automatically establish an agreed team decision.
