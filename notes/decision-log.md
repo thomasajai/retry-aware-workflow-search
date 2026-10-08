@@ -119,6 +119,39 @@ records and clean code provenance. Milestone 3 is complete. Total known workflow
 spend is $0.01033542 across 101 calls. Checkpoint before Milestone 4; its larger
 evaluation needs a separate scope/cost proposal.
 
+## October 7 development evaluation preparation
+
+After the user asked to move ahead, the [first development evaluation](solver-verifier-development-proposal.md)
+was prepared offline. Use twenty seeded development questions (excluding the
+two loop-pilot questions), all twenty-seven ordered triples, one repetition:
+540 executions. Keep solver/verifier profiles and graph behavior fixed. Recorded
+exposure is confined to the first hundred dataset questions; reserve the last
+hundred. Shuffle configuration order within each question with a saved seed.
+Reuse fresh first-slot observations for matching one-attempt baselines without
+additional calls or execution prefix sharing.
+
+Fresh free provider metadata gives an expected $0.39651192 / 2,160 requests,
+conservative full-cap reservations $3.12607080, proposed cap $3.50 / 3,240
+requests. This larger paid scope awaits numeric budget approval. Preparation
+adds a guarded runner, per-sequence comparisons, Wilson accuracy intervals,
+paired question-block bootstrap diagnostics, recovery/repeat metrics, and no
+ranking for incomplete coverage. No automatic finalist or held-out run.
+The full suite passed 132 offline tests; evaluation checks are repeated after
+the final interval safeguard. Real database unchanged, four existing runs,
+101 calls / $0.01033542 known spend, no new paid evaluation. Milestone 4 remains
+open pending comparable results and separate held-out confirmation.
+
+## October 8 development evaluation approval
+
+The user explicitly approved the $3.50 cap and 3,240-request maximum. Public
+prices/controls were refreshed at 17:01 UTC without credits; the selected twenty
+questions, 27 profiles, schedule, $0.39651192 estimate and $3.12607080 stress
+reservations are unchanged. The refreshed approved plan hash is
+`9e80da128d3b2f2894d62b1fccd50d918df22c6edc2637774b83f09e00699588`.
+Commit the tested checkpoint, then execute once with no transport retries,
+provider fallback, automatic resume or held-out run. Report measured coverage,
+cost, technical errors and independent scores before deciding the next stage.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)

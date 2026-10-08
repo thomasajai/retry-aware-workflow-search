@@ -81,6 +81,18 @@ source/data-bound plans, provider price ceilings, and independent scoring.
 The proposal records its advance cost breakdown and scope; a larger evaluation
 requires its own proposal and authorization.
 
+The [first development evaluation proposal](notes/solver-verifier-development-proposal.md)
+prepares all 27 sequences on the same twenty development questions, once each:
+540 executions, estimated $0.39651192, proposed $3.50 cap and 3,240-request maximum.
+The new runner provides balanced scheduling and paired reports, reusing new
+first-slot observations for baselines without extra calls. The last hundred
+questions remain reserved. The user approved the $3.50 / 3,240-request limits
+on October 8; refreshed free prices and scope are unchanged. Preparation
+consumes no OpenRouter credits.
+All **132 offline tests pass**, including nine evaluation tests. Per-sequence
+accuracy intervals and paired question-level comparisons retain uncertainty;
+an incomplete stage produces no final ranking.
+
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
 
