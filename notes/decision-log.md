@@ -4,6 +4,25 @@ Last reviewed: 2026-09-25. This records the current plan, not experimental resul
 
 ## October 6 planning update
 
+Latest October 8 completed comparison: the user approved the one fresh v5 run.
+Its [results](solver-verifier-routed-development-v5-results.md) cover all 540
+executions/20 question blocks: 2,194 requests, $0.30118175983 reported spend,
+no new unknown costs, zero client transport retries. Seventy reconciled solver
+truncations consumed mathematical slots; the run completed without a guard stop.
+All prior rows and frozen original-only requests are preserved; independently
+recomputed grades/costs/ranking and SQLite integrity/foreign-key audits pass.
+
+Four configurations tie at 13/20 key accuracy (65%); the cheapest tied sequence
+is DeepSeek → DeepSeek → Qwen2.5. Two accepted final answers are wrong, with
+specific false acceptances and false rejections reviewed on the asteroid
+question. Six question-quality flags produced 162 exhausted executions; do
+not silently change their keys or remove them after seeing performance.
+The complete 27-sequence table is a development reference under the original
+keys and fixed provisional verifier. No deployment/finalist selection follows
+automatically. Review saved decisions and data quality offline before another
+paid stage. The approval is consumed, held-out questions remain unexposed by
+recorded calls, and Milestone 4 stays open for finalist assessment.
+
 Latest October 8 execution checkpoint: the user approved the routed development
 comparison. It [stopped](solver-verifier-routed-development-results.md) after
 223 requests/$0.0284535204 reported cost, with no new unknown billing. Fifty-nine
@@ -22,8 +41,9 @@ prior configuration policies/records stay intact, and no migration/dependency
 change is required. A separate fresh 540-execution run retains the original
 questions, model controls and costs: $0.48995280 estimate, $3.75507954 stress
 reservations, $4.25 cap, maximum 3,240 gateway requests. Its frozen plan binds
-the amended policy and migration hashes. Fresh paid approval is pending;
-the previous run's approval is consumed. No automatic continuation occurred.
+the amended policy and migration hashes. The user subsequently approved this
+fresh run, which completed as recorded above; both run approvals are consumed.
+No automatic continuation occurred.
 
 Latest October 8 checkpoint: the user requested preparation of the balanced
 27-configuration comparison after the routed check. The

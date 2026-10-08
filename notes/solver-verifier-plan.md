@@ -4,6 +4,22 @@ Created: 2026-10-06. Updated: 2026-10-08. Status: Milestones 1–3 completed,
 with a user-selected provisional verifier and a successful live integration pilot.
 Milestone 4 remains. This document alone does not authorize paid calls.
 
+Latest October 8 completed stage: the user approved the v5 comparison. Its
+[results](solver-verifier-routed-development-v5-results.md) cover all 540
+executions and twenty question blocks, with 2,194 requests and $0.30118175983
+reported cost. No new unknown charges, client retries or guard stop; seventy
+fully billed solver truncations consumed ordinary mathematical slots. Request,
+grade, budget, provider and prior-row audits pass; reserved held-out questions
+remain unexposed by recorded calls.
+
+Four sequences tied at 65% independent key accuracy; the cheapest tied sequence
+was DeepSeek → DeepSeek → Qwen2.5. Six question-quality flags and reviewed
+verifier false acceptances/rejections prevent treating this small comparison
+as a deployment recommendation. The development comparison is complete;
+Milestone 4 remains open for separately authorized finalist assessment. Review
+saved verifier decisions and question quality offline before further paid work.
+This approval is consumed; no automatic follow-up runs.
+
 Latest October 8 checkpoint: the approved routed comparison
 [stopped](solver-verifier-routed-development-results.md) after 223 requests,
 $0.0284535204 reported spend, 59 graded executions and two complete question
@@ -18,7 +34,8 @@ attempt, preserving its cost and the three-slot limit. Other gateway/billing/
 identity/usage/price failures still stop. All 174 offline tests pass; old policies
 and records remain intact, with no new migration or dependency. A fresh run of
 the same 540 executions is prepared at the same $0.48995280 estimate, $4.25 cap
-and 3,240-request maximum. It requires fresh approval; no paid rerun occurred.
+and 3,240-request maximum. The user then approved this one fresh run; its
+completion is recorded above, with historical partial results kept separate.
 
 Earlier October 8 preparation: the user requested the
 [routed development comparison](solver-verifier-routed-development-proposal.md).

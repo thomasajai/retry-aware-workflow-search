@@ -172,7 +172,18 @@ counts a known, fully reconciled solver truncation as one unusable mathematical
 attempt within the existing three-slot limit. All billing/identity/usage/price
 guards remain. All **174 offline tests pass**; old policies and historical rows
 are preserved. The fresh 540-execution proposal retains the **$0.49 estimate,
-$4.25 cap and 3,240-request maximum**. No new paid run is authorized yet.
+$4.25 cap and 3,240-request maximum**. The user approved that single fresh run.
+It [completed all 540 executions](notes/solver-verifier-routed-development-v5-results.md)
+with **2,194 requests and $0.30118175983 reported spend**, no new unknown charges,
+and passing request/grade/budget/storage audits. Seventy fully billed solver
+truncations consumed ordinary attempt slots; all twenty question blocks finished.
+Four configurations tied at **65% independent key accuracy (13/20)**; the
+cheapest tied sequence was **DeepSeek → DeepSeek → Qwen2.5**. Six flagged
+question-quality issues, two accepted wrong answers and reviewed false
+rejections limit interpretation. The full 27-configuration table is in the
+results note. Next review saved decisions and question quality offline before
+selecting finalists or proposing another paid run. Milestone 4 remains open
+for held-out assessment; no follow-up calls are authorized.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:

@@ -103,6 +103,8 @@ and keeps all billing/identity/usage/price guards. All **174 offline tests pass*
 migration, dependency or token-limit change is required.
 
 The [v5 rerun proposal](solver-verifier-routed-development-v5-proposal.md)
-requires fresh approval. This historical run stays partial under its original
-policy; no retroactive regrading or paid continuation is authorized. Milestone
-4 remains open.
+required fresh approval; the user subsequently approved it and the separate
+[run completed](solver-verifier-routed-development-v5-results.md). This
+historical run stays partial under its original policy, with no retroactive
+regrading, resumed calls or pooled observations. Milestone 4 remains open for
+finalist assessment; no further paid run is authorized.

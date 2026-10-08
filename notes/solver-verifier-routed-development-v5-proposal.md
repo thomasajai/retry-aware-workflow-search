@@ -1,9 +1,11 @@
 # Routed development comparison v5 — fresh-run proposal, October 8, 2026
 
-Status: prepared and tested offline; **paid approval is pending** for one new
-run with a **$4.25 cap and 3,240 maximum gateway requests**. The preceding
-approval was consumed by the [stopped v4 run](solver-verifier-routed-development-results.md).
-No further model calls have run. Follow the [OpenRouter spending rule](../README.md#openrouter-spending-rule).
+Status: the user approved this one fresh run with a **$4.25 cap and 3,240 maximum
+gateway requests**. It [completed](solver-verifier-routed-development-v5-results.md)
+all 540 executions with 2,194 requests and $0.30118175983 reported spend, no new
+unknown charges, and passing audits. This approval is consumed; no automatic
+follow-up is authorized. The preceding stopped v4 run remains separate. Follow
+the [OpenRouter spending rule](../README.md#openrouter-spending-rule).
 
 ## Purpose and policy amendment
 

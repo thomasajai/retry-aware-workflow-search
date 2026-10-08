@@ -5,7 +5,8 @@ Status: the user approved this single $4.25 / 3,240-request comparison. The
 and $0.0284535204 reported spend when a fully billed solver answer truncated.
 There are no new unknown charges; 59 of 540 executions were graded. This
 approval is consumed. The [v5 amendment and fresh-run proposal](solver-verifier-routed-development-v5-proposal.md)
-awaits separate approval under the
+was separately approved and [completed](solver-verifier-routed-development-v5-results.md).
+No further paid run is authorized under the
 [OpenRouter spending rule](../README.md#openrouter-spending-rule).
 
 ## Purpose and scope
