@@ -256,7 +256,7 @@ def evaluation_summary(run_id, *, database_path):
         rows = by_exec[e["execution_id"]]
         seen = set()
         for a in rows:
-            if a["parsed_fields_json"]:
+            if a["usable"] == 1 and a["parsed_fields_json"]:
                 fields = json.loads(a["parsed_fields_json"])
                 signature = (fields["option"],fields["value"])
                 if a["position"]>1:

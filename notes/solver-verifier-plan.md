@@ -201,7 +201,15 @@ suggestion remains a possible expansion, not the initial scope. First-slot
 observations supply matching baselines with no extra paid batch. Estimated
 $0.39651192, full-cap reservations $3.12607080, proposed cap $3.50 / 3,240
 requests. Balanced plans, exposure checks, guarded execution and paired reports
-are implemented; numeric paid approval is pending. Milestone 4 remains open.
+were implemented with numeric paid approval pending at preparation. Milestone 4 remains open.
+
+The user approved that scope on October 8. The [attempted evaluation](solver-verifier-development-results.md)
+stopped after 45 requests at a DeepInfra 429 with unknown billing, before any
+question completed all 27 sequences. Fourteen executions have final scores;
+one is incomplete. Known spend $0.00555908 plus one unreported charge. The
+partial-report exporter is repaired, all 133 offline tests pass, and prior
+records remain intact. No ranking or automatic continuation; resolve provider
+capacity and propose a new frozen/costed stage before another paid run.
 
 - Standing user instruction: before every credit-consuming OpenRouter workflow/script, explain its purpose, proposed scope, estimated total cost, and a small cost breakdown. This applies to live diagnostics/tests, trials, batches, reruns, and retries as well as the main workflow. Follow the [repository spending rule](../README.md#openrouter-spending-rule).
 - The advance breakdown includes models/providers and roles, expected/maximum request counts, input-token and total billed output-token assumptions (including reasoning), current rates, and subtotals. Separate the expected estimate from the spending limit and disclose uncertainty. Reuse saved responses/offline checks where they suffice. Run only within existing user authorization; expansion beyond it needs authorization before execution. Report actual known spend and unknown measurements afterward.

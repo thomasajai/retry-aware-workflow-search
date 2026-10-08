@@ -152,6 +152,31 @@ Commit the tested checkpoint, then execute once with no transport retries,
 provider fallback, automatic resume or held-out run. Report measured coverage,
 cost, technical errors and independent scores before deciding the next stage.
 
+## October 8 partial development run and reporter repair
+
+The tested evaluation was committed as `203e79b` before the authorized run.
+The [run stopped](solver-verifier-development-results.md) at a DeepInfra
+`engine_overloaded` HTTP 429 without usage/cost/generation ID. Forty-five
+requests were recorded (44 completed, one failed), fourteen executions finished,
+one is incomplete, and no question completed all 27 sequences. Known new spend
+is $0.00555908 plus one unknown charge; total known workflow spend is $0.01589450
+across 146 requests. No retry, resume, fallback or further paid call occurred.
+
+The post-stop repeat-answer exporter attempted to index decoded JSON null
+fields. Restricting that metric to usable attempts fixes the exporter; the
+partial report was recovered offline. A mocked upstream-429 regression covers
+this exact case. All 133 offline tests pass. Read-only audits independently
+recompute grades/summary counts, reconstruct requests, and confirm prior records
+and database integrity. The full comparison remains incomplete with no ranking.
+
+All 22 usable proposals selected the key's correct option for the only reached
+question, but Gemini rejected nine. Profit-to-investment proportionality is an
+unstated assumption there; preserve this ambiguity rather than turning key
+matching into reasoning labels or silently changing the question/verifier.
+Gemini stays provisional. Address DeepInfra capacity and billing evidence before
+a newly costed/authorized continuation, potentially using another explicit
+provider pin. Milestone 4 remains open; no new continuation is scheduled.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)

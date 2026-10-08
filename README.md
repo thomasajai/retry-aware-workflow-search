@@ -89,9 +89,17 @@ first-slot observations for baselines without extra calls. The last hundred
 questions remain reserved. The user approved the $3.50 / 3,240-request limits
 on October 8; refreshed free prices and scope are unchanged. Preparation
 consumes no OpenRouter credits.
-All **132 offline tests pass**, including nine evaluation tests. Per-sequence
+Before execution, **132 offline tests passed**, including nine evaluation tests. Per-sequence
 accuracy intervals and paired question-level comparisons retain uncertainty;
 an incomplete stage produces no final ranking.
+
+The [approved development run stopped](notes/solver-verifier-development-results.md)
+after 45 requests at a DeepInfra HTTP 429 without reported cost: fourteen
+executions finished, one is incomplete, known new spend $0.00555908 plus one
+unknown charge. No question block completed, so there is no sequence ranking.
+The partial-report null-fields bug is fixed and the saved report recovered
+without more model calls. **133 offline tests pass**. No automatic rerun or
+provider change has occurred; Milestone 4 remains open.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:

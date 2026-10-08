@@ -182,6 +182,22 @@ class EvaluationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"scope"):
             self.run_mock(budget=self.plan["execution_policy"]["maximum_budget_usd"]+.01)
 
+    def test_upstream_429_without_usage_exports_partial_report_with_null_fields(self):
+        def overloaded(request):
+            self.sent.append(json.loads(request.content))
+            return httpx.Response(429,json={"error":{"code":429,"message":"Provider returned error",
+                "metadata":{"provider_error_code":"engine_overloaded","limit_source":"upstream_provider_shared_pool"}}})
+        report = self.run_mock(handler=overloaded)
+        self.assertEqual((report["status"],report["stop_reason"],report["new_requests"]),("budget_stopped","unknown_cost",1))
+        self.assertEqual(report["known_new_cost_usd"],"0")
+        self.assertEqual(report["unknown_cost_calls"],1)
+        self.assertEqual(report["repeat_option_value_after_retry"],{"usable_retries":0,"repeats_of_any_prior_answer":0})
+        self.assertIsNone(report["ranking"])
+        with closing(store.connect(self.db)) as c:
+            row = c.execute('SELECT usable,parsed_fields_json FROM workflow_attempts').fetchone()
+        self.assertEqual(row["usable"],0)
+        self.assertEqual(row["parsed_fields_json"],"null")
+
     def test_live_adapter_recovery_repeated_answers_and_distinct_verified_baseline(self):
         # Smaller disposable plan exercises all 27 triples and actual mocked graph calls.
         with patch.object(evaluation,"QUESTION_COUNT",1):
