@@ -20,7 +20,7 @@ import httpx
 from dotenv import load_dotenv
 
 from mathqa_batch import DATASET_PATH, DATABASE_PATH, OPENROUTER_URL, PROJECT_ROOT
-from mathqa_models import workflow_model_configs
+from mathqa_models import workflow_model_configs, WORKFLOW_DEEPSEEK_PROVIDERS
 from mathqa_verifier import build_request
 from mathqa_verifier_preflight import request_cost
 import mathqa_workflow as workflow
@@ -63,7 +63,7 @@ def exposure_snapshot(database_path):
             "workflow_question_ids": workflows, "note": "Recorded exposure, not a guarantee against unrecorded inspection."}
 
 
-def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None):
+def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None, deepseek_provider="deepinfra/fp4"):
     raw = Path(dataset_path).read_bytes()
     records = json.loads(raw)
     if len(records) != 200 or len({r["id"] for r in records}) != 200:
@@ -78,8 +78,8 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
     if any(r.get("correct") not in list("abcde") for r in selected):
         raise ValueError("Selected questions require independent option keys.")
     questions = [{"id":r["id"], "problem":r["Problem"], "options":r["options"]} for r in selected]
-    configs = {"-".join(c["solver_sequence"]):c for c in workflow.configurations()}
-    profiles = list(workflow_model_configs().values()) + [next(iter(configs.values()))["verifier"]]
+    configs = {"-".join(c["solver_sequence"]):c for c in workflow.configurations(deepseek_provider=deepseek_provider)}
+    profiles = list(workflow_model_configs(deepseek_provider=deepseek_provider).values()) + [next(iter(configs.values()))["verifier"]]
     endpoints, ceilings = {}, {}
     for p in profiles:
         m, settings = p["model"], p.get("body_settings",p.get("settings"))
@@ -142,17 +142,20 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
             "estimated_total_usd":str(sum((Decimal(c["estimated_cost_usd"]) for c in costs),Decimal(0))),
             "conservative_reservation_total_usd":str(reserve_total),
             "assumptions":"Two slots per execution, solver output 96/verifier 512 including reasoning once; chars/3+96 input; no cache discount. Stress: full UTF-8 request+256 framing, 8192-character calculation and full output caps. Estimates are not billing guarantees."}}
+    if deepseek_provider != "deepinfra/fp4":
+        plan.update(version="workflow-evaluation-plan-v2", deepseek_provider=deepseek_provider)
     plan["sha256"] = pilot.digest(plan)
     return plan
 
 
 def validate_plan(plan):
-    if plan.get("version") != "workflow-evaluation-plan-v1" or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
+    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
         raise ValueError("Evaluation checksum/version failed.")
     age = (datetime.now(timezone.utc)-datetime.fromisoformat(plan["metadata"]["fetched_at_utc"])).total_seconds()
     if age < -300 or age > 24*3600:
         raise ValueError("Refresh free metadata and prepare a new proposal.")
-    rebuilt = prepare_plan(plan["metadata"],plan["split"]["exposure_snapshot"],dataset_path=plan["dataset"]["path"],created_at=plan["created_at_utc"])
+    rebuilt = prepare_plan(plan["metadata"],plan["split"]["exposure_snapshot"],dataset_path=plan["dataset"]["path"],created_at=plan["created_at_utc"],
+                           deepseek_provider=plan.get("deepseek_provider", "deepinfra/fp4"))
     if rebuilt != plan:
         raise ValueError("Dataset, code, profiles, schedule or evidence changed; prepare a new plan.")
 
@@ -337,6 +340,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan",type=Path)
     parser.add_argument("--metadata",type=Path)
+    parser.add_argument("--deepseek-provider",choices=WORKFLOW_DEEPSEEK_PROVIDERS,help="Offline preparation only; execution uses the frozen plan.")
     parser.add_argument("--fetch-metadata",type=Path,help="Free public metadata only; no generation.")
     parser.add_argument("--database",type=Path,default=DATABASE_PATH)
     parser.add_argument("--run",action="store_true")
@@ -353,7 +357,7 @@ def main():
         if len(set(outputs))!=len(outputs) or args.metadata and args.metadata.resolve() in outputs:
             raise ValueError("Inputs/outputs must use distinct paths.")
         if args.fetch_metadata:
-            if args.run or args.plan or args.metadata or args.report:
+            if args.run or args.plan or args.metadata or args.report or args.deepseek_provider:
                 parser.error("--fetch-metadata is a separate free operation.")
             if args.fetch_metadata.exists():
                 raise ValueError("Metadata file exists; choose a new filename.")
@@ -366,13 +370,16 @@ def main():
                 parser.error("Offline preparation requires --plan and --metadata.")
             if args.plan.exists():
                 raise ValueError("Plan exists; choose a new filename.")
-            plan = prepare_plan(json.loads(args.metadata.read_text(encoding="utf-8")),exposure_snapshot(args.database))
+            plan = prepare_plan(json.loads(args.metadata.read_text(encoding="utf-8")),exposure_snapshot(args.database),
+                                deepseek_provider=args.deepseek_provider or "deepinfra/fp4")
             validate_plan(plan)
             args.plan.parent.mkdir(parents=True,exist_ok=True)
             args.plan.write_text(json.dumps(plan,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
             print(json.dumps({"mode":"offline","sha256":plan["sha256"],"questions":[q["id"] for q in plan["questions"]],
                 "executions":len(plan["schedule"]),"limits":plan["execution_policy"],"cost_preview":plan["cost_preview"],"generation_requests":0},indent=2))
         else:
+            if args.deepseek_provider:
+                parser.error("Execution provider is frozen in --plan; --deepseek-provider applies only to preparation.")
             if not args.plan or args.budget_usd is None or args.max_requests is None or not args.report:
                 parser.error("--run requires --plan, --budget-usd, --max-requests and --report.")
             if args.report.exists():

@@ -26,21 +26,24 @@ import mathqa_workflow_store as store
 SELECTED_VERIFIER = "flashlite25__reasoning"
 
 
-def configuration(sequence, *, temperature=0.2, max_tokens=512):
+def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4"):
     if len(sequence) != 3 or any(alias not in MODEL_PROFILES for alias in sequence):
         raise ValueError("A sequence has exactly three declared solver aliases, with repetitions allowed.")
-    models = workflow_model_configs(temperature=temperature, max_tokens=max_tokens)
-    return {"version": "solver-verifier-config-v1", "solver_sequence": list(sequence),
+    models = workflow_model_configs(temperature=temperature, max_tokens=max_tokens, deepseek_provider=deepseek_provider)
+    result = {"version": "solver-verifier-config-v1", "solver_sequence": list(sequence),
             "solvers": [deepcopy(models[alias]) for alias in sequence],
             "verifier_alias": SELECTED_VERIFIER, "verifier": profile(SELECTED_VERIFIER),
             "verifier_selection": "provisional user choice after verifier screening",
             "policy": {"max_attempts": 3, "transport_retries": 0, "feedback_to_solver": False,
                 "technical_failure": "advance when billing/usage are known; otherwise stop",
                 "solver_settings": "proposed loop settings; live pilot pending"}}
+    if deepseek_provider != "deepinfra/fp4":
+        result.update(version="solver-verifier-config-v2", deepseek_provider=deepseek_provider)
+    return result
 
 
-def configurations():
-    return [configuration(sequence) for sequence in product(MODEL_PROFILES, repeat=3)]
+def configurations(*, deepseek_provider="deepinfra/fp4"):
+    return [configuration(sequence, deepseek_provider=deepseek_provider) for sequence in product(MODEL_PROFILES, repeat=3)]
 
 
 def solver_request(solver, question):
@@ -89,7 +92,8 @@ class Runner:
         self.config = deepcopy(config)
         expected = configuration(config["solver_sequence"],
             temperature=config["solvers"][0]["body_settings"]["temperature"],
-            max_tokens=config["solvers"][0]["body_settings"]["max_tokens"])
+            max_tokens=config["solvers"][0]["body_settings"]["max_tokens"],
+            deepseek_provider=config.get("deepseek_provider", "deepinfra/fp4"))
         if self.config != expected:
             raise ValueError("Workflow configuration differs from trusted profile builders.")
         self.db, self.sender, self.reservations = database_path, sender, reservations

@@ -96,6 +96,73 @@ class EvaluationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"unique"):
             evaluation.prepare_plan(self.metadata,self.exposure,dataset_path=self.dataset)
 
+    def venice_metadata(self):
+        metadata = deepcopy(self.metadata)
+        endpoint = deepcopy(metadata["models"]["deepseek/deepseek-v3.2"]["data"]["endpoints"][0])
+        endpoint.update(tag="venice", provider_name="Venice")
+        endpoint["pricing"] = {"prompt":"0.00000026829", "completion":"0.00000039024"}
+        metadata["models"]["deepseek/deepseek-v3.2"]["data"]["endpoints"].append(endpoint)
+        return metadata
+
+    def test_venice_plan_preserves_scope_and_other_profiles_and_binds_provider(self):
+        plan = evaluation.prepare_plan(self.venice_metadata(),self.exposure,dataset_path=self.dataset,deepseek_provider="venice")
+        evaluation.validate_plan(plan)
+        self.assertEqual(plan["version"],"workflow-evaluation-plan-v2")
+        self.assertEqual(plan["questions"],self.plan["questions"])
+        self.assertEqual(plan["schedule"],self.plan["schedule"])
+        for name, config in plan["configurations"].items():
+            old = self.plan["configurations"][name]
+            self.assertEqual(config["verifier"],old["verifier"])
+            for alias, current, previous in zip(config["solver_sequence"],config["solvers"],old["solvers"]):
+                if alias == "deepseek":
+                    self.assertEqual(current["body_settings"]["provider"],{"only":["venice"],"allow_fallbacks":False,"require_parameters":True})
+                    previous = deepcopy(previous)
+                    previous["body_settings"]["provider"]["only"] = ["venice"]
+                    previous["control_notes"] = current["control_notes"]
+                self.assertEqual(current,previous)
+        cost = next(c for c in plan["cost_preview"]["breakdown"] if c["model"]=="deepseek/deepseek-v3.2")
+        self.assertEqual((cost["provider"],cost["input_usd_per_million"],cost["output_usd_per_million"]),("Venice",.26829,.39024))
+        for mutation in ("undeclared", "missing", "slot"):
+            changed = deepcopy(plan)
+            if mutation=="undeclared":
+                changed["deepseek_provider"]="unknown"
+            elif mutation=="missing":
+                del changed["deepseek_provider"]
+            else:
+                changed["configurations"]["deepseek-deepseek-deepseek"]["solvers"][0]["body_settings"]["provider"]["only"]=["deepinfra/fp4"]
+            changed["sha256"] = pilot.digest({k:v for k,v in changed.items() if k!="sha256"})
+            with self.assertRaises(ValueError):
+                evaluation.validate_plan(changed)
+
+    def test_venice_preflight_rejects_unavailable_or_missing_reasoning_controls(self):
+        for failure in ("inactive","control"):
+            metadata = self.venice_metadata()
+            endpoint = metadata["models"]["deepseek/deepseek-v3.2"]["data"]["endpoints"][-1]
+            if failure=="inactive":
+                endpoint["status"]=-2
+            else:
+                endpoint["supported_parameters"].remove("reasoning")
+            with self.assertRaises(ValueError):
+                evaluation.prepare_plan(metadata,self.exposure,dataset_path=self.dataset,deepseek_provider="venice")
+
+    def test_venice_frozen_profiles_execute_all_sequences_with_mocked_provider(self):
+        with patch.object(evaluation,"QUESTION_COUNT",1):
+            self.plan = evaluation.prepare_plan(self.venice_metadata(),self.exposure,dataset_path=self.dataset,deepseek_provider="venice")
+            def respond(request):
+                response = self.response(request)
+                body = json.loads(request.content)
+                if body["model"]=="deepseek/deepseek-v3.2":
+                    payload = response.json()
+                    payload["provider"]="Venice"
+                    return httpx.Response(200,json=payload)
+                return response
+            report = self.run_mock(max_requests=162,handler=respond)
+        self.assertTrue(report["complete_coverage"])
+        self.assertEqual(report["new_requests"],54)
+        deepseek = [r for r in self.sent if r["model"]=="deepseek/deepseek-v3.2"]
+        self.assertEqual(len(deepseek),9)
+        self.assertTrue(all(r["provider"]["only"]==["venice"] for r in deepseek))
+
     def test_readonly_exposure_inventory_does_not_modify_database(self):
         store.migrate(self.db)
         before = hashlib.sha256(self.db.read_bytes()).hexdigest()

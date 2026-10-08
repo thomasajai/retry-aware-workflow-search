@@ -11,6 +11,9 @@ Preparation and tests are offline; no new paid run has occurred.
 Subsequent status: the [authorized run stopped](solver-verifier-development-results.md)
 after 45 requests at an upstream 429 with unknown billing. The report is
 recovered and audited; no automatic continuation or configuration ranking.
+The user subsequently requested a different DeepSeek provider; the
+[Venice proposal](solver-verifier-venice-proposal.md) prepares that change and a
+new cost notice. Additional paid execution requires its own authorization.
 
 The user approved the $3.50 cap / 3,240-request maximum. Free public metadata
 was refreshed at `2026-10-08T17:01:25.885118+00:00`; rates, requested controls,

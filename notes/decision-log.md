@@ -4,6 +4,15 @@ Last reviewed: 2026-09-25. This records the current plan, not experimental resul
 
 ## October 6 planning update
 
+Latest October 8 checkpoint: following the stopped development run, the user
+requested a DeepSeek provider change. The [Venice proposal](solver-verifier-venice-proposal.md)
+freezes the new pin while preserving Gemini and the same twenty questions and
+twenty-seven sequences. All 136 offline tests pass; legacy profiles, old workflow
+builders and the real database are unchanged. No paid calls during preparation.
+The new 540-execution run proposes approximately $0.398 expected spend, $3.50
+cap and 3,240 maximum requests; it awaits authorization. The prior run's
+$0.00555908 known spend and one unresolved charge remain preserved separately.
+
 The user requested an explicit [solver-verifier implementation and experiment
 plan](solver-verifier-plan.md). It records the newly agreed rules: fresh solver
 requests with small non-zero temperature, acceptance requiring correct reasoning
