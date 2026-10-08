@@ -84,7 +84,7 @@ def preview_saved(source_run=DEFAULT_SOURCE_RUN, *, database_path=DATABASE_PATH,
             result = extract_usable(call["answer_text"], contract, status=call["status"], finish_reason=call["finish_reason"])
             fields = result["fields"]
             option_correct = (fields["option"] == record["correct"]) if result["usable"] else None
-            natural.append({"source_call_id": call["call_id"], "question_id": qid, "solver_model": model,
+            natural.append({"source_call_id": call["call_id"], "question_id": qid, "question": question, "solver_model": model,
                             "generation_status": call["status"], "original_answer": call["answer_text"],
                             "usability": result, "offline_labels": {"option_correct": option_correct, "reasoning_valid": None,
                             "source": "dataset option key only; reasoning not reviewed"},

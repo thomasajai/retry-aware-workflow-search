@@ -111,3 +111,17 @@ def experiment_config(model_alias: str, experiment: str) -> tuple[str, dict]:
     """Use the same model controls for batch defaults and formatting trials."""
     profile = MODEL_PROFILES[model_alias]
     return profile.model, profile.config(experiment)
+
+
+def workflow_model_configs(*, temperature=0.2, max_tokens=512):
+    """Proposed loop controls; preserve legacy batch defaults and prompts."""
+    if isinstance(temperature, bool) or not isinstance(temperature, (int, float)) or not 0 < temperature <= 1:
+        raise ValueError("Workflow temperature must be small and nonzero (0 < value <= 1).")
+    if type(max_tokens) is not int or max_tokens < 1:
+        raise ValueError("Workflow output limit must be a positive integer.")
+    configs = {}
+    for alias, model_profile in MODEL_PROFILES.items():
+        config = model_profile.config()
+        config["body_settings"].update(temperature=temperature, max_tokens=max_tokens)
+        configs[alias] = {"model": model_profile.model, **config}
+    return configs

@@ -21,6 +21,76 @@ Storage, read-only verifier previews, and synthetic reviewed cases are available
 the paid runner, verifier selection, and LangGraph retry loop are still pending.
 No OpenRouter credits were consumed. Work stops at this milestone boundary for review.
 
+## October 7 implementation update
+
+Milestone 1 is committed as `c25aa92`.
+The [Milestone 2 preparation report](solver-verifier-milestone-2-preparation.md)
+records the guarded screening runner and a concrete 36-call pilot proposal:
+estimated $0.00789713, conservative reservations $0.03450510, proposed scheduling
+limit $0.05. The user approved the pilot, which subsequently completed with
+36 calls and $0.00163967 in reported cost. [Results](solver-verifier-pilot-results.md)
+show one incorrect natural solution accepted by each candidate, despite success
+on the eight labeled synthetic diagnostics. No verifier is selected. The full
+screening comparison and LangGraph retry loop remain subsequent checkpoints;
+additional paid experiments require a new proposal and authorization.
+
+Following the user's instruction to continue, the
+[recomputation comparison](solver-verifier-comparison-proposal.md) was prepared
+offline: unchanged baseline, prompt-only recomputation, and recomputation plus
+reasoning allowance, across eight reviewed questions. Nine pilot verdicts are
+reused; 189 new calls are proposed. Estimated cost is $0.04831528 and the proposed
+$0.25 spending limit was approved. All 82 offline tests passed before execution.
+The [comparison stopped](solver-verifier-comparison-results.md) after five new
+calls costing $0.00136376: DeepSeek with reasoning enabled returned no verdict
+and inconsistent reasoning/output counts. A free metadata lookup confirmed its
+reported charge. No expansion question was reached; no verifier is selected.
+Known verifier-selection spend is $0.00300343 across both runs. Recommended next
+checkpoint: prepare an amended comparison without that failing profile and
+reuse all thirteen valid matching natural verdicts. No paid continuation or
+larger token allowance is authorized automatically.
+
+Following the user's instruction to proceed, the [amended comparison](solver-verifier-comparison-amended-proposal.md)
+was implemented and prepared offline. Version 2 plans explicitly name multiple
+finished reuse sources and excluded profiles; duplicate judgments and evidence
+drift are rejected. Thirteen natural verdicts are reused, including mathematical
+errors, and DeepSeek's failing reasoning profile is excluded. The remaining
+eight profiles require 163 new requests, estimated at $0.03962351 from refreshed
+provider metadata, with $0.21356408 in conservative reservations and proposed
+$0.22 cap. All 89 offline tests pass; original plans still validate and the real
+database is unchanged. The new numeric cost proposal awaits approval; no paid
+continuation occurred during preparation. The user then approved the $0.22 cap
+and 163-request maximum. The [amended run](solver-verifier-comparison-amended-results.md)
+stopped after forty new calls costing $0.00483675: DeepSeek recompute produced
+prose and exhausted its output cap without a verdict. Thirteen saved judgments
+were reused; 123 new requests were unreached. All costs are known, database
+checks pass, and total verifier-selection spend is $0.00784018. Every tested
+profile has an observed false acceptance. Gemini 2.5 with reasoning has the
+strongest partial common-coverage result (four correct out of five labeled
+proposals), insufficient for selection. Proposed next checkpoint: a small
+stronger-reference-verifier comparison on saved failures, with a fresh model,
+provider, scope, and cost proposal. No automatic continuation or token-cap
+increase occurred.
+
+## October 7 provisional verifier and offline loop
+
+The user chose to proceed with Gemini 2.5 rather than extend verifier selection.
+Use `flashlite25__reasoning`: Gemini 2.5 Flash-Lite, the recomputation prompt,
+Google AI Studio pin, temperature zero, 512 reasoning tokens, and 1,024 total
+output tokens. This is a provisional user choice; the observed false acceptance
+remains in the record. Further verifier-selection experiments are deferred.
+
+The [offline Milestone 3 work](solver-verifier-milestone-3-offline.md) implements
+the three-slot LangGraph with durable call records, no feedback/key leakage,
+unusable-answer/error routing, run-wide spending gates, and independent atomic
+option grades. One graph supports all 27 ordered solver triples. Proposed
+workflow sampling uses temperature 0.2 and 512 total output tokens, preserving
+legacy batch defaults. All 112 offline tests pass. A separate controlled demo
+uses sixteen simulated calls to demonstrate early acceptance, third acceptance,
+exhaustion, and an accepted wrong option scored zero. No OpenRouter credits were
+consumed, and the real database still contains 81 prior verifier calls costing
+$0.00784018. Next prepare a separately costed live loop pilot; no stronger
+verifier experiment or live workflow run is automatically authorized.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)

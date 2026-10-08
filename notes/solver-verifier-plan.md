@@ -1,6 +1,8 @@
 # Solver-verifier workflow implementation and experiment plan
 
-Created: 2026-10-06. Status: Milestone 1 completed offline; see the [milestone report](solver-verifier-milestone-1.md). Later stages remain planned, and this document alone does not authorize paid calls.
+Created: 2026-10-06. Updated: 2026-10-07. Status: Milestones 1 and 2 completed,
+with a user-selected provisional verifier. Milestone 3's offline loop is complete;
+its live pilot remains. This document alone does not authorize paid calls.
 
 This plan records the design agreed in the October 5-6 discussion. It covers choosing a verifier, implementing a bounded retry workflow, and evaluating solver sequences. It complements the broader [project description](../PROJECT.md) and [decision log](decision-log.md). Suggested settings and sample sizes below are proposals, not measured results or already agreed experimental choices.
 
@@ -211,7 +213,8 @@ Names are proposed implementation boundaries, not files already implemented.
 | `scripts/mathqa_workflow_store.py` | Workflow schema/migrations, snapshots, and records. |
 | `scripts/migrations/NNN_*.sql` | Numbered schema changes. |
 | `scripts/mathqa_verifier.py` | Verifier profiles/prompt, request construction, and verdict parsing. |
-| `scripts/mathqa_verifier_trials.py` | Saved-answer screening, previews, execution, and comparisons. |
+| `scripts/mathqa_verifier_trials.py` | Read-only saved-answer screening previews. |
+| `scripts/mathqa_verifier_preflight.py`, `scripts/mathqa_verifier_screen.py` | Free metadata/cost preflight, frozen screening plans, explicitly budgeted execution, and comparisons. |
 | `scripts/mathqa_workflow.py` | LangGraph nodes/routing and workflow CLI. |
 | `scripts/mathqa_workflow_grading.py` | Independent execution scores and workflow summaries. |
 | `tests/test_mathqa_workflow*.py`, `tests/test_mathqa_verifier*.py` | Meaningful routing, leakage, parsing, migration, and measurement checks. |
@@ -228,7 +231,7 @@ No dependency change is expected initially: LangGraph, httpx, dotenv, and built-
 
 ## Decisions still to freeze before their dependent live stage
 
-- Verifier shortlist/providers, final prompt, supported reasoning settings, sampling, and total output-token limits.
+- Fresh live-stage controls/pricing preflight for the fixed provisional verifier `flashlite25__reasoning`.
 - Solver temperature (proposed `0.2`), retained/changed sampling controls, prompt, and adequate output limits.
 - Precise usability extraction and technical-failure policy.
 - Reviewed reasoning labels, reliability targets, treatment of ambiguous/noisy MathQA annotations, and the size of verifier expansion/repeat checks.
@@ -241,8 +244,52 @@ These are implementation/experiment choices to resolve at the relevant milestone
 
 - [x] Record agreed rules and explicit implementation/experiment plan.
 - [x] Milestone 1: storage, offline screening preview, and reviewed fixtures (2026-10-06; 53 offline tests passed, zero OpenRouter requests).
-- [ ] Milestone 2: run budgeted verifier experiments and freeze a verifier.
+- [x] Milestone 2: run budgeted verifier experiments and choose Gemini 2.5 Flash-Lite with reasoning provisionally (user choice, 2026-10-07).
 - [ ] Milestone 3: implement/test the loop and finish a small live pilot.
 - [ ] Milestone 4: evaluate sequences and held-out finalists.
+
+Milestone 1 was committed as `c25aa92` on 2026-10-07. [Milestone 2 offline
+preparation](solver-verifier-milestone-2-preparation.md) is complete: public provider
+metadata, 22 reviewed natural outputs, a frozen 36-call pilot proposal, guarded
+screening execution, and 71 passing offline tests. The user approved the 36-call
+pilot with a $0.05 limit; [it completed](solver-verifier-pilot-results.md) costing
+$0.00163967, with no missing costs or technical errors. Every candidate accepted
+one incorrect natural solution, so none is selected. The 195-call full screen
+and verifier selection remain later work in Milestone 2, pending a new budget
+proposal and authorization for any follow-up paid run.
+
+The [recomputation comparison](solver-verifier-comparison-proposal.md) is now
+prepared offline with 82 passing tests: three variants per model, eight
+reviewed questions, nine reused baseline verdicts, and 189 proposed new calls.
+Estimated new cost is $0.04831528, with $0.24849207 in conservative reservations.
+The user approved the $0.25 limit; the run stopped after five new calls costing
+$0.00136376 when DeepSeek's reasoning profile truncated and reported
+inconsistent token counts. The [partial results](solver-verifier-comparison-results.md)
+record the billing/storage audit and proposed next checkpoint. None of the
+expansion questions was reached, so no verifier can be selected. A revised
+comparison and new advance cost notice are needed before further paid calls.
+The [amended comparison](solver-verifier-comparison-amended-proposal.md) is now
+prepared offline: eight profiles, thirteen reused verdicts, 163 new requests,
+estimated cost $0.03962351, conservative reservations $0.21356408, proposed cap
+$0.22 was approved. The [amended run](solver-verifier-comparison-amended-results.md)
+stopped after forty new calls costing $0.00483675, when DeepSeek recompute
+truncated without a Boolean verdict. All 89 offline tests passed before
+execution; the post-run audit passes and legacy records are unchanged. Total
+known verifier-selection spend is $0.00784018. Every tested profile has observed
+false acceptances. The user then chose to proceed with Gemini 2.5 Flash-Lite
+using recomputation plus reasoning, deferring additional verifier experiments.
+This provisional selection concludes Milestone 2; it does not remove the
+recorded mistakes or turn acceptance into independent correctness.
+
+The [offline part of Milestone 3](solver-verifier-milestone-3-offline.md) is
+implemented: one bounded LangGraph for all 27 triples, durable calls, original
+input-only retries, usability/error routing, serial run-wide spend gates, and
+atomic independent option grading. All 112 offline tests pass. A saved
+controlled demo exercises acceptance at the first/third slot, exhaustion,
+and an accepted wrong option; it uses sixteen mock calls and zero OpenRouter
+requests. The real experiment database remains unchanged. Next prepare a small
+live loop pilot with fresh endpoint preflight, a frozen numeric budget/request
+cap, an HTTP adapter, and advance cost disclosure. Milestone 3 stays open until
+that approved live integration is demonstrated.
 
 Reference documentation consulted during design: [LangGraph workflows](https://docs.langchain.com/oss/python/langgraph/workflows-agents), [SQLite use cases](https://www.sqlite.org/whentouse.html), [Alembic](https://alembic.sqlalchemy.org/en/latest/), and [OpenRouter reasoning-token controls](https://openrouter.ai/docs/guides/best-practices/reasoning-tokens). Availability, prices, and provider support must be rechecked at live execution time.

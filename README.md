@@ -47,8 +47,30 @@ The [solver-verifier plan](notes/solver-verifier-plan.md) records the agreed ret
 rules, verifier screening experiment, LangGraph workflow, SQLite storage design,
 and staged completion criteria. [Milestone 1 is complete](notes/solver-verifier-milestone-1.md):
 offline storage, screening previews, and reviewed diagnostic fixtures are available.
-The LangGraph retry loop and paid verifier runner are later milestones. Paid
-stages require advance cost disclosure and explicit execution with a defined budget.
+The [Milestone 2 preparation report](notes/solver-verifier-milestone-2-preparation.md)
+documents the screening runner and reviewed natural answers. The approved
+[36-call pilot completed](notes/solver-verifier-pilot-results.md) for $0.00163967,
+with no technical errors, but every candidate accepted an incorrect natural
+solution. The user has now chosen **Gemini 2.5 Flash-Lite with recomputation and
+reasoning** as the provisional verifier. Additional verifier selection is
+deferred. The [offline loop milestone](notes/solver-verifier-milestone-3-offline.md)
+implements the three-attempt LangGraph workflow, durable calls, and independent
+option grading. **112 offline tests pass**; a small live loop pilot remains.
+Paid stages require advance cost disclosure and explicit execution with a
+defined budget.
+
+Preview all 27 solver triples or save controlled loop traces without model calls:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/mathqa_workflow.py --preview
+.\.venv\Scripts\python.exe scripts/mathqa_workflow_demo.py --output results/workflow_previews/new-loop-demo
+```
+
+The demo uses a separate database and simulated responses, with no credentials
+or HTTP. It demonstrates early acceptance, third-attempt acceptance, rejection
+exhaustion, and independent scoring of an accepted wrong option. These commands
+have no paid execution mode. Solver temperature 0.2 and a 512-token output cap
+are proposed loop settings; legacy batch defaults are unchanged.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
@@ -63,6 +85,67 @@ coverage, and request counts. It has no paid execution option. Candidate provide
 controls and current prices are marked pending review, so estimated future costs
 remain unknown rather than being presented as zero. Natural-answer labels and
 synthetic diagnostic labels remain separate and never enter verifier requests.
+
+Fetch free public metadata and prepare a frozen 36-call pilot proposal (both
+commands make zero generation requests and do not load an API key):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/mathqa_verifier_preflight.py --fetch --output results/workflow_previews/provider-metadata.json
+.\.venv\Scripts\python.exe scripts/mathqa_verifier_screen.py --metadata results/workflow_previews/provider-metadata.json --plan results/workflow_previews/verifier-pilot.json
+```
+
+The plan includes exact requests, provider pins, prices, estimated token costs,
+conservative per-call reservations, and offline review labels. It defaults to
+one saved question (three solver answers), plus nine usable synthetic diagnostics,
+for twelve requests per candidate. There are no new solver requests or transport
+retries. Preparation does not overwrite an existing plan. Provider metadata must
+be at most 24 hours old at execution; refreshing it requires a new plan/cost notice.
+
+**Paid execution is a separate step.** Only after advance notice and authorization
+for the proposed scope and numeric limits, invoke the screening runner with
+`--run --plan <approved-plan> --budget-usd <authorized-limit> --max-requests <authorized-count> --report <new-report>`.
+No budget is implicit. Requests run serially with no fallbacks or client retries.
+Routing price ceilings use dollars per million tokens; reservations account for
+input and total billed output, including reasoning. These are conservative
+estimates, not guarantees of provider billing. The runner checks known spending
+plus the next reservation before scheduling a call, and stops for unknown cost,
+unknown token usage, provider/model changes, or an exceeded reservation. It also
+refuses a second execution of the same frozen plan in the same database.
+
+Responses, usage, reasoning tokens, costs, timing, and errors are retained in
+SQLite. Synthetic proposals are offline sources, not invented paid solver calls;
+saved solver costs are not charged to the new screening run. Reports separate
+natural and synthetic quality, valid Boolean verdicts, technical/format errors,
+unknown labels, and key-correct answers with bad reasoning. A rejected one-attempt
+screening execution uses terminal status `failed` with reason `screen_reject`;
+three-attempt exhaustion and final workflow scores apply to the later loop.
+
+The [follow-up comparison proposal](notes/solver-verifier-comparison-proposal.md)
+tests the unchanged baseline, an independent recomputation prompt, and that
+prompt with a larger reasoning allowance across eight reviewed questions.
+It reuses nine exact pilot verdicts, planning 189 new calls with no synthetic
+reruns. Prepare it offline with `scripts/mathqa_verifier_compare.py`; this CLI
+has no paid execution option. After authorization, execute the frozen plan via
+the guarded screening runner. Comparison reports separate inspected regression
+cases from expansion, paired changes from raw acceptance, and new spending
+from reused historical costs. The comparison also stops on the first technical
+or format error, including truncation. This follow-up has 82 passing offline
+tests. The user approved a $0.25 cap; the run stopped after five new calls costing
+$0.00136376 because DeepSeek's reasoning profile returned a truncated response
+with inconsistent token counts. The [partial results and billing audit](notes/solver-verifier-comparison-results.md)
+record incomplete coverage and the proposed next checkpoint. No verifier was
+selected at that checkpoint. The [amended comparison proposal](notes/solver-verifier-comparison-amended-proposal.md)
+excludes DeepSeek's reasoning profile and reuses thirteen judgments, leaving
+163 new verifier calls. It is prepared with 89 passing offline tests, estimated
+cost $0.03962351. The user approved the $0.22 cap, and the
+[amended run stopped](notes/solver-verifier-comparison-amended-results.md) after
+forty new calls costing $0.00483675 when DeepSeek recompute produced prose and
+truncated before a verdict. Total known verifier-selection spend is $0.00784018.
+All profiles have observed false acceptances. The subsequent user decision to
+proceed provisionally with Gemini 2.5 is recorded above. Repeated `--reuse-run`
+and `--exclude-candidate` options support explicit sources and profile subsets;
+finished stopped runs contribute only eligible completed calls. Duplicate
+matching judgments are rejected, and incorrect verdicts remain observations.
 
 Apply workflow storage upgrades explicitly, without model calls:
 

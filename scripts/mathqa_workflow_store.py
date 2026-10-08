@@ -108,14 +108,14 @@ def migrate(database_path=DATABASE_PATH, *, migration_dir=MIGRATIONS):
 
 
 def create_run(kind, dataset_path, dataset_sha256, question_ids, settings, *,
-               database_path=DATABASE_PATH, budget_usd=None, max_requests=None):
+               database_path=DATABASE_PATH, budget_usd=None, max_requests=None, plan_sha256=None):
     if not question_ids or len(set(question_ids)) != len(question_ids):
         raise ValueError("Question IDs must be nonempty and unique.")
     run_id = str(uuid4())
     with closing(connect(database_path)) as c, c:
         c.execute("INSERT INTO workflow_runs (run_id,kind,created_at_utc,dataset_path,dataset_sha256,"
-                  "question_ids_json,settings_json,budget_usd,max_requests) VALUES (?,?,?,?,?,?,?,?,?)",
-                  (run_id, kind, now(), str(dataset_path), dataset_sha256, encode(question_ids), encode(settings), budget_usd, max_requests))
+                  "question_ids_json,settings_json,budget_usd,max_requests,plan_sha256) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                  (run_id, kind, now(), str(dataset_path), dataset_sha256, encode(question_ids), encode(settings), budget_usd, max_requests, plan_sha256))
     return run_id
 
 
@@ -141,7 +141,7 @@ def create_execution(run_id, config_id, question, *, repetition=1, database_path
     return execution_id
 
 
-def create_attempt(execution_id, position, solver_model, *, historical_solver_call_id=None, database_path=DATABASE_PATH):
+def create_attempt(execution_id, position, solver_model, *, historical_solver_call_id=None, offline_source=None, database_path=DATABASE_PATH):
     attempt_id = str(uuid4())
     with closing(connect(database_path)) as c, c:
         execution = c.execute("SELECT * FROM workflow_executions WHERE execution_id=?", (execution_id,)).fetchone()
@@ -157,8 +157,9 @@ def create_attempt(execution_id, position, solver_model, *, historical_solver_ca
             source = c.execute("SELECT question_id,requested_model FROM calls WHERE call_id=?", (historical_solver_call_id,)).fetchone()
             if source is None or source[0] != execution["question_id"] or source[1] != solver_model:
                 raise ValueError("Historical solver call does not match the execution question/model.")
-        c.execute("INSERT INTO workflow_attempts (attempt_id,execution_id,position,solver_model,historical_solver_call_id) "
-                  "VALUES (?,?,?,?,?)", (attempt_id, execution_id, position, solver_model, historical_solver_call_id))
+        c.execute("INSERT INTO workflow_attempts (attempt_id,execution_id,position,solver_model,historical_solver_call_id,offline_source_json) "
+                  "VALUES (?,?,?,?,?,?)", (attempt_id, execution_id, position, solver_model, historical_solver_call_id,
+                  encode(offline_source) if offline_source is not None else None))
         c.execute("UPDATE workflow_executions SET status='running' WHERE execution_id=?", (execution_id,))
     return attempt_id
 
@@ -168,8 +169,11 @@ def record_usability(attempt_id, result, *, database_path=DATABASE_PATH):
         attempt = c.execute("SELECT * FROM workflow_attempts WHERE attempt_id=?", (attempt_id,)).fetchone()
         if attempt is None:
             raise ValueError("Missing attempt.")
-        table, call_id = ("calls", attempt["historical_solver_call_id"]) if attempt["historical_solver_call_id"] else ("workflow_calls", attempt["solver_call_id"])
-        source = c.execute(f"SELECT status,finish_reason FROM {table} WHERE call_id=?", (call_id,)).fetchone()
+        if attempt["offline_source_json"] is not None:
+            source = json.loads(attempt["offline_source_json"])
+        else:
+            table, call_id = ("calls", attempt["historical_solver_call_id"]) if attempt["historical_solver_call_id"] else ("workflow_calls", attempt["solver_call_id"])
+            source = c.execute(f"SELECT status,finish_reason FROM {table} WHERE call_id=?", (call_id,)).fetchone()
         if source is None or source["status"] == "running":
             raise ValueError("Usability evidence needs a finished solver source.")
         if result["usable"] and (source["status"] != "completed" or source["finish_reason"] in ("length", "error")):
@@ -181,7 +185,7 @@ def record_usability(attempt_id, result, *, database_path=DATABASE_PATH):
             raise ValueError("Attempt is missing or already has usability evidence.")
 
 
-def create_call(attempt_id, role, requested_model, request, *, database_path=DATABASE_PATH):
+def create_call(attempt_id, role, requested_model, request, *, cost_reservation_usd=None, database_path=DATABASE_PATH):
     """Record initiation only. This helper does not execute HTTP requests."""
     if role not in ("solver", "verifier"):
         raise ValueError("Unknown call role.")
@@ -193,12 +197,14 @@ def create_call(attempt_id, role, requested_model, request, *, database_path=DAT
         execution = c.execute("SELECT status FROM workflow_executions WHERE execution_id=?", (attempt["execution_id"],)).fetchone()
         if execution[0] not in ("prepared", "running"):
             raise ValueError("Cannot initiate calls for a terminal execution.")
-        if role == "solver" and (attempt["historical_solver_call_id"] or requested_model != attempt["solver_model"]):
+        if role == "solver" and (attempt["historical_solver_call_id"] or attempt["offline_source_json"] or requested_model != attempt["solver_model"]):
             raise ValueError("New solver call conflicts with historical source or selected model.")
         if role == "verifier" and attempt["usable"] != 1:
             raise ValueError("Only usable answers can be verified.")
-        c.execute("INSERT INTO workflow_calls (call_id,attempt_id,role,requested_model,started_at_utc,request_json) "
-                  "VALUES (?,?,?,?,?,?)", (call_id, attempt_id, role, requested_model, now(), encode(request)))
+        if request.get("model", requested_model) != requested_model:
+            raise ValueError("Request model differs from the recorded model.")
+        c.execute("INSERT INTO workflow_calls (call_id,attempt_id,role,requested_model,started_at_utc,request_json,cost_reservation_usd) "
+                  "VALUES (?,?,?,?,?,?,?)", (call_id, attempt_id, role, requested_model, now(), encode(request), _measurement(cost_reservation_usd)))
         column = "solver_call_id" if role == "solver" else "verifier_call_id"
         c.execute(f"UPDATE workflow_attempts SET {column}=? WHERE attempt_id=?", (call_id, attempt_id))
         if role == "verifier":
@@ -214,6 +220,19 @@ def _measurement(value, *, integer=False):
     if integer and not isinstance(value, int):
         raise ValueError("Token measurements must be integers.")
     return value
+
+
+def _reported_measurement(value, *, integer=False):
+    # Preserve malformed provider usage in the raw payload, but never turn it
+    # into a trusted measurement or lose a finished response over it.
+    try:
+        return _measurement(value, integer=integer)
+    except ValueError:
+        return None
+
+
+def _reported_text(value):
+    return clean(value) if isinstance(value, str) else None
 
 
 def finish_call(call_id, *, status, elapsed_seconds, payload=None, raw_response=None,
@@ -233,9 +252,9 @@ def finish_call(call_id, *, status, elapsed_seconds, payload=None, raw_response=
                            "error_type=?,error_message=? WHERE call_id=? AND status='running'", (
             status, now(), _measurement(elapsed_seconds), encode(payload) if payload is not None else None,
             clean(raw_response), clean(message.get("content")) if isinstance(message.get("content"), str) else None,
-            p.get("model"), p.get("provider"), p.get("id"), http_status, choice.get("finish_reason"), encode(usage),
-            _measurement(usage.get("prompt_tokens"), integer=True), _measurement(usage.get("completion_tokens"), integer=True),
-            _measurement(details.get("reasoning_tokens"), integer=True), _measurement(usage.get("cost")),
+            _reported_text(p.get("model")), _reported_text(p.get("provider")), _reported_text(p.get("id")), http_status, _reported_text(choice.get("finish_reason")), encode(usage),
+            _reported_measurement(usage.get("prompt_tokens"), integer=True), _reported_measurement(usage.get("completion_tokens"), integer=True),
+            _reported_measurement(details.get("reasoning_tokens"), integer=True), _reported_measurement(usage.get("cost")),
             error_type, clean(error_message), call_id))
         if cursor.rowcount != 1:
             raise ValueError("Call is missing or already finished.")

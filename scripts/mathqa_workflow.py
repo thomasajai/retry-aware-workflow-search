@@ -1,0 +1,269 @@
+"""Bounded LangGraph solver/verifier loop. CLI preview/demo are entirely offline.
+
+The runner accepts an explicit request sender, provider expectations, and cost
+reservations. No HTTP client, API key loading, or paid CLI is supplied here.
+Live integration requires a separately prepared and approved pilot.
+"""
+
+import argparse
+from contextlib import closing
+from copy import deepcopy
+from dataclasses import dataclass
+from decimal import Decimal
+from itertools import product
+import json
+from time import perf_counter
+from typing import TypedDict
+
+import httpx
+from langgraph.graph import END, START, StateGraph
+
+from mathqa_models import MODEL_PROFILES, workflow_model_configs
+from mathqa_verifier import build_request, extract_usable, parse_verdict, profile
+from mathqa_verifier_preflight import input_token_reservation
+import mathqa_workflow_store as store
+
+SELECTED_VERIFIER = "flashlite25__reasoning"
+
+
+def configuration(sequence, *, temperature=0.2, max_tokens=512):
+    if len(sequence) != 3 or any(alias not in MODEL_PROFILES for alias in sequence):
+        raise ValueError("A sequence has exactly three declared solver aliases, with repetitions allowed.")
+    models = workflow_model_configs(temperature=temperature, max_tokens=max_tokens)
+    return {"version": "solver-verifier-config-v1", "solver_sequence": list(sequence),
+            "solvers": [deepcopy(models[alias]) for alias in sequence],
+            "verifier_alias": SELECTED_VERIFIER, "verifier": profile(SELECTED_VERIFIER),
+            "verifier_selection": "provisional user choice after verifier screening",
+            "policy": {"max_attempts": 3, "transport_retries": 0, "feedback_to_solver": False,
+                "technical_failure": "advance when billing/usage are known; otherwise stop",
+                "solver_settings": "proposed loop settings; live pilot pending"}}
+
+
+def configurations():
+    return [configuration(sequence) for sequence in product(MODEL_PROFILES, repeat=3)]
+
+
+def solver_request(solver, question):
+    # This allowlist, rather than graph history, is the only solver input.
+    return {"model": solver["model"], **deepcopy(solver["body_settings"]), "messages": [{
+        "role": "user", "content": solver["prompt_template"].format(
+            problem=question["problem"], options=question["options"])}]}
+
+
+@dataclass(frozen=True)
+class Limits:
+    budget_usd: float
+    max_requests: int
+
+    def __post_init__(self):
+        if (isinstance(self.budget_usd, bool) or not isinstance(self.budget_usd, (int, float))
+                or not Decimal(str(self.budget_usd)).is_finite() or self.budget_usd <= 0):
+            raise ValueError("A finite positive budget is required.")
+        if type(self.max_requests) is not int or self.max_requests < 1:
+            raise ValueError("A positive request limit is required.")
+
+
+class WorkflowState(TypedDict, total=False):
+    question: dict
+    position: int
+    attempt_id: str
+    call: dict
+    usability: dict
+    verdict: dict
+    halt_status: str | None
+    halt_reason: str | None
+    technical_errors: int
+    outcome: dict
+
+
+class Runner:
+    """One frozen config, durable calls, and a shared run-wide spending gate.
+
+    sender(request) returns (HTTP status, decoded response). It receives neither
+    the answer key nor graph history. Tests/demo supply controlled senders.
+    reservations(request) quotes a conservative charge, excluding past spend.
+    """
+
+    def __init__(self, run_id, config_id, config, *, database_path, sender, reservations, providers, limits):
+        self.run_id, self.config_id = run_id, config_id
+        self.config = deepcopy(config)
+        expected = configuration(config["solver_sequence"],
+            temperature=config["solvers"][0]["body_settings"]["temperature"],
+            max_tokens=config["solvers"][0]["body_settings"]["max_tokens"])
+        if self.config != expected:
+            raise ValueError("Workflow configuration differs from trusted profile builders.")
+        self.db, self.sender, self.reservations = database_path, sender, reservations
+        self.providers, self.limits = deepcopy(providers), limits
+        with closing(store.connect(self.db)) as c:
+            row = c.execute("SELECT * FROM workflow_configs WHERE config_id=? AND run_id=?", (config_id, run_id)).fetchone()
+            run = c.execute("SELECT * FROM workflow_runs WHERE run_id=?", (run_id,)).fetchone()
+        if row is None or json.loads(row["snapshot_json"]) != self.config:
+            raise ValueError("Stored configuration does not match the runner.")
+        if run["kind"] != "sequence_evaluation" or run["status"] not in ("prepared", "running"):
+            raise ValueError("Runner requires an unfinished sequence evaluation.")
+        if run["budget_usd"] != limits.budget_usd or run["max_requests"] != limits.max_requests:
+            raise ValueError("Limits must match the recorded run budget/request cap.")
+
+    def gate(self, request):
+        reserve = Decimal(str(self.reservations(deepcopy(request))))
+        if not reserve.is_finite() or reserve <= 0:
+            raise ValueError("A finite positive per-call reservation is required.")
+        if request["model"] not in self.providers:
+            raise ValueError("Missing pinned provider expectation.")
+        with closing(store.connect(self.db)) as c:
+            rows = c.execute("SELECT w.status,w.cost_usd FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
+                "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?", (self.run_id,)).fetchall()
+        if any(r["status"] == "running" or r["cost_usd"] is None for r in rows):
+            return reserve, "unreconciled_call"
+        if len(rows) >= self.limits.max_requests:
+            return reserve, "request_limit"
+        spent = sum((Decimal(str(r["cost_usd"])) for r in rows), Decimal(0))
+        return reserve, "spending_limit" if spent + reserve > Decimal(str(self.limits.budget_usd)) else None
+
+    def perform(self, attempt_id, role, request, reservation):
+        call_id = store.create_call(attempt_id, role, request["model"], request,
+            cost_reservation_usd=float(reservation), database_path=self.db)
+        started, payload, http_status = perf_counter(), None, None
+        status, error, unexpected = "completed", None, None
+        try:
+            http_status, payload = self.sender(deepcopy(request))
+            if not isinstance(payload, dict):
+                payload = None
+                status, error = "failed", "InvalidResponse"
+            elif http_status != 200 or "error" in payload:
+                status, error = "failed", "ProviderError"
+            elif payload.get("model") != request["model"] or payload.get("provider") != self.providers[request["model"]]:
+                status, error = "failed", "ProviderOrModelMismatch"
+            else:
+                choices = payload.get("choices")
+                if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict) or choices[0].get("finish_reason") != "stop":
+                    status, error = "failed", "IncompleteGeneration"
+        except KeyboardInterrupt:
+            status, error = "interrupted", "KeyboardInterrupt"
+        except httpx.HTTPError:
+            status, error = "failed", "TransportError"
+        except Exception as exception:
+            status, error, unexpected = "failed", type(exception).__name__, exception
+        store.finish_call(call_id, status=status, elapsed_seconds=perf_counter()-started, payload=payload,
+            http_status=http_status, error_type=error, database_path=self.db)
+        if unexpected is not None:
+            raise unexpected
+        with closing(store.connect(self.db)) as c:
+            row = dict(c.execute("SELECT * FROM workflow_calls WHERE call_id=?", (call_id,)).fetchone())
+            spent = c.execute("SELECT SUM(w.cost_usd) FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
+                "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?", (self.run_id,)).fetchone()[0]
+        halt, reason = None, None
+        if status == "interrupted":
+            halt, reason = "interrupted", "cancelled_billing_may_be_unknown"
+        elif row["cost_usd"] is None:
+            halt, reason = "budget_stopped", "unknown_cost"
+        elif row["returned_model"] != request["model"] or row["provider"] != self.providers[request["model"]]:
+            halt, reason = "budget_stopped", "provider_or_model_mismatch"
+        elif row["input_tokens"] is None or row["output_tokens"] is None:
+            halt, reason = "budget_stopped", "unknown_token_usage"
+        elif row["reasoning_tokens"] is not None and row["reasoning_tokens"] > row["output_tokens"]:
+            halt, reason = "budget_stopped", "inconsistent_reasoning_usage"
+        elif (row["input_tokens"] > input_token_reservation(request) or row["output_tokens"] > request["max_tokens"]
+              or Decimal(str(row["cost_usd"])) > reservation or Decimal(str(spent)) > Decimal(str(self.limits.budget_usd))):
+            halt, reason = "budget_stopped", "reservation_exceeded"
+        return row, halt, reason
+
+    def execute(self, question, *, repetition=1):
+        with closing(store.connect(self.db)) as c:
+            run = c.execute("SELECT status FROM workflow_runs WHERE run_id=?", (self.run_id,)).fetchone()
+        if run[0] not in ("prepared", "running"):
+            raise ValueError("A terminal run cannot schedule executions.")
+        with closing(store.connect(self.db)) as c, c:
+            c.execute("UPDATE workflow_runs SET status='running',started_at_utc=COALESCE(started_at_utc,?) WHERE run_id=?",
+                      (store.now(), self.run_id))
+        runtime_question = {k: question[k] for k in ("id", "problem", "options")}
+        execution_id = store.create_execution(self.run_id, self.config_id, runtime_question,
+            repetition=repetition, database_path=self.db)
+        started = perf_counter()
+
+        def solve(state):
+            solver = self.config["solvers"][state["position"]-1]
+            request = solver_request(solver, state["question"])
+            reserve, stop = self.gate(request)
+            if stop:
+                return {"halt_status": "budget_stopped", "halt_reason": stop}
+            attempt = store.create_attempt(execution_id, state["position"], solver["model"], database_path=self.db)
+            call, halt, reason = self.perform(attempt, "solver", request, reserve)
+            return {"attempt_id": attempt, "call": call, "halt_status": halt, "halt_reason": reason,
+                    "technical_errors": state["technical_errors"] + int(call["status"] != "completed")}
+
+        def usable(state):
+            solver = self.config["solvers"][state["position"]-1]
+            call = state["call"]
+            result = extract_usable(call["answer_text"], solver["response_contract"],
+                status=call["status"], finish_reason=call["finish_reason"])
+            store.record_usability(state["attempt_id"], result, database_path=self.db)
+            return {"usability": result}
+
+        def verify(state):
+            request = build_request(self.config["verifier_alias"], state["question"], state["usability"]["fields"])
+            reserve, stop = self.gate(request)
+            if stop:
+                return {"halt_status": "budget_stopped", "halt_reason": stop}
+            call, halt, reason = self.perform(state["attempt_id"], "verifier", request, reserve)
+            verdict = parse_verdict(call["answer_text"], status=call["status"], finish_reason=call["finish_reason"])
+            store.record_verification(state["attempt_id"], verdict["status"], database_path=self.db)
+            return {"verdict": verdict, "halt_status": halt, "halt_reason": reason,
+                    "technical_errors": state["technical_errors"] + int(verdict["status"] in ("error", "invalid"))}
+
+        def advance(state):
+            return {"position": state["position"]+1, "attempt_id": None, "call": None,
+                    "usability": None, "verdict": None}
+
+        def finish(state):
+            accepted = not state.get("halt_status") and (state.get("verdict") or {}).get("status") == "accept"
+            status = state.get("halt_status") or ("accepted" if accepted else "failed" if state["technical_errors"] else "exhausted")
+            reason = state.get("halt_reason") or ("verifier_accept" if accepted else
+                "attempt_limit_with_technical_errors" if state["technical_errors"] else "attempt_limit_rejected_or_unusable")
+            store.finish_execution(execution_id, status, reason, perf_counter()-started,
+                accepted_attempt_id=state["attempt_id"] if accepted else None, database_path=self.db)
+            return {"outcome": {"execution_id": execution_id, "status": status, "terminal_reason": reason,
+                "accepted_fields": state["usability"]["fields"] if accepted else None}}
+
+        builder = StateGraph(WorkflowState)
+        for name, node in (("solver", solve), ("usability", usable), ("verifier", verify), ("advance", advance), ("finish", finish)):
+            builder.add_node(name, node)
+        builder.add_edge(START, "solver")
+        builder.add_conditional_edges("solver", lambda s: "finish" if s.get("halt_status") and s.get("call") is None else "usability")
+        builder.add_conditional_edges("usability", lambda s: "finish" if s.get("halt_status") else
+            "verifier" if s["usability"]["usable"] else "advance" if s["position"] < 3 else "finish")
+        builder.add_conditional_edges("verifier", lambda s: "finish" if s.get("halt_status") or s["verdict"]["status"] == "accept"
+            else "advance" if s["position"] < 3 else "finish")
+        builder.add_edge("advance", "solver")
+        builder.add_edge("finish", END)
+        try:
+            result = builder.compile().invoke({"question": runtime_question, "position": 1, "technical_errors": 0},
+                                               config={"recursion_limit": 24})
+        except BaseException:
+            try:
+                store.finish_execution(execution_id, "interrupted", "unexpected_failure_review_calls", perf_counter()-started,
+                                       database_path=self.db)
+            finally:
+                with closing(store.connect(self.db)) as c, c:
+                    c.execute("UPDATE workflow_runs SET status='interrupted',finished_at_utc=?,stop_reason=? WHERE run_id=?",
+                              (store.now(), "unexpected_failure_review_calls", self.run_id))
+            raise
+        if result["outcome"]["status"] in ("interrupted", "budget_stopped"):
+            with closing(store.connect(self.db)) as c, c:
+                c.execute("UPDATE workflow_runs SET status=?,finished_at_utc=?,stop_reason=? WHERE run_id=?",
+                    (result["outcome"]["status"], store.now(), result["outcome"]["terminal_reason"], self.run_id))
+        return result["outcome"]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--preview", action="store_true", help="Print all 27 configurations without calls or database writes.")
+    args = parser.parse_args()
+    if not args.preview:
+        parser.error("Choose --preview. No paid execution command exists yet.")
+    print(json.dumps({"mode": "offline_preview", "configurations": configurations(), "count": 27,
+                      "max_calls_per_question_per_config": 6, "new_generation_requests": 0}, indent=2))
+
+
+if __name__ == "__main__":
+    main()

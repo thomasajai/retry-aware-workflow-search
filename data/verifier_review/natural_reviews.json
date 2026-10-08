@@ -1,0 +1,404 @@
+{
+  "schema_version": "natural-verifier-review-v1",
+  "source_run_id": "6e8ba4fd-3f6d-41f9-9522-23c84e0d332d",
+  "dataset_sha256": "07ec007c4ad73eb40b57d8b494429f73e37e0c2d79cf1c6b90debf3f05ebbaca",
+  "scope": "First eight development questions, usable saved answers only. Assistant-reviewed; not human annotation. Labels never enter verifier requests.",
+  "reviews": [
+    {
+      "source_call_id": "45ab356e-64f9-4f1a-ad8a-68f399b9125f",
+      "question_id": "mathqa_test_0002",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "8dac141c54fc7757dabf864a3b030b8ec6396df8870f0c8c19a2035367807267",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "There are 28 intermediate stations plus two endpoints. Ordered origin/destination tickets number 30*29=870. The proposal excludes the endpoints and uses undirected pairs; even 28*27/2 is 378, not 380."
+      }
+    },
+    {
+      "source_call_id": "db917c04-7c1e-4daf-9a68-845e6b24d322",
+      "question_id": "mathqa_test_0002",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "5fc7d1a07b30d8ae4049f8536d4995603911a4d0afe54264fddf63c571ac336f",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "The intended ordered count is 30*29=870. The displayed 30*29/2 is 435, not 380, and undirected pairs are the wrong ticket count."
+      }
+    },
+    {
+      "source_call_id": "a50d427a-e5a5-4285-b7da-1d91b2a26b8e",
+      "question_id": "mathqa_test_0002",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "89205bf58bd65bd61eda3c506ae7f66e977eb58c5e56676d688cf3457d2f948f",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "28 intermediate stations plus two endpoints gives 30 stations. Each of 30 origins has 29 other destinations, so 30*29=870, option c."
+      }
+    },
+    {
+      "source_call_id": "10c00111-8da0-41e4-aa61-ada832136f6e",
+      "question_id": "mathqa_test_0013",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "27b78cb6a0128a2373cb52ed88508e0ef544cc81527a05b98cd7e4952fb7773f",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "The displayed sum for i=0,1,2 has terms 1,1,1. Adding 100+10 gives 113, not 192; a key-correct choice is supported by invalid arithmetic."
+      }
+    },
+    {
+      "source_call_id": "319d9e31-b5eb-438a-9883-85b71091cdc1",
+      "question_id": "mathqa_test_0013",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "58ac4974475a33dcecca45cc387576e6dfb1e04120d304e8cb8c8b8a40e2de32",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "999//10-9=90; 999//100-9=0; 999//1000=0. The expression is 90, not its claimed 190. The actual zero count is 9+180+3=192."
+      }
+    },
+    {
+      "source_call_id": "c892f1a8-3413-43f9-87cf-796db115c28f",
+      "question_id": "mathqa_test_0013",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "45c1a5a8efb387182c8ea1b4e777f2c9a063a31bb3062bc64e430e8a46571e31",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "Numbers 10-99 contribute nine zeroes. Each of the nine hundreds ranges 100-199 through 900-999 contributes twenty zeroes; 1000 contributes three. Total 9+9*20+3=192."
+      }
+    },
+    {
+      "source_call_id": "79b35df2-e4f0-424b-9467-cbcbba41c159",
+      "question_id": "mathqa_test_0026",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "0d334c197c8403d2591b0f99bb1db7a625bb4feb0162cd0c27b04c413df9dce2",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": true,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "The displayed weighted-tax expression evaluates to (18000+28800)/132000*100=35.4545...%, not the selected 34.4%. No exact choice is printed, but this choice is not supported."
+      }
+    },
+    {
+      "source_call_id": "acb0cac9-82ba-422d-a04d-095b5a16678a",
+      "question_id": "mathqa_test_0026",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "a8a868810559b14d15c69614be403ce37836a47a0064a21523f7d270060c0ee9",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": true,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "46800/132000=0.354545..., not 0.344. The equation and selected 34.4% are unsupported. The question has no exact printed answer."
+      }
+    },
+    {
+      "source_call_id": "0649cc86-0405-471a-a59f-69202293f895",
+      "question_id": "mathqa_test_0026",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "451476894a305d93bf728135522573d29e7559048b065f1d48509938d5354ab9",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": null,
+        "expected_accept": null
+      },
+      "annotation_uncertainty": true,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "The main weighted-tax calculation gives 35.4545...%. The selected 35.6% is the nearest printed choice but not standard rounding to one decimal (35.5%). Acceptance depends on an unstated approximation rule. Leave the reasoning/acceptance label uncertain."
+      }
+    },
+    {
+      "source_call_id": "44c4209e-bf62-4324-97b6-c85a13ca3430",
+      "question_id": "mathqa_test_0047",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "b003f98c1e1452d6e40c0abf8841c44b5e666db0cf28e5e962c0a060cb18c1c3",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "Euclidean remainders 570,205,160,45,25,20,5 give gcd(1345,775)=5, not 91. The maximum equally supplied student count is five."
+      }
+    },
+    {
+      "source_call_id": "4416f002-edf0-4c67-ad00-9aacc5cb8afb",
+      "question_id": "mathqa_test_0047",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "8af986fe111f27dd1679e017c46c2234061670c3cbbc378872d50408b146d8c2",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "The maximum number of students divides both item counts, hence gcd(1345,775)=5; option d is five."
+      }
+    },
+    {
+      "source_call_id": "20d4d7a2-2a4e-417c-89e7-1cb8c1c9258d",
+      "question_id": "mathqa_test_0047",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "403cfb59acd92f482eb8eef790f70107f3d5d17846b007ffbfbc2a5782677333",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "Every displayed Euclidean remainder is correct: 570,205,160,45,25,20,5. The gcd and maximum equal-distribution count are five, option d."
+      }
+    },
+    {
+      "source_call_id": "a6f8b990-f8fc-4d0a-8dd9-38a8f8491358",
+      "question_id": "mathqa_test_0079",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "3ccf096ead11403352398583ee97b7846fe3f5dd3ae1d77cc1ebd8fb54f61a1c",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "The ratios sum to 13/12 and a has 6/12, so a gets 6/13 of 1638. Since 1638/13=126, the share is 756, option c."
+      }
+    },
+    {
+      "source_call_id": "bd8b9efb-12ed-4216-858f-65fb0bee492c",
+      "question_id": "mathqa_test_0079",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "9f310044405aab702ffaee7eb77e6094fdc5b5ca0933619be79c54edef3e2126",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "1638*(1/2)/(13/12)=1638*6/13=756; selected option c agrees."
+      }
+    },
+    {
+      "source_call_id": "67f9f673-a25a-475a-83b6-a42e2d52bae5",
+      "question_id": "mathqa_test_0079",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "e15fb16dca9e5d43c7f47d4a91f40439216fd906d8efbff8c3b31bfb38b231de",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "Multiplying each ratio by 12 gives 6:4:3. Thirteen parts make 1638 and six parts make 756; the displayed calculation and choice agree."
+      }
+    },
+    {
+      "source_call_id": "0522708a-c69f-49c9-be01-95bf6f5bbf12",
+      "question_id": "mathqa_test_0102",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "7edc2827ea82bf8c83592b4f0549fa777fc6a7d2f05140bbf02b299d79d5cdff",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "29*28=812 is true but omits one of the 30 total stations and does not equal the selected 800. Ordered origin/destination tickets require 30*29=870."
+      }
+    },
+    {
+      "source_call_id": "785984a8-17c6-49b4-9110-9ad2282a27db",
+      "question_id": "mathqa_test_0102",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "99b574cdd39f91a9c0f7093b52e2bf0ca00ae835daa1b7ca28b87c596126e642",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "28 intermediate stations plus two endpoints yields 30 stations and 30*29=870 ordered tickets, option d."
+      }
+    },
+    {
+      "source_call_id": "f0617020-8300-46bf-8311-9d7a72b0f663",
+      "question_id": "mathqa_test_0108",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "c015402e3546b334b41f6ff66631e216665845034e22ba0b87b89179935f6a59",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": true,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "As printed, a five-percentage-point gain difference on a selling-price difference of 980 implies cost 980/0.05=19600, absent from the options. The displayed chain also falsely equates 19600 with 392 and then selects 1200 without support."
+      }
+    },
+    {
+      "source_call_id": "f185d2af-7ca0-44b9-9c06-fa4395f0136c",
+      "question_id": "mathqa_test_0108",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "6782e0400318ff5f843ac176ced5e074a23ea7643fd385daaa269b99a45508b7",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": true,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "(1000-20)/0.05 equals 19600, not 1960, and neither equals selected 1680. The printed question/options are inconsistent; the proposal is independently invalid despite that annotation issue."
+      }
+    },
+    {
+      "source_call_id": "3b3f39e7-5883-4375-811c-6c37d7024380",
+      "question_id": "mathqa_test_0122",
+      "solver_model": "qwen/qwen-2.5-7b-instruct",
+      "answer_sha256": "9f66544936dd28e3b7fb007404f2f4892f4447710ed069fc7661a8ad2bfcb19f",
+      "labels": {
+        "option_correct": false,
+        "reasoning_valid": false,
+        "expected_accept": false
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "Inclusion-exclusion gives 312+232-112=432. The selected letter b denotes 428, while the supplied value says 432; the explicit choice conflicts with the correct calculation."
+      }
+    },
+    {
+      "source_call_id": "5bfb49cc-6b0f-483f-94d5-7f466a660ba6",
+      "question_id": "mathqa_test_0122",
+      "solver_model": "qwen/qwen3-32b",
+      "answer_sha256": "b9fec9ccb19f1a01f20c729f66fbbef47b10ae23f18ec3a6b4ae5af2e15fdbcb",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "Inclusion-exclusion gives 432. Option d is 432; omitting its decorative final period does not change the mathematical value."
+      }
+    },
+    {
+      "source_call_id": "8344b77e-5dcd-4c6e-ac1f-3142ca7c78cd",
+      "question_id": "mathqa_test_0122",
+      "solver_model": "deepseek/deepseek-v3.2",
+      "answer_sha256": "add3acce28400850fe94162c2ef01c9af368598b420c7333d3130367b2d65c11",
+      "labels": {
+        "option_correct": true,
+        "reasoning_valid": true,
+        "expected_accept": true
+      },
+      "annotation_uncertainty": false,
+      "review": {
+        "reviewer": "Codex (assistant review; not human annotation)",
+        "date": "2026-10-07",
+        "method": "Independent hand calculation and question interpretation; no candidate verifier used",
+        "explanation": "312+232-112=432 by inclusion-exclusion; option d and copied value agree."
+      }
+    }
+  ]
+}

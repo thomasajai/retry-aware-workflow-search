@@ -33,7 +33,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_fresh_schema_and_noop_rerun(self):
         result = store.migrate(self.db)
-        self.assertEqual(result["applied"], ["001_workflow.sql"])
+        self.assertEqual(result["applied"], ["001_workflow.sql", "002_screening.sql"])
         self.assertIsNone(result["backup_path"])
         before = fingerprint(self.db)
         self.assertEqual(store.migrate(self.db), {"applied": [], "backup_path": None})
@@ -73,7 +73,7 @@ class MigrationTests(unittest.TestCase):
         before = fingerprint(self.db)
         copied = Path(self.directory.name) / "migrations"
         shutil.copytree(store.MIGRATIONS, copied)
-        (copied / "002_broken.sql").write_text("CREATE TABLE not_committed (id INTEGER);\nINVALID SQL;\n", encoding="utf-8")
+        (copied / "003_broken.sql").write_text("CREATE TABLE not_committed (id INTEGER);\nINVALID SQL;\n", encoding="utf-8")
         with self.assertRaises(sqlite3.Error):
             store.migrate(self.db, migration_dir=copied)
         self.assertEqual(before, fingerprint(self.db))
