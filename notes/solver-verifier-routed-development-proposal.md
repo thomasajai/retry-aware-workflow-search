@@ -1,11 +1,12 @@
 # Routed 27-configuration development comparison — October 8, 2026
 
-Status: the user requested preparation after the
-[successful routed availability check](solver-verifier-routing-results.md).
-Preparation uses free public metadata and offline audits. **No model calls have
-run. Approval is pending for this single $4.25 / 3,240-request comparison** under
-the [OpenRouter spending rule](../README.md#openrouter-spending-rule). Prior run
-approvals do not authorize this new frozen plan, a rerun, or held-out evaluation.
+Status: the user approved this single $4.25 / 3,240-request comparison. The
+[run stopped](solver-verifier-routed-development-results.md) after 223 requests
+and $0.0284535204 reported spend when a fully billed solver answer truncated.
+There are no new unknown charges; 59 of 540 executions were graded. This
+approval is consumed. The [v5 amendment and fresh-run proposal](solver-verifier-routed-development-v5-proposal.md)
+awaits separate approval under the
+[OpenRouter spending rule](../README.md#openrouter-spending-rule).
 
 ## Purpose and scope
 
@@ -173,7 +174,7 @@ Final execution plan:
 SHA-256:
 `c4b21c8648a92095120120b97822b5c75c75a38380dc703041e9e7edcf4e1581`.
 The earlier provisional plan is preserved and is not the plan proposed for
-execution. Metadata, dataset, eleven source files, migrations, controls,
+execution. Metadata, dataset, eleven source files, controls,
 prices, split and schedule are frozen. The paid command cannot override routing
 or rerun a used plan. Metadata must be less than twenty-four hours old at
 execution; refresh and re-disclose a new plan if delayed.

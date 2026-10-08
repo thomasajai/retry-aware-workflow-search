@@ -1,6 +1,7 @@
 """Provider changes, ceiling-priced budgets and mathematical retries, offline."""
 from copy import deepcopy
 from decimal import Decimal
+import hashlib
 import json
 import unittest
 
@@ -13,6 +14,8 @@ import mathqa_workflow as workflow
 import mathqa_workflow_availability as availability
 import mathqa_workflow_evaluation as evaluation
 import mathqa_workflow_pilot as pilot
+import mathqa_workflow_store as store
+from mathqa_workflow_grading import grade_execution
 from mathqa_verifier_preflight import request_cost
 
 DEEPSEEK = MODEL_PROFILES["deepseek"].model
@@ -198,6 +201,125 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual([q["id"] for q in routed["questions"]],original_ids)
         self.assertEqual(routed["execution_policy"]["maximum_requests"],3240)
         self.assertFalse(self.db.exists())
+
+    def output_loop(self, handler, *, repetitions=1, requests=36):
+        config = workflow.configuration(["deepseek"]*3,deepseek_provider="auto",solver_truncation_unusable=True)
+        store.migrate(self.db)
+        run = store.create_run("sequence_evaluation",self.dataset,hashlib.sha256(self.dataset.read_bytes()).hexdigest(),
+            [q["id"] for q in self.plan["questions"]],{"mode":"offline-test"},
+            database_path=self.db,budget_usd=.07,max_requests=requests)
+        cid = store.create_config(run,"deepseek-deepseek-deepseek",config,database_path=self.db)
+        def sender(body):
+            response = handler(httpx.Request("POST","https://mock.invalid",json=body))
+            return response.status_code,response.json()
+        runner = workflow.Runner(run,cid,config,database_path=self.db,sender=sender,
+            reservations=lambda r:request_cost(r,self.plan["endpoints"][r["model"]]),
+            providers={m:e.get("provider_names",e["provider_name"]) for m,e in self.plan["endpoints"].items()},
+            limits=workflow.Limits(.07,requests),price_limits=self.plan["price_limits"])
+        outcomes=[]
+        for rep in range(1,repetitions+1):
+            result = runner.execute(self.plan["questions"][0],repetition=rep)
+            if result["status"] in ("accepted","exhausted","failed"):
+                result["grade"] = grade_execution(result["execution_id"],database_path=self.db)
+            outcomes.append(result)
+            if result["status"] in ("budget_stopped","interrupted"):
+                break
+        return outcomes
+
+    def truncate(self, request, **kwargs):
+        payload = self.response(request,**kwargs).json()
+        payload["choices"][0]["finish_reason"] = "length"
+        payload["choices"][0]["message"]["content"] = '{"calculation":"unfinished'
+        payload["usage"]["completion_tokens"] = 512
+        return httpx.Response(200,json=payload)
+
+    def test_known_solver_truncation_consumes_one_slot_then_original_input_retry(self):
+        result = self.output_loop(lambda r:self.truncate(r) if not self.sent else self.response(r))[0]
+        self.assertEqual((result["status"],result["grade"]["workflow_score"],len(self.sent)),("accepted",1,3))
+        self.assertEqual(self.sent[0],self.sent[1])
+        attempts=self.rows("workflow_attempts")
+        self.assertEqual([a["position"] for a in attempts],[1,2])
+        self.assertEqual(attempts[0]["usable"],0)
+        self.assertIsNone(attempts[0]["verifier_call_id"])
+        calls=self.rows("workflow_calls")
+        self.assertEqual((calls[0]["status"],calls[0]["finish_reason"]),("failed","length"))
+        self.assertEqual(calls[0]["cost_usd"],.00001)
+        self.assertEqual(calls[0]["answer_text"],'{"calculation":"unfinished')
+        self.assertNotIn("SECRET_KEY_ONLY_REASONING",json.dumps(self.sent))
+
+    def test_three_truncated_solver_outputs_score_zero_and_next_execution_runs(self):
+        results=self.output_loop(self.truncate,repetitions=2)
+        self.assertEqual([r["status"] for r in results],["exhausted","exhausted"])
+        self.assertEqual([r["grade"]["workflow_score"] for r in results],[0,0])
+        self.assertEqual(len(self.sent),6)
+        self.assertTrue(all(r["role"]=="solver" for r in self.rows("workflow_calls")))
+        self.assertTrue(all(r["usable"]==0 for r in self.rows("workflow_attempts")))
+        self.assertEqual(self.sent,[self.sent[0]]*6)
+
+    def test_unknown_cost_on_truncated_solver_still_stops(self):
+        result=self.output_loop(lambda r:self.truncate(r,unknown=True))[0]
+        self.assertEqual((result["status"],result["terminal_reason"],len(self.sent)),("budget_stopped","unknown_cost",1))
+        self.assertNotIn("grade",result)
+
+    def test_truncated_solver_does_not_bypass_identity_or_output_guards(self):
+        for field,value,reason in (("model","wrong/model","provider_or_model_mismatch"),
+                                   ("completion_tokens",513,"reservation_exceeded")):
+            with self.subTest(field=field):
+                if self.db.exists():
+                    self.setUp()
+                def altered(request):
+                    payload=self.truncate(request).json()
+                    if field=="model":
+                        payload[field]=value
+                    else:
+                        payload["usage"][field]=value
+                    return httpx.Response(200,json=payload)
+                result=self.output_loop(altered)[0]
+                self.assertEqual((result["terminal_reason"],len(self.sent)),(reason,1))
+
+    def test_verifier_truncation_and_gateway_errors_still_stop(self):
+        result=self.output_loop(lambda r:self.response(r) if not self.sent else self.truncate(r))[0]
+        self.assertEqual((result["terminal_reason"],len(self.sent)),("gateway_failure",2))
+        self.setUp()
+        def failed(request):
+            payload=self.truncate(request).json()
+            payload["error"]={"code":503}
+            return httpx.Response(503,json=payload)
+        result=self.output_loop(failed)[0]
+        self.assertEqual((result["terminal_reason"],len(self.sent)),("gateway_failure",1))
+
+    def test_final_slot_truncation_after_two_rejections_scores_zero(self):
+        def respond(request):
+            if len(self.sent)==4:
+                return self.truncate(request)
+            payload=self.response(request).json()
+            if json.loads(request.content)["messages"][0]["role"]=="system":
+                payload["choices"][0]["message"]["content"]='{"accepted":false}'
+            return httpx.Response(200,json=payload)
+        result=self.output_loop(respond)[0]
+        self.assertEqual((result["status"],result["grade"]["workflow_score"],len(self.sent)),("exhausted",0,5))
+        self.assertEqual([a["position"] for a in self.rows("workflow_attempts")],[1,2,3])
+
+    def test_truncation_still_consumes_budget_and_request_allowance(self):
+        result=self.output_loop(self.truncate,requests=1)[0]
+        self.assertEqual((result["terminal_reason"],len(self.sent)),("request_limit",1))
+        self.assertEqual(self.rows("workflow_calls")[0]["cost_usd"],.00001)
+
+    def test_v4_truncation_policy_preserved_and_v5_plan_frozen(self):
+        result=self.run_mock(self.truncate)
+        self.assertEqual(result["stop_reason"],"gateway_failure")
+        evaluation_fixtures.EvaluationTests.setUp(self)
+        new=evaluation.prepare_plan(self.metadata,self.exposure,dataset_path=self.dataset,deepseek_provider="auto",solver_truncation_unusable=True)
+        evaluation.validate_plan(new)
+        self.assertEqual(new["version"],"workflow-evaluation-plan-v5")
+        self.assertTrue(all(c["version"]=="solver-verifier-config-v5" for c in new["configurations"].values()))
+        self.assertEqual(new["questions"],self.plan["questions"])
+        self.assertEqual(new["schedule"],self.plan["schedule"])
+        changed=deepcopy(new)
+        changed["solver_truncation_unusable"]=False
+        changed["sha256"]=pilot.digest({k:v for k,v in changed.items() if k!="sha256"})
+        with self.assertRaises(ValueError):
+            evaluation.validate_plan(changed)
 
 
 if __name__ == "__main__":

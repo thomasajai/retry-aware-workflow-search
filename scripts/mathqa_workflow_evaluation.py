@@ -64,7 +64,7 @@ def exposure_snapshot(database_path):
             "workflow_question_ids": workflows, "note": "Recorded exposure, not a guarantee against unrecorded inspection."}
 
 
-def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
+def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None, deepseek_provider="deepinfra/fp4", rate_limit_retries=False, solver_truncation_unusable=False):
     raw = Path(dataset_path).read_bytes()
     records = json.loads(raw)
     if len(records) != 200 or len({r["id"] for r in records}) != 200:
@@ -79,7 +79,8 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
     if any(r.get("correct") not in list("abcde") for r in selected):
         raise ValueError("Selected questions require independent option keys.")
     questions = [{"id":r["id"], "problem":r["Problem"], "options":r["options"]} for r in selected]
-    configs = {"-".join(c["solver_sequence"]):c for c in workflow.configurations(deepseek_provider=deepseek_provider,rate_limit_retries=rate_limit_retries)}
+    configs = {"-".join(c["solver_sequence"]):c for c in workflow.configurations(deepseek_provider=deepseek_provider,rate_limit_retries=rate_limit_retries,
+        solver_truncation_unusable=solver_truncation_unusable)}
     profiles = list(workflow_model_configs(deepseek_provider=deepseek_provider).values()) + [next(iter(configs.values()))["verifier"]]
     endpoints, ceilings = {}, {}
     for p in profiles:
@@ -160,18 +161,23 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
         plan["execution_policy"]["request_count_scope"] = "Client HTTP requests; OpenRouter internal provider tries unobserved."
         plan["analysis_policy"]["routing"] = "DeepSeek under a fixed price-bounded routing policy; report observed providers, not a fixed endpoint comparison."
         plan["cost_preview"]["assumptions"] += " DeepSeek estimated costs and reservations use routing price ceilings, not cheapest endpoint rates."
+    if solver_truncation_unusable:
+        plan.update(version="workflow-evaluation-plan-v5",solver_truncation_unusable=True,
+            migration_sha256={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in store.MIGRATIONS.glob("*.sql")})
+        plan["execution_policy"]["solver_truncation"] = "Known billed HTTP 200 solver length truncation consumes a mathematical attempt as unusable; all billing/identity/usage guards remain."
     plan["sha256"] = pilot.digest(plan)
     return plan
 
 
 def validate_plan(plan):
-    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2", "workflow-evaluation-plan-v3", "workflow-evaluation-plan-v4") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
+    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2", "workflow-evaluation-plan-v3", "workflow-evaluation-plan-v4", "workflow-evaluation-plan-v5") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
         raise ValueError("Evaluation checksum/version failed.")
     age = (datetime.now(timezone.utc)-datetime.fromisoformat(plan["metadata"]["fetched_at_utc"])).total_seconds()
     if age < -300 or age > 24*3600:
         raise ValueError("Refresh free metadata and prepare a new proposal.")
     rebuilt = prepare_plan(plan["metadata"],plan["split"]["exposure_snapshot"],dataset_path=plan["dataset"]["path"],created_at=plan["created_at_utc"],
-                           deepseek_provider=plan.get("deepseek_provider", "deepinfra/fp4"),rate_limit_retries=plan.get("rate_limit_retries",False))
+                           deepseek_provider=plan.get("deepseek_provider", "deepinfra/fp4"),rate_limit_retries=plan.get("rate_limit_retries",False),
+                           solver_truncation_unusable=plan.get("solver_truncation_unusable",False))
     if rebuilt != plan:
         raise ValueError("Dataset, code, profiles, schedule or evidence changed; prepare a new plan.")
 
@@ -363,6 +369,7 @@ def main():
     parser.add_argument("--metadata",type=Path)
     parser.add_argument("--deepseek-provider",choices=WORKFLOW_DEEPSEEK_PROVIDERS,help="Offline preparation only; execution uses the frozen plan.")
     parser.add_argument("--rate-limit-retries",action="store_true",help="Offline preparation only; opt into the bounded upstream 429 policy.")
+    parser.add_argument("--solver-truncation-unusable",action="store_true",help="Offline preparation only; consume known solver truncation as an unusable mathematical attempt.")
     parser.add_argument("--fetch-metadata",type=Path,help="Free public metadata only; no generation.")
     parser.add_argument("--database",type=Path,default=DATABASE_PATH)
     parser.add_argument("--run",action="store_true")
@@ -379,7 +386,7 @@ def main():
         if len(set(outputs))!=len(outputs) or args.metadata and args.metadata.resolve() in outputs:
             raise ValueError("Inputs/outputs must use distinct paths.")
         if args.fetch_metadata:
-            if args.run or args.plan or args.metadata or args.report or args.deepseek_provider or args.rate_limit_retries:
+            if args.run or args.plan or args.metadata or args.report or args.deepseek_provider or args.rate_limit_retries or args.solver_truncation_unusable:
                 parser.error("--fetch-metadata is a separate free operation.")
             if args.fetch_metadata.exists():
                 raise ValueError("Metadata file exists; choose a new filename.")
@@ -393,14 +400,15 @@ def main():
             if args.plan.exists():
                 raise ValueError("Plan exists; choose a new filename.")
             plan = prepare_plan(json.loads(args.metadata.read_text(encoding="utf-8")),exposure_snapshot(args.database),
-                                deepseek_provider=args.deepseek_provider or "deepinfra/fp4",rate_limit_retries=args.rate_limit_retries)
+                                deepseek_provider=args.deepseek_provider or "deepinfra/fp4",rate_limit_retries=args.rate_limit_retries,
+                                solver_truncation_unusable=args.solver_truncation_unusable)
             validate_plan(plan)
             args.plan.parent.mkdir(parents=True,exist_ok=True)
             args.plan.write_text(json.dumps(plan,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
             print(json.dumps({"mode":"offline","sha256":plan["sha256"],"questions":[q["id"] for q in plan["questions"]],
                 "executions":len(plan["schedule"]),"limits":plan["execution_policy"],"cost_preview":plan["cost_preview"],"generation_requests":0},indent=2))
         else:
-            if args.deepseek_provider or args.rate_limit_retries:
+            if args.deepseek_provider or args.rate_limit_retries or args.solver_truncation_unusable:
                 parser.error("Execution provider is frozen in --plan; --deepseek-provider applies only to preparation.")
             if not args.plan or args.budget_usd is None or args.max_requests is None or not args.report:
                 parser.error("--run requires --plan, --budget-usd, --max-requests and --report.")

@@ -4,7 +4,23 @@ Created: 2026-10-06. Updated: 2026-10-08. Status: Milestones 1–3 completed,
 with a user-selected provisional verifier and a successful live integration pilot.
 Milestone 4 remains. This document alone does not authorize paid calls.
 
-Latest October 8 preparation: the user requested the
+Latest October 8 checkpoint: the approved routed comparison
+[stopped](solver-verifier-routed-development-results.md) after 223 requests,
+$0.0284535204 reported spend, 59 graded executions and two complete question
+blocks. No new unknown charges or full ranking. A fully billed 512-token solver
+truncation was classified as a global gateway failure under the frozen v4
+policy; the spend cap was not exhausted. A separate option/key inconsistency in
+`mathqa_test_0187` is flagged without changing the selected dataset.
+
+The [opt-in v5 amendment](solver-verifier-routed-development-v5-proposal.md)
+now counts reconciled solver length truncation as one unusable mathematical
+attempt, preserving its cost and the three-slot limit. Other gateway/billing/
+identity/usage/price failures still stop. All 174 offline tests pass; old policies
+and records remain intact, with no new migration or dependency. A fresh run of
+the same 540 executions is prepared at the same $0.48995280 estimate, $4.25 cap
+and 3,240-request maximum. It requires fresh approval; no paid rerun occurred.
+
+Earlier October 8 preparation: the user requested the
 [routed development comparison](solver-verifier-routed-development-proposal.md).
 The final frozen plan retains twenty original questions, all twenty-seven
 sequences, one repetition and the fixed Gemini verifier: 540 executions,
@@ -12,7 +28,8 @@ $0.48995280 estimated new cost, $3.75507954 conservative reservations, proposed
 $4.25 cap and 3,240 maximum gateway HTTP requests. Known compatible DeepSeek
 providers can return after temporary inactivity, within unchanged routing
 price/parameter controls. All 166 offline tests and preparation audits pass.
-No credits consumed; approval for this specific paid run is pending.
+Preparation consumed no credits; this run was subsequently approved and stopped
+as recorded above.
 
 October 8 checkpoint: after pinned DeepSeek development runs and bounded
 cooldown recovery encountered upstream throttling, the user chose to keep

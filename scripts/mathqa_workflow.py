@@ -27,11 +27,13 @@ from mathqa_transport import retry_policy, upstream_429, retry_delay
 SELECTED_VERIFIER = "flashlite25__reasoning"
 
 
-def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
+def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4", rate_limit_retries=False, solver_truncation_unusable=False):
     if type(rate_limit_retries) is not bool:
         raise ValueError("Rate-limit recovery must be explicitly enabled or disabled.")
     if deepseek_provider == "auto" and rate_limit_retries:
         raise ValueError("Automatic provider routing uses no client transport retries.")
+    if type(solver_truncation_unusable) is not bool or solver_truncation_unusable and deepseek_provider != "auto":
+        raise ValueError("Known solver truncation handling is opt-in for automatic routing.")
     if len(sequence) != 3 or any(alias not in MODEL_PROFILES for alias in sequence):
         raise ValueError("A sequence has exactly three declared solver aliases, with repetitions allowed.")
     models = workflow_model_configs(temperature=temperature, max_tokens=max_tokens, deepseek_provider=deepseek_provider)
@@ -51,11 +53,15 @@ def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provide
     if deepseek_provider == "auto":
         result["version"] = "solver-verifier-config-v4"
         result["policy"]["technical_failure"] = "stop on gateway failures; no client transport retries"
+    if solver_truncation_unusable:
+        result.update(version="solver-verifier-config-v5",solver_truncation_unusable=True)
+        result["policy"]["solver_truncation"] = "HTTP 200 length-limited solver output with reconciled identity/usage/cost is unusable; consume one mathematical attempt."
     return result
 
 
-def configurations(*, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
-    return [configuration(sequence, deepseek_provider=deepseek_provider,rate_limit_retries=rate_limit_retries) for sequence in product(MODEL_PROFILES, repeat=3)]
+def configurations(*, deepseek_provider="deepinfra/fp4", rate_limit_retries=False, solver_truncation_unusable=False):
+    return [configuration(sequence, deepseek_provider=deepseek_provider,rate_limit_retries=rate_limit_retries,
+        solver_truncation_unusable=solver_truncation_unusable) for sequence in product(MODEL_PROFILES, repeat=3)]
 
 
 def solver_request(solver, question):
@@ -105,7 +111,8 @@ class Runner:
         expected = configuration(config["solver_sequence"],
             temperature=config["solvers"][0]["body_settings"]["temperature"],
             max_tokens=config["solvers"][0]["body_settings"]["max_tokens"],
-            deepseek_provider=config.get("deepseek_provider", "deepinfra/fp4"),rate_limit_retries="transport_policy" in config)
+            deepseek_provider=config.get("deepseek_provider", "deepinfra/fp4"),rate_limit_retries="transport_policy" in config,
+            solver_truncation_unusable=config.get("solver_truncation_unusable",False))
         if self.config != expected:
             raise ValueError("Workflow configuration differs from trusted profile builders.")
         self.db, self.sender, self.reservations = database_path, sender, reservations
@@ -153,6 +160,13 @@ class Runner:
     def provider_matches(self, model, provider):
         expected = self.providers[model]
         return isinstance(provider, str) and (provider in expected if isinstance(expected, list) else provider == expected)
+
+    def solver_truncation(self, role, call):
+        # Billing/identity/usage guards in perform() still run before continuation.
+        # Keep the failed call and partial raw text; usability never verifies it.
+        return (self.config.get("solver_truncation_unusable",False) and role == "solver"
+                and call["http_status"] == 200 and call["status"] == "failed"
+                and call["error_type"] == "IncompleteGeneration" and call["finish_reason"] == "length")
 
     def gate(self, request, *, ignore_unstarted_call=None):
         reserve = Decimal(str(self.reservations(deepcopy(request))))
@@ -227,7 +241,8 @@ class Runner:
         elif (row["input_tokens"] > input_token_reservation(request) or row["output_tokens"] > request["max_tokens"]
               or Decimal(str(row["cost_usd"])) > reservation or Decimal(str(spent)) > Decimal(str(self.limits.budget_usd))):
             halt, reason = "budget_stopped", "reservation_exceeded"
-        elif self.config.get("deepseek_provider") == "auto" and status != "completed":
+        elif (self.config.get("deepseek_provider") == "auto" and status != "completed"
+              and not self.solver_truncation(role,row)):
             halt, reason = "budget_stopped", "gateway_failure"
         return row, halt, reason
 
@@ -370,7 +385,7 @@ class Runner:
             attempt = store.create_attempt(execution_id, state["position"], solver["model"], database_path=self.db)
             call, halt, reason = self.perform(attempt, "solver", request, reserve)
             return {"attempt_id": attempt, "call": call, "halt_status": halt, "halt_reason": reason,
-                    "technical_errors": state["technical_errors"] + int(call["status"] != "completed")}
+                    "technical_errors": state["technical_errors"] + int(call["status"] != "completed" and not self.solver_truncation("solver",call))}
 
         def usable(state):
             solver = self.config["solvers"][state["position"]-1]

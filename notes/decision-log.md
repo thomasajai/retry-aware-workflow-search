@@ -4,6 +4,27 @@ Last reviewed: 2026-09-25. This records the current plan, not experimental resul
 
 ## October 6 planning update
 
+Latest October 8 execution checkpoint: the user approved the routed development
+comparison. It [stopped](solver-verifier-routed-development-results.md) after
+223 requests/$0.0284535204 reported cost, with no new unknown billing. Fifty-nine
+executions were graded (46 accepted key matches, 13 exhausted), one incomplete,
+480 unreached; two complete question blocks and no full ranking. DeepSeek's
+fully billed HTTP 200 output hit 512 tokens in slot three; v4 treated that as a
+global gateway failure. The spend cap was not reached. Record the independent
+geometry/option-key inconsistency in `mathqa_test_0187`, preserving the selected
+dataset and grading key pending separate adjudication.
+
+An [opt-in v5 amendment](solver-verifier-routed-development-v5-proposal.md)
+counts this narrow known-cost solver truncation as unusable within the existing
+three-attempt allowance. No verification of partial text or extra HTTP retry;
+all identity/usage/price/billing/budget guards remain. All 174 offline tests pass,
+prior configuration policies/records stay intact, and no migration/dependency
+change is required. A separate fresh 540-execution run retains the original
+questions, model controls and costs: $0.48995280 estimate, $3.75507954 stress
+reservations, $4.25 cap, maximum 3,240 gateway requests. Its frozen plan binds
+the amended policy and migration hashes. Fresh paid approval is pending;
+the previous run's approval is consumed. No automatic continuation occurred.
+
 Latest October 8 checkpoint: the user requested preparation of the balanced
 27-configuration comparison after the routed check. The
 [routed development proposal](solver-verifier-routed-development-proposal.md)
@@ -16,7 +37,8 @@ after temporary inactivity while preserving the outgoing routing/price policy;
 require at least one active compatible provider at preflight. This changes only
 response recognition. All 166 offline tests and the read-only scope, arithmetic,
 frozen-plan and database audit pass; preparation consumed no credits. This
-single paid run awaits fresh approval. Historical runs remain separate.
+single paid run was subsequently approved and stopped as recorded above.
+Historical runs remain separate.
 
 Latest October 8 checkpoint: the user proposed keeping DeepSeek without a
 provider pin and authorized implementation, offline tests, a commit, and a

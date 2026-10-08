@@ -159,8 +159,20 @@ It retains the original twenty questions and all twenty-seven configurations:
 status changes, so response audits now recognize all known compatible providers
 within the existing ceilings, including temporarily inactive ones; at least one
 must be active at preflight. Outgoing routing and prompts are unchanged.
-All **166 offline tests pass**; the frozen plan and read-only scope/cost/database
-audits pass. Preparation consumed no credits. Paid approval is pending.
+All **166 offline tests passed** before the approved run. Its
+[partial results](notes/solver-verifier-routed-development-results.md) record
+223 requests, **$0.0284535204 reported spend**, no new unknown charges and 59
+graded executions. A fully billed, truncated solver answer triggered the v4
+global stop; the cap was not exhausted. Two question blocks are complete, so
+the full comparison has no ranking. The third question has a flagged option/key
+inconsistency; the selected dataset remains unchanged.
+
+The [v5 amendment](notes/solver-verifier-routed-development-v5-proposal.md)
+counts a known, fully reconciled solver truncation as one unusable mathematical
+attempt within the existing three-slot limit. All billing/identity/usage/price
+guards remain. All **174 offline tests pass**; old policies and historical rows
+are preserved. The fresh 540-execution proposal retains the **$0.49 estimate,
+$4.25 cap and 3,240-request maximum**. No new paid run is authorized yet.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
