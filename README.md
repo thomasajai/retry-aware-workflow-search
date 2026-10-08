@@ -116,8 +116,15 @@ Each physical request is stored and budgeted separately. Eligible unreported
 stops scheduling. The small six-execution check proposes $0.00491167 expected
 spend, a $0.05 cap and 38 maximum HTTP requests. **153 offline tests pass across
 the full/focused runs**; migration rehearsal preserves old rows/results, and
-the live database is unchanged. New paid execution awaits approval of its
-numeric limits and the explicit unknown-billing allowance.
+the live database was unchanged during preparation. The user approved the
+numeric limits and explicit unknown-billing allowance. The
+[availability check stopped](notes/solver-verifier-availability-results.md)
+after seven physical requests, with three consecutive DeepSeek 429s despite
+30/60-second cooldowns. Two of six executions finished and matched the answer
+key. Known new spend $0.00055315773 plus three unresolved charges; authorized
+holds total $0.00120554892. Migration and runtime audits pass, old rows are
+preserved, and no automatic continuation occurred. A free account check found
+the key spending cap unexhausted; the errors identify upstream throttling.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:

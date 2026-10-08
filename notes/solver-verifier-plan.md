@@ -230,6 +230,15 @@ prepared at approximately $0.0049 expected / $0.05 cap / 38 maximum requests,
 awaiting its paid approval. Offline validation and migration rehearsal pass;
 Milestone 4 remains open and no broad rerun is authorized automatically.
 
+The user approved this check and its explicit billing exception. The
+[availability results](solver-verifier-availability-results.md) record seven
+physical requests, two finished executions, one incomplete, and three consecutive
+DeepSeek 429s after 30/60-second cooldowns. Known new spend $0.00055315773, three
+unresolved charges and $0.00120554892 authorized holds. Live transport/slot
+separation and budget guards pass independent audit; the key cap is not exhausted.
+Prepare a replacement third solver as the recommended next checkpoint, keeping
+Gemini fixed and disclosing a new live scope/cost before more paid calls.
+
 - Standing user instruction: before every credit-consuming OpenRouter workflow/script, explain its purpose, proposed scope, estimated total cost, and a small cost breakdown. This applies to live diagnostics/tests, trials, batches, reruns, and retries as well as the main workflow. Follow the [repository spending rule](../README.md#openrouter-spending-rule).
 - The advance breakdown includes models/providers and roles, expected/maximum request counts, input-token and total billed output-token assumptions (including reasoning), current rates, and subtotals. Separate the expected estimate from the spending limit and disclose uncertainty. Reuse saved responses/offline checks where they suffice. Run only within existing user authorization; expansion beyond it needs authorization before execution. Report actual known spend and unknown measurements afterward.
 - Planning, previews, migrations/tests on disposable databases, and offline grading make no model calls.

@@ -1,9 +1,12 @@
 # Bounded 429 recovery and availability check — October 8, 2026
 
 Status: the user requested the implementation and small diagnostic proposal.
-All preparation is offline; **the new paid check awaits approval** under the
-[spending rule](../README.md#openrouter-spending-rule). No automatic continuation
-of either stopped development run is allowed.
+The user approved this single check's $0.05 / 38-request limits and explicit
+$0.002 unknown-429 reservation allowance under the
+[spending rule](../README.md#openrouter-spending-rule). The
+[availability run stopped](solver-verifier-availability-results.md) after seven
+requests and both approved cooldown/retries, with three consecutive upstream
+429s. No further paid continuation is authorized automatically.
 
 ## What changed and why
 

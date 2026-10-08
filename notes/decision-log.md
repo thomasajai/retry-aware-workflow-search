@@ -14,6 +14,17 @@ diagnostic: expected $0.00491167056, $0.05 cap, 38 maximum physical requests,
 with two shared transport retries and up to $0.002 held unknown-cost reservations
 inside the cap. Its numeric scope and billing exception await paid approval.
 
+The user then approved that single check. Its
+[availability results](solver-verifier-availability-results.md) show the bounded
+retry mechanism exercised live: three DeepSeek/Venice 429s despite 30/60-second
+waits, with all three transmissions in the same mathematical slot. Seven total
+requests, two completed key-matching executions, one incomplete; $0.00055315773
+known new spend plus three unresolved charges, with $0.00120554892 authorized
+holds. The additive migration and physical-call/grade/budget audit pass and old
+rows are preserved. A free key-limit check found the configured spending cap
+unexhausted. No paid continuation; prepare a replacement third solver as the
+recommended next checkpoint while holding Gemini and workflow rules fixed.
+
 Latest October 8 checkpoint: following the stopped development run, the user
 requested a DeepSeek provider change. The [Venice proposal](solver-verifier-venice-proposal.md)
 freezes the new pin while preserving Gemini and the same twenty questions and
