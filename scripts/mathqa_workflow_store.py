@@ -235,8 +235,10 @@ def _reported_text(value):
     return clean(value) if isinstance(value, str) else None
 
 
-def finish_call(call_id, *, status, elapsed_seconds, payload=None, raw_response=None,
+def _finish_response(call_id, *, table, status, elapsed_seconds, payload=None, raw_response=None,
                 http_status=None, error_type=None, error_message=None, database_path=DATABASE_PATH):
+    if table not in ("workflow_calls", "workflow_transport_calls"):
+        raise ValueError("Invalid response table.")
     if status not in ("completed", "failed", "interrupted"):
         raise ValueError("Invalid final call status.")
     p = payload if isinstance(payload, dict) else {}
@@ -246,7 +248,7 @@ def finish_call(call_id, *, status, elapsed_seconds, payload=None, raw_response=
     message = choice.get("message") if isinstance(choice.get("message"), dict) else {}
     details = usage.get("completion_tokens_details") if isinstance(usage.get("completion_tokens_details"), dict) else {}
     with closing(connect(database_path)) as c, c:
-        cursor = c.execute("UPDATE workflow_calls SET status=?,finished_at_utc=?,elapsed_seconds=?,response_json=?,"
+        cursor = c.execute(f"UPDATE {table} SET status=?,finished_at_utc=?,elapsed_seconds=?,response_json=?,"
                            "response_body_text=?,answer_text=?,returned_model=?,provider=?,response_id=?,http_status=?,"
                            "finish_reason=?,usage_json=?,input_tokens=?,output_tokens=?,reasoning_tokens=?,cost_usd=?,"
                            "error_type=?,error_message=? WHERE call_id=? AND status='running'", (
@@ -258,6 +260,70 @@ def finish_call(call_id, *, status, elapsed_seconds, payload=None, raw_response=
             error_type, clean(error_message), call_id))
         if cursor.rowcount != 1:
             raise ValueError("Call is missing or already finished.")
+
+
+def finish_call(call_id, **kwargs):
+    _finish_response(call_id,table="workflow_calls",**kwargs)
+
+
+def create_transport_call(logical_call_id, request, reservation, *, database_path=DATABASE_PATH):
+    with closing(connect(database_path)) as c,c:
+        parent = c.execute("SELECT * FROM workflow_calls WHERE call_id=?",(logical_call_id,)).fetchone()
+        if parent is None or parent["status"] != "running" or parent["request_json"] != encode(request):
+            raise ValueError("Transport request must match its running logical call.")
+        previous = c.execute("SELECT * FROM workflow_transport_calls WHERE logical_call_id=? ORDER BY ordinal",(logical_call_id,)).fetchall()
+        if previous and (previous[-1]["status"] != "failed" or previous[-1]["retry_wait_seconds"] is None):
+            raise ValueError("Retry needs finished, authorized rate-limit evidence.")
+        call_id = str(uuid4())
+        c.execute("INSERT INTO workflow_transport_calls (call_id,logical_call_id,ordinal,started_at_utc,request_json,cost_reservation_usd) "
+                  "VALUES (?,?,?,?,?,?)",(call_id,logical_call_id,len(previous)+1,now(),encode(request),_measurement(reservation)))
+        return call_id
+
+
+def finish_transport_call(call_id, *, headers, database_path=DATABASE_PATH, **kwargs):
+    _finish_response(call_id,table="workflow_transport_calls",database_path=database_path,**kwargs)
+    with closing(connect(database_path)) as c,c:
+        c.execute("UPDATE workflow_transport_calls SET response_headers_json=? WHERE call_id=?",
+                  (encode({k:v for k,v in headers.items() if k.lower()=="retry-after"}),call_id))
+
+
+def record_transport_retry(call_id, delay, *, expected_provider, database_path=DATABASE_PATH):
+    from mathqa_transport import retry_policy, upstream_429
+    policy = retry_policy()
+    with closing(connect(database_path)) as c,c:
+        row = c.execute("SELECT t.*,w.requested_model FROM workflow_transport_calls t JOIN workflow_calls w ON w.call_id=t.logical_call_id "
+                        "WHERE t.call_id=?",(call_id,)).fetchone()
+        if (row is None or row["status"]!="failed" or row["retry_wait_seconds"] is not None
+                or row["ordinal"]>policy["max_retries_per_call"]
+                or not upstream_429(row["http_status"],json.loads(row["response_json"]),expected_provider,row["requested_model"])):
+            raise ValueError("Retry needs eligible, finished upstream 429 evidence.")
+        wait = _measurement(delay)
+        if wait is None or wait > policy["max_wait_seconds"]:
+            raise ValueError("Invalid bounded cooldown.")
+        c.execute("UPDATE workflow_transport_calls SET retry_wait_seconds=?,held_cost_usd=? WHERE call_id=?",
+                  (wait,row["cost_reservation_usd"] if row["cost_usd"] is None else None,call_id))
+
+
+def billing_rows(run_id, *, database_path=DATABASE_PATH, ignore_unstarted_call=None):
+    """Physical calls when present; historical logical calls counted once."""
+    with closing(connect(database_path)) as c:
+        has_view = c.execute("SELECT 1 FROM sqlite_master WHERE name='workflow_billable_calls'").fetchone()
+        table = "workflow_billable_calls" if has_view else "workflow_calls"
+        rows = [dict(r) for r in c.execute(f"SELECT w.* FROM {table} w JOIN workflow_attempts a USING(attempt_id) "
+                    "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?",(run_id,))]
+    for row in rows:
+        row.setdefault("logical_call_id",row["call_id"])
+        row.setdefault("held_cost_usd",None)
+        row.setdefault("retry_wait_seconds",None)
+    return [r for r in rows if not (r["call_id"]==ignore_unstarted_call and r["call_id"]==r["logical_call_id"])]
+
+
+def billing_totals(rows):
+    from decimal import Decimal
+    known = sum((Decimal(str(r["cost_usd"])) for r in rows if r["cost_usd"] is not None),Decimal(0))
+    held = sum((Decimal(str(r["held_cost_usd"])) for r in rows if r["cost_usd"] is None and r["held_cost_usd"] is not None),Decimal(0))
+    return {"requests":len(rows),"known_cost_usd":str(known),"unknown_cost_calls":sum(r["cost_usd"] is None for r in rows),
+            "held_unknown_cost_usd":str(held),"accounted_exposure_usd":str(known+held)}
 
 
 def record_verification(attempt_id, verdict, *, database_path=DATABASE_PATH):
@@ -325,12 +391,13 @@ def record_grade(execution_id, grader_version, dataset_sha256, label_source, *, 
 
 
 def cost_summary(run_id, *, database_path=DATABASE_PATH):
-    with closing(connect(database_path)) as c:
-        rows = c.execute("SELECT w.role,COUNT(*) AS requests,COALESCE(SUM(w.cost_usd),0) AS known_cost_usd,"
-                         "SUM(w.cost_usd IS NULL) AS unknown_cost_calls FROM workflow_calls w "
-                         "JOIN workflow_attempts a USING(attempt_id) JOIN workflow_executions e USING(execution_id) "
-                         "WHERE e.run_id=? GROUP BY w.role", (run_id,)).fetchall()
-        return [dict(row) for row in rows]
+    rows = billing_rows(run_id,database_path=database_path)
+    result = []
+    for role in sorted({r["role"] for r in rows}):
+        totals = billing_totals([r for r in rows if r["role"]==role])
+        result.append({"role":role,"requests":totals["requests"],"known_cost_usd":float(totals["known_cost_usd"]),
+                       "unknown_cost_calls":totals["unknown_cost_calls"]})
+    return result
 
 
 def main():

@@ -108,6 +108,17 @@ billing. Ten executions finished; one is incomplete. Known additional spend
 $0.00379209782 plus one unresolved charge. Both runs remain separate with no
 ranking or automatic continuation; Milestone 4 remains open.
 
+The user requested [bounded 429 recovery and a small availability check](notes/solver-verifier-availability-proposal.md).
+Recovery is explicitly enabled in frozen version-three snapshots; at most two
+extra HTTP requests are shared across a run, distinct from mathematical retries.
+Each physical request is stored and budgeted separately. Eligible unreported
+429 charges remain unknown with bounded held reservations; other unknown billing
+stops scheduling. The small six-execution check proposes $0.00491167 expected
+spend, a $0.05 cap and 38 maximum HTTP requests. **153 offline tests pass across
+the full/focused runs**; migration rehearsal preserves old rows/results, and
+the live database is unchanged. New paid execution awaits approval of its
+numeric limits and the explicit unknown-billing allowance.
+
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
 

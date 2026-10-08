@@ -4,6 +4,16 @@ Last reviewed: 2026-09-25. This records the current plan, not experimental resul
 
 ## October 6 planning update
 
+Latest implementation checkpoint on October 8: the user requested bounded
+cooldown/retry handling and a small provider diagnostic. The
+[availability proposal](solver-verifier-availability-proposal.md) records the
+offline implementation, additive physical-call storage, explicit unknown-cost
+exception, 153 passing offline tests across full/focused runs, and migration
+rehearsal. The live database and old reports remain intact. New six-execution
+diagnostic: expected $0.00491167056, $0.05 cap, 38 maximum physical requests,
+with two shared transport retries and up to $0.002 held unknown-cost reservations
+inside the cap. Its numeric scope and billing exception await paid approval.
+
 Latest October 8 checkpoint: following the stopped development run, the user
 requested a DeepSeek provider change. The [Venice proposal](solver-verifier-venice-proposal.md)
 freezes the new pin while preserving Gemini and the same twenty questions and

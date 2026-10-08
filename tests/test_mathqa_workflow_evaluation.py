@@ -96,6 +96,34 @@ class EvaluationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"unique"):
             evaluation.prepare_plan(self.metadata,self.exposure,dataset_path=self.dataset)
 
+    def test_opt_in_retry_plan_counts_physical_requests_in_comparison_and_baselines(self):
+        with patch.object(evaluation,"QUESTION_COUNT",1):
+            self.plan = evaluation.prepare_plan(self.metadata,self.exposure,dataset_path=self.dataset,rate_limit_retries=True)
+            self.assertEqual(self.plan["version"],"workflow-evaluation-plan-v3")
+            self.assertEqual(self.plan["cost_preview"]["maximum_calls"],164)
+            self.assertEqual(self.plan["execution_policy"]["transport_policy"]["max_retry_requests"],2)
+            waits = []
+            def respond(request):
+                if not self.sent:
+                    self.sent.append(json.loads(request.content))
+                    return httpx.Response(429,json={"error":{"code":429,"metadata":{
+                        "provider_name":"Offline fixture","limit_source":"upstream_provider_shared_pool"}}},
+                        headers={"Retry-After":"35"})
+                return self.response(request)
+            with httpx.Client(transport=httpx.MockTransport(respond)) as client:
+                report = evaluation.run_evaluation(self.plan,database_path=self.db,api_key="mock_secret",client=client,
+                    budget_usd=self.plan["execution_policy"]["maximum_budget_usd"],max_requests=164,waiter=waits.append)
+        self.assertTrue(report["complete_coverage"])
+        self.assertEqual((report["score_total"],report["new_requests"],report["unknown_cost_calls"]),(27,55,1))
+        self.assertEqual(waits,[35])
+        self.assertEqual(self.sent[0],self.sent[1])
+        self.assertEqual(sum(r["requests"] for r in report["configurations"]),55)
+        self.assertEqual(sum(r["unknown_cost_calls"] for r in report["one_attempt_baselines"]),1)
+        self.assertIsNone(report["ranking"])
+        self.assertIsNone(report["accuracy_cost_frontier"])
+        self.assertFalse(report["cost_comparison_complete"])
+        self.assertTrue(any(r["mean_cost_usd_per_planned_execution"] is None for r in report["configurations"]))
+
     def venice_metadata(self):
         metadata = deepcopy(self.metadata)
         endpoint = deepcopy(metadata["models"]["deepseek/deepseek-v3.2"]["data"]["endpoints"][0])

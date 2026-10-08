@@ -20,13 +20,14 @@ from dotenv import load_dotenv
 from mathqa_batch import DATASET_PATH, DATABASE_PATH, OPENROUTER_URL, PROJECT_ROOT
 from mathqa_verifier import build_request
 from mathqa_verifier_preflight import request_cost
+from mathqa_transport import decode_response
 import mathqa_workflow as workflow
 from mathqa_workflow_grading import grade_execution, GRADER_VERSION
 import mathqa_workflow_store as store
 
 QUESTION_IDS = ("mathqa_test_0002", "mathqa_test_0047")
 SEQUENCES = (("qwen25", "qwen3", "deepseek"), ("qwen3", "deepseek", "qwen25"), ("deepseek", "qwen25", "qwen3"))
-SOURCE_FILES = ("mathqa_batch.py", "mathqa_response.py", "mathqa_models.py", "mathqa_verifier.py", "mathqa_verifier_preflight.py", "mathqa_workflow.py",
+SOURCE_FILES = ("mathqa_batch.py", "mathqa_response.py", "mathqa_models.py", "mathqa_verifier.py", "mathqa_verifier_preflight.py", "mathqa_workflow.py", "mathqa_transport.py",
                 "mathqa_workflow_grading.py", "mathqa_workflow_store.py", "mathqa_workflow_pilot.py")
 
 
@@ -147,9 +148,9 @@ def summary(run_id, *, database_path):
         executions = [dict(r) for r in c.execute("SELECT e.*,f.name configuration,g.workflow_score,g.option_correct FROM workflow_executions e "
             "JOIN workflow_configs f USING(config_id) LEFT JOIN workflow_grades g ON g.execution_id=e.execution_id "
             "AND g.attempt_id IS NULL AND g.grader_version=? WHERE e.run_id=? ORDER BY e.rowid", (GRADER_VERSION,run_id))]
-        calls = [dict(r) for r in c.execute("SELECT w.* FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
-            "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?",(run_id,))]
         attempts = [dict(r) for r in c.execute("SELECT a.* FROM workflow_attempts a JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?",(run_id,))]
+    calls = store.billing_rows(run_id,database_path=database_path)
+    totals = store.billing_totals(calls)
     per_model = []
     groups = defaultdict(list)
     for row in calls:
@@ -162,6 +163,8 @@ def summary(run_id, *, database_path):
             "reasoning_tokens_subset":sum(r["reasoning_tokens"] or 0 for r in rows)})
     scored = [r for r in executions if r["workflow_score"] is not None]
     return {"run_id":run_id,"status":run["status"],"stop_reason":run["stop_reason"],"plan_sha256":plan["sha256"],
+        "held_unknown_cost_usd":totals["held_unknown_cost_usd"],"accounted_exposure_usd":totals["accounted_exposure_usd"],
+        "transport_retry_requests":len(calls)-len({r["logical_call_id"] for r in calls}),
         "planned_executions":len(plan["schedule"]),"reached_executions":len(executions),"scored_executions":len(scored),
         "score_total":sum(r["workflow_score"] for r in scored),"accuracy_completed_only":sum(r["workflow_score"] for r in scored)/len(scored) if scored else None,
         "complete_coverage":len(scored)==len(plan["schedule"]),"executions":executions,"costs":per_model,
@@ -196,12 +199,7 @@ def run_pilot(plan, *, database_path, budget_usd, max_requests, api_key, client)
     providers = {m:e["provider_name"] for m,e in plan["endpoints"].items()}
     def sender(request):
         response = client.post(OPENROUTER_URL,json=request,headers={"Authorization":"Bearer "+api_key},timeout=60)
-        try:
-            payload = json.loads(response.text,parse_constant=_reject_nonfinite)
-        except ValueError:
-            # Preserve diagnostic body without classifying unknown billing as free.
-            payload = {"error":{"type":"InvalidJSON","raw_response":store.clean(response.text)}}
-        return response.status_code,payload
+        return decode_response(response,_reject_nonfinite)
     config_ids = {name:store.create_config(run,name,config,database_path=database_path) for name,config in plan["configurations"].items()}
     questions = {q["id"]:q for q in plan["questions"]}
     try:

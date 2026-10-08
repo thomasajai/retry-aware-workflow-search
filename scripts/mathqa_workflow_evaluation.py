@@ -23,6 +23,7 @@ from mathqa_batch import DATASET_PATH, DATABASE_PATH, OPENROUTER_URL, PROJECT_RO
 from mathqa_models import workflow_model_configs, WORKFLOW_DEEPSEEK_PROVIDERS
 from mathqa_verifier import build_request
 from mathqa_verifier_preflight import request_cost
+from mathqa_transport import decode_response, retry_policy
 import mathqa_workflow as workflow
 from mathqa_workflow_grading import grade_execution, GRADER_VERSION
 import mathqa_workflow_pilot as pilot
@@ -63,7 +64,7 @@ def exposure_snapshot(database_path):
             "workflow_question_ids": workflows, "note": "Recorded exposure, not a guarantee against unrecorded inspection."}
 
 
-def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None, deepseek_provider="deepinfra/fp4"):
+def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=None, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
     raw = Path(dataset_path).read_bytes()
     records = json.loads(raw)
     if len(records) != 200 or len({r["id"] for r in records}) != 200:
@@ -78,7 +79,7 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
     if any(r.get("correct") not in list("abcde") for r in selected):
         raise ValueError("Selected questions require independent option keys.")
     questions = [{"id":r["id"], "problem":r["Problem"], "options":r["options"]} for r in selected]
-    configs = {"-".join(c["solver_sequence"]):c for c in workflow.configurations(deepseek_provider=deepseek_provider)}
+    configs = {"-".join(c["solver_sequence"]):c for c in workflow.configurations(deepseek_provider=deepseek_provider,rate_limit_retries=rate_limit_retries)}
     profiles = list(workflow_model_configs(deepseek_provider=deepseek_provider).values()) + [next(iter(configs.values()))["verifier"]]
     endpoints, ceilings = {}, {}
     for p in profiles:
@@ -94,6 +95,7 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
         r["provider"]["max_price"] = deepcopy(ceilings[r["model"]])
         return r
     costs = []
+    maximum_reservation = Decimal(0)
     for p in profiles:
         verifier = "settings" in p
         m, ep = p["model"], endpoints[p["model"]]
@@ -109,6 +111,7 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
         stressed = [priced(build_request(workflow.SELECTED_VERIFIER,q,{"calculation":"x"*8192,"option":"a","value":"x"*120}))
                     for q in questions] if verifier else requests
         reserve = sum((request_cost(r,ep) for r in stressed),Decimal(0))*max_weight
+        maximum_reservation = max(maximum_reservation,max(request_cost(r,ep) for r in stressed))
         costs.append({"role":"verifier" if verifier else "solver", "model":m, "provider":ep["provider_name"],
             "provider_tag":ep["tag"], "expected_calls":len(questions)*expected_weight,"maximum_calls":len(questions)*max_weight,
             "estimated_input_tokens":sum(inputs)*expected_weight,"estimated_output_tokens_including_reasoning":output*len(questions)*expected_weight,
@@ -116,6 +119,8 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
             "estimated_input_cost_usd":str(input_cost),"estimated_output_cost_usd":str(expected-input_cost),
             "estimated_cost_usd":str(expected),"conservative_reservation_usd":str(reserve)})
     reserve_total = sum((Decimal(c["conservative_reservation_usd"]) for c in costs),Decimal(0))
+    if rate_limit_retries:
+        reserve_total += maximum_reservation*retry_policy()["max_retry_requests"]
     cap = (reserve_total*Decimal("1.10")*4).to_integral_value(rounding=ROUND_CEILING)/4
     rng = random.Random(SCHEDULE_SEED)
     schedule = []
@@ -144,18 +149,24 @@ def prepare_plan(metadata, exposure, *, dataset_path=DATASET_PATH, created_at=No
             "assumptions":"Two slots per execution, solver output 96/verifier 512 including reasoning once; chars/3+96 input; no cache discount. Stress: full UTF-8 request+256 framing, 8192-character calculation and full output caps. Estimates are not billing guarantees."}}
     if deepseek_provider != "deepinfra/fp4":
         plan.update(version="workflow-evaluation-plan-v2", deepseek_provider=deepseek_provider)
+    if rate_limit_retries:
+        plan.update(version="workflow-evaluation-plan-v3",deepseek_provider=deepseek_provider,rate_limit_retries=True)
+        extra = retry_policy()["max_retry_requests"]
+        plan["execution_policy"].update(transport_retries=2,transport_policy=retry_policy(),maximum_requests=len(schedule)*6+extra)
+        plan["cost_preview"].update(maximum_calls=len(schedule)*6+extra,maximum_retry_requests=extra,
+                                    extra_retry_reservation_usd=str(maximum_reservation*extra))
     plan["sha256"] = pilot.digest(plan)
     return plan
 
 
 def validate_plan(plan):
-    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
+    if plan.get("version") not in ("workflow-evaluation-plan-v1", "workflow-evaluation-plan-v2", "workflow-evaluation-plan-v3") or plan.get("sha256") != pilot.digest({k:v for k,v in plan.items() if k!="sha256"}):
         raise ValueError("Evaluation checksum/version failed.")
     age = (datetime.now(timezone.utc)-datetime.fromisoformat(plan["metadata"]["fetched_at_utc"])).total_seconds()
     if age < -300 or age > 24*3600:
         raise ValueError("Refresh free metadata and prepare a new proposal.")
     rebuilt = prepare_plan(plan["metadata"],plan["split"]["exposure_snapshot"],dataset_path=plan["dataset"]["path"],created_at=plan["created_at_utc"],
-                           deepseek_provider=plan.get("deepseek_provider", "deepinfra/fp4"))
+                           deepseek_provider=plan.get("deepseek_provider", "deepinfra/fp4"),rate_limit_retries=plan.get("rate_limit_retries",False))
     if rebuilt != plan:
         raise ValueError("Dataset, code, profiles, schedule or evidence changed; prepare a new plan.")
 
@@ -182,8 +193,11 @@ def evaluation_summary(run_id, *, database_path):
         attempts = [dict(r) for r in c.execute("SELECT a.*,e.question_id,f.name configuration,g.option_correct "
             "FROM workflow_attempts a JOIN workflow_executions e USING(execution_id) JOIN workflow_configs f USING(config_id) "
             "LEFT JOIN workflow_grades g ON g.attempt_id=a.attempt_id AND g.grader_version=? WHERE e.run_id=?",(GRADER_VERSION,run_id))]
-        calls = {r["call_id"]:dict(r) for r in c.execute("SELECT w.* FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
+        logical_calls = {r["call_id"]:dict(r) for r in c.execute("SELECT w.* FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
             "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?",(run_id,))}
+    calls = defaultdict(list)
+    for row in store.billing_rows(run_id,database_path=database_path):
+        calls[row["logical_call_id"]].append(row)
     expected_questions = [q["id"] for q in plan["questions"]]
     grouped = defaultdict(list)
     by_exec = defaultdict(list)
@@ -200,8 +214,8 @@ def evaluation_summary(run_id, *, database_path):
     for name in plan["configurations"]:
         executions = grouped[name]
         completed = [e for e in executions if e["workflow_score"] is not None]
-        reached_calls = [calls[a[k]] for e in executions for a in by_exec[e["execution_id"]]
-                         for k in ("solver_call_id","verifier_call_id") if a[k]]
+        reached_calls = [call for e in executions for a in by_exec[e["execution_id"]]
+                         for k in ("solver_call_id","verifier_call_id") if a[k] for call in calls[a[k]]]
         cost = sum((Decimal(str(r["cost_usd"])) for r in reached_calls if r["cost_usd"] is not None),Decimal(0))
         all_complete = len(completed)==len(expected_questions)
         if all_complete:
@@ -210,7 +224,7 @@ def evaluation_summary(run_id, *, database_path):
         configurations.append({"configuration":name,"planned":len(expected_questions),"reached":len(executions),"scored":len(completed),
             "accuracy_completed_only":sum(e["workflow_score"] for e in completed)/len(completed) if completed else None,
             "complete_coverage":all_complete,"known_cost_usd":str(cost),"unknown_cost_calls":sum(r["cost_usd"] is None for r in reached_calls),
-            "mean_cost_usd_per_planned_execution":float(cost)/len(expected_questions) if all_complete else None,
+            "mean_cost_usd_per_planned_execution":float(cost)/len(expected_questions) if all_complete and all(r["cost_usd"] is not None for r in reached_calls) else None,
             "accepted_answer_coverage":sum(e["status"]=="accepted" for e in completed)/len(completed) if completed else None,
             "mean_wall_seconds_completed":sum(e["elapsed_seconds"] for e in completed)/len(completed) if completed else None,
             "solver_attempts":sum(len(by_exec[e["execution_id"]]) for e in executions),"requests":len(reached_calls),
@@ -218,9 +232,10 @@ def evaluation_summary(run_id, *, database_path):
             "answer_accuracy_wilson_95_interval":wilson(sum(scores[name]),len(expected_questions)) if all_complete else None,
             "question_scores":[{"question_id":e["question_id"],"score":e["workflow_score"]} for e in completed]})
     complete = report["complete_coverage"]
-    ranking = sorted(configurations,key=lambda r:(-r["accuracy_completed_only"],float(r["known_cost_usd"]),r["configuration"])) if complete else None
+    cost_complete = complete and report["unknown_cost_calls"]==0
+    ranking = sorted(configurations,key=lambda r:(-r["accuracy_completed_only"],float(r["known_cost_usd"]),r["configuration"])) if cost_complete else None
     frontier = None
-    if complete:
+    if cost_complete:
         frontier = [r["configuration"] for r in configurations if not any(
             s["accuracy_completed_only"]>=r["accuracy_completed_only"] and Decimal(s["known_cost_usd"])<=Decimal(r["known_cost_usd"])
             and (s["accuracy_completed_only"]>r["accuracy_completed_only"] or Decimal(s["known_cost_usd"])<Decimal(r["known_cost_usd"])) for s in configurations)]
@@ -239,16 +254,16 @@ def evaluation_summary(run_id, *, database_path):
         baseline_scores = {q:[a for a in initial if a["question_id"]==q] for q in expected_questions}
         baseline_complete = all(len(rows)==9 for rows in baseline_scores.values())
         values = [sum(a["option_correct"]==1 for a in baseline_scores[q])/9 for q in expected_questions]
-        raw_cost = sum((Decimal(str(calls[a["solver_call_id"]]["cost_usd"])) for a in initial if calls[a["solver_call_id"]]["cost_usd"] is not None),Decimal(0))
-        first_calls = [calls[a[k]] for a in initial for k in ("solver_call_id","verifier_call_id") if a[k]]
+        raw_cost = sum((Decimal(str(call["cost_usd"])) for a in initial for call in calls[a["solver_call_id"]] if call["cost_usd"] is not None),Decimal(0))
+        first_calls = [call for a in initial for k in ("solver_call_id","verifier_call_id") if a[k] for call in calls[a[k]]]
         verified_cost = sum((Decimal(str(r["cost_usd"])) for r in first_calls if r["cost_usd"] is not None),Decimal(0))
         baselines.append({"model":model["model"],"planned_first_slot_calls":9*len(expected_questions),"scored_first_slot_calls":len(initial),
             "complete_coverage":baseline_complete,"raw_solver_accuracy":sum(a["option_correct"]==1 for a in initial)/len(initial) if initial else None,
             "one_attempt_verified_accuracy":sum(a["option_correct"]==1 and a["verification_status"]=="accept" for a in initial)/len(initial) if initial else None,
             "raw_solver_known_cost_usd":str(raw_cost),"one_attempt_verified_known_cost_usd":str(verified_cost),
-            "mean_raw_solver_cost_usd":float(raw_cost)/len(initial) if initial else None,
-            "mean_one_attempt_verified_cost_usd":float(verified_cost)/len(initial) if initial else None,
-            "mean_raw_solver_wall_seconds":sum(calls[a["solver_call_id"]]["elapsed_seconds"] for a in initial)/len(initial) if initial else None,
+            "mean_raw_solver_cost_usd":float(raw_cost)/len(initial) if initial and all(call["cost_usd"] is not None for a in initial for call in calls[a["solver_call_id"]]) else None,
+            "mean_one_attempt_verified_cost_usd":float(verified_cost)/len(initial) if initial and all(r["cost_usd"] is not None for r in first_calls) else None,
+            "mean_raw_solver_wall_seconds":sum(logical_calls[a["solver_call_id"]]["elapsed_seconds"] for a in initial)/len(initial) if initial else None,
             "unknown_cost_calls":sum(r["cost_usd"] is None for r in first_calls),
             "question_bootstrap_95_interval":bootstrap(values,draws) if baseline_complete else None})
     repeated = 0
@@ -269,16 +284,21 @@ def evaluation_summary(run_id, *, database_path):
         if rows and rows[0]["verification_status"]=="reject" and e["workflow_score"] is not None:
             rejected_first += 1
             recovery += e["workflow_score"]==1
-    report.update({"configurations":configurations,"ranking":ranking,"accuracy_cost_frontier":frontier,"paired_differences":paired,
+    report.update({"configurations":configurations,"ranking":ranking,"accuracy_cost_frontier":frontier,"paired_differences":paired,"cost_comparison_complete":cost_complete,
         "one_attempt_baselines":baselines,"recovery_after_first_rejection":{"finished_executions":rejected_first,"correct_final":recovery},
         "repeat_option_value_after_retry":{"usable_retries":eligible_retries,"repeats_of_any_prior_answer":repeated},
-        "note":"Development comparison; intervals are descriptive, without selection/multiple-comparison adjustment. Bootstrap can degenerate at boundaries; Wilson intervals retain finite-sample uncertainty. No automatic finalist. Reasoning validity requires separate review."})
+        "note":"Development comparison; intervals are descriptive, without selection/multiple-comparison adjustment. Bootstrap can degenerate at boundaries; Wilson intervals retain finite-sample uncertainty. Cost rankings/frontier require resolved billing as well as full score coverage. No automatic finalist. Reasoning validity requires separate review."})
     return report
 
 
-def run_evaluation(plan, *, database_path, budget_usd, max_requests, api_key, client):
-    limits = workflow.Limits(budget_usd,max_requests)
+def run_evaluation(plan, *, database_path, budget_usd, max_requests, api_key, client, waiter=None):
     validate_plan(plan)
+    return _run_schedule(plan,database_path=database_path,budget_usd=budget_usd,max_requests=max_requests,api_key=api_key,client=client,waiter=waiter)
+
+
+def _run_schedule(plan, *, database_path, budget_usd, max_requests, api_key, client, reporter=evaluation_summary, waiter=None):
+    """Shared adapter; public entry points validate their frozen plans first."""
+    limits = workflow.Limits(budget_usd,max_requests)
     if budget_usd>plan["execution_policy"]["maximum_budget_usd"] or max_requests>plan["execution_policy"]["maximum_requests"]:
         raise ValueError("Limits exceed frozen evaluation scope.")
     if not api_key:
@@ -301,11 +321,7 @@ def run_evaluation(plan, *, database_path, budget_usd, max_requests, api_key, cl
     providers = {m:e["provider_name"] for m,e in plan["endpoints"].items()}
     def sender(request):
         response = client.post(OPENROUTER_URL,json=request,headers={"Authorization":"Bearer "+api_key},timeout=60)
-        try:
-            payload = json.loads(response.text,parse_constant=pilot._reject_nonfinite)
-        except ValueError:
-            payload = {"error":{"type":"InvalidJSON","raw_response":store.clean(response.text)}}
-        return response.status_code,payload
+        return decode_response(response,pilot._reject_nonfinite)
     with closing(store.connect(database_path)) as c,c:
         c.execute("UPDATE workflow_runs SET status='running',started_at_utc=? WHERE run_id=?",(store.now(),run))
     try:
@@ -315,7 +331,7 @@ def run_evaluation(plan, *, database_path, budget_usd, max_requests, api_key, cl
             config = plan["configurations"][item["configuration"]]
             runner = workflow.Runner(run,config_ids[item["configuration"]],config,database_path=database_path,
                 sender=sender,reservations=lambda r:request_cost(r,plan["endpoints"][r["model"]]),providers=providers,
-                limits=limits,price_limits=plan["price_limits"])
+                limits=limits,price_limits=plan["price_limits"],waiter=waiter)
             outcome = runner.execute(questions[item["question_id"]],repetition=item["repetition"])
             if outcome["status"] in ("interrupted","budget_stopped"):
                 break
@@ -326,14 +342,14 @@ def run_evaluation(plan, *, database_path, budget_usd, max_requests, api_key, cl
             with closing(store.connect(database_path)) as c,c:
                 errors = c.execute("SELECT COUNT(*) FROM workflow_attempts a JOIN workflow_executions e USING(execution_id) "
                     "WHERE e.run_id=? AND (a.verification_status IN ('invalid','error') OR EXISTS "
-                    "(SELECT 1 FROM workflow_calls w WHERE w.attempt_id=a.attempt_id AND w.status!='completed'))",(run,)).fetchone()[0]
+                    "(SELECT 1 FROM workflow_billable_calls w WHERE w.attempt_id=a.attempt_id AND w.status!='completed'))",(run,)).fetchone()[0]
                 c.execute("UPDATE workflow_runs SET status=?,finished_at_utc=? WHERE run_id=?",("completed_with_errors" if errors else "completed",store.now(),run))
     except BaseException:
         with closing(store.connect(database_path)) as c,c:
             c.execute("UPDATE workflow_runs SET status='interrupted',finished_at_utc=?,stop_reason=? WHERE run_id=?",
                       (store.now(),"unexpected_failure_review_calls",run))
         raise
-    return evaluation_summary(run,database_path=database_path)
+    return reporter(run,database_path=database_path)
 
 
 def main():
@@ -341,6 +357,7 @@ def main():
     parser.add_argument("--plan",type=Path)
     parser.add_argument("--metadata",type=Path)
     parser.add_argument("--deepseek-provider",choices=WORKFLOW_DEEPSEEK_PROVIDERS,help="Offline preparation only; execution uses the frozen plan.")
+    parser.add_argument("--rate-limit-retries",action="store_true",help="Offline preparation only; opt into the bounded upstream 429 policy.")
     parser.add_argument("--fetch-metadata",type=Path,help="Free public metadata only; no generation.")
     parser.add_argument("--database",type=Path,default=DATABASE_PATH)
     parser.add_argument("--run",action="store_true")
@@ -357,7 +374,7 @@ def main():
         if len(set(outputs))!=len(outputs) or args.metadata and args.metadata.resolve() in outputs:
             raise ValueError("Inputs/outputs must use distinct paths.")
         if args.fetch_metadata:
-            if args.run or args.plan or args.metadata or args.report or args.deepseek_provider:
+            if args.run or args.plan or args.metadata or args.report or args.deepseek_provider or args.rate_limit_retries:
                 parser.error("--fetch-metadata is a separate free operation.")
             if args.fetch_metadata.exists():
                 raise ValueError("Metadata file exists; choose a new filename.")
@@ -371,14 +388,14 @@ def main():
             if args.plan.exists():
                 raise ValueError("Plan exists; choose a new filename.")
             plan = prepare_plan(json.loads(args.metadata.read_text(encoding="utf-8")),exposure_snapshot(args.database),
-                                deepseek_provider=args.deepseek_provider or "deepinfra/fp4")
+                                deepseek_provider=args.deepseek_provider or "deepinfra/fp4",rate_limit_retries=args.rate_limit_retries)
             validate_plan(plan)
             args.plan.parent.mkdir(parents=True,exist_ok=True)
             args.plan.write_text(json.dumps(plan,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
             print(json.dumps({"mode":"offline","sha256":plan["sha256"],"questions":[q["id"] for q in plan["questions"]],
                 "executions":len(plan["schedule"]),"limits":plan["execution_policy"],"cost_preview":plan["cost_preview"],"generation_requests":0},indent=2))
         else:
-            if args.deepseek_provider:
+            if args.deepseek_provider or args.rate_limit_retries:
                 parser.error("Execution provider is frozen in --plan; --deepseek-provider applies only to preparation.")
             if not args.plan or args.budget_usd is None or args.max_requests is None or not args.report:
                 parser.error("--run requires --plan, --budget-usd, --max-requests and --report.")

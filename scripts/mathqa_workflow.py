@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from itertools import product
 import json
-from time import perf_counter
+from time import perf_counter, sleep
 from typing import TypedDict
 
 import httpx
@@ -22,11 +22,14 @@ from mathqa_models import MODEL_PROFILES, workflow_model_configs
 from mathqa_verifier import build_request, extract_usable, parse_verdict, profile
 from mathqa_verifier_preflight import input_token_reservation
 import mathqa_workflow_store as store
+from mathqa_transport import retry_policy, upstream_429, retry_delay
 
 SELECTED_VERIFIER = "flashlite25__reasoning"
 
 
-def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4"):
+def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
+    if type(rate_limit_retries) is not bool:
+        raise ValueError("Rate-limit recovery must be explicitly enabled or disabled.")
     if len(sequence) != 3 or any(alias not in MODEL_PROFILES for alias in sequence):
         raise ValueError("A sequence has exactly three declared solver aliases, with repetitions allowed.")
     models = workflow_model_configs(temperature=temperature, max_tokens=max_tokens, deepseek_provider=deepseek_provider)
@@ -39,11 +42,15 @@ def configuration(sequence, *, temperature=0.2, max_tokens=512, deepseek_provide
                 "solver_settings": "proposed loop settings; live pilot pending"}}
     if deepseek_provider != "deepinfra/fp4":
         result.update(version="solver-verifier-config-v2", deepseek_provider=deepseek_provider)
+    if rate_limit_retries:
+        result.update(version="solver-verifier-config-v3",deepseek_provider=deepseek_provider,transport_policy=retry_policy())
+        result["policy"]["transport_retries"] = 2
+        result["policy"]["technical_failure"] = "bounded upstream 429 recovery; stop if unresolved or exhausted"
     return result
 
 
-def configurations(*, deepseek_provider="deepinfra/fp4"):
-    return [configuration(sequence, deepseek_provider=deepseek_provider) for sequence in product(MODEL_PROFILES, repeat=3)]
+def configurations(*, deepseek_provider="deepinfra/fp4", rate_limit_retries=False):
+    return [configuration(sequence, deepseek_provider=deepseek_provider,rate_limit_retries=rate_limit_retries) for sequence in product(MODEL_PROFILES, repeat=3)]
 
 
 def solver_request(solver, question):
@@ -87,17 +94,19 @@ class Runner:
     reservations(request) quotes a conservative charge, excluding past spend.
     """
 
-    def __init__(self, run_id, config_id, config, *, database_path, sender, reservations, providers, limits, price_limits=None):
+    def __init__(self, run_id, config_id, config, *, database_path, sender, reservations, providers, limits, price_limits=None, waiter=None):
         self.run_id, self.config_id = run_id, config_id
         self.config = deepcopy(config)
         expected = configuration(config["solver_sequence"],
             temperature=config["solvers"][0]["body_settings"]["temperature"],
             max_tokens=config["solvers"][0]["body_settings"]["max_tokens"],
-            deepseek_provider=config.get("deepseek_provider", "deepinfra/fp4"))
+            deepseek_provider=config.get("deepseek_provider", "deepinfra/fp4"),rate_limit_retries="transport_policy" in config)
         if self.config != expected:
             raise ValueError("Workflow configuration differs from trusted profile builders.")
         self.db, self.sender, self.reservations = database_path, sender, reservations
         self.providers, self.limits = deepcopy(providers), limits
+        self.retry_policy = deepcopy(config.get("transport_policy"))
+        self.waiter = waiter or sleep
         self.price_limits = deepcopy(price_limits)
         if self.price_limits is not None:
             for model in {p["model"] for p in self.config["solvers"] + [self.config["verifier"]]}:
@@ -121,29 +130,36 @@ class Runner:
             request["provider"]["max_price"] = deepcopy(self.price_limits[request["model"]])
         return request
 
-    def gate(self, request):
+    def gate(self, request, *, ignore_unstarted_call=None):
         reserve = Decimal(str(self.reservations(deepcopy(request))))
         if not reserve.is_finite() or reserve <= 0:
             raise ValueError("A finite positive per-call reservation is required.")
         if request["model"] not in self.providers:
             raise ValueError("Missing pinned provider expectation.")
         with closing(store.connect(self.db)) as c:
-            rows = c.execute("SELECT w.status,w.cost_usd FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
-                "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=?", (self.run_id,)).fetchall()
-        if any(r["status"] == "running" or r["cost_usd"] is None for r in rows):
+            running = c.execute("SELECT w.call_id FROM workflow_calls w JOIN workflow_attempts a USING(attempt_id) "
+                "JOIN workflow_executions e USING(execution_id) WHERE e.run_id=? AND w.status='running'",(self.run_id,)).fetchall()
+        if any(r["call_id"]!=ignore_unstarted_call for r in running):
+            return reserve,"unreconciled_call"
+        rows = store.billing_rows(self.run_id,database_path=self.db,ignore_unstarted_call=ignore_unstarted_call)
+        if any(r["status"] == "running" or (r["cost_usd"] is None and
+                (self.retry_policy is None or r["held_cost_usd"] is None)) for r in rows):
             return reserve, "unreconciled_call"
         if len(rows) >= self.limits.max_requests:
             return reserve, "request_limit"
-        spent = sum((Decimal(str(r["cost_usd"])) for r in rows), Decimal(0))
+        spent = Decimal(store.billing_totals(rows)["accounted_exposure_usd"])
         return reserve, "spending_limit" if spent + reserve > Decimal(str(self.limits.budget_usd)) else None
 
     def perform(self, attempt_id, role, request, reservation):
+        if self.retry_policy is not None:
+            return self.perform_with_retries(attempt_id,role,request,reservation)
         call_id = store.create_call(attempt_id, role, request["model"], request,
             cost_reservation_usd=float(reservation), database_path=self.db)
         started, payload, http_status = perf_counter(), None, None
         status, error, unexpected = "completed", None, None
         try:
-            http_status, payload = self.sender(deepcopy(request))
+            response = self.sender(deepcopy(request))
+            http_status, payload = response[:2]
             if not isinstance(payload, dict):
                 payload = None
                 status, error = "failed", "InvalidResponse"
@@ -184,6 +200,123 @@ class Runner:
               or Decimal(str(row["cost_usd"])) > reservation or Decimal(str(spent)) > Decimal(str(self.limits.budget_usd))):
             halt, reason = "budget_stopped", "reservation_exceeded"
         return row, halt, reason
+
+    def retry_decision(self, physical, request, headers):
+        policy = self.retry_policy
+        if not upstream_429(physical["http_status"],json.loads(physical["response_json"]),self.providers[request["model"]],request["model"]):
+            return None,"ineligible_rate_limit"
+        rows = store.billing_rows(self.run_id,database_path=self.db)
+        retried = [r for r in rows if r["retry_wait_seconds"] is not None]
+        if physical["ordinal"]>policy["max_retries_per_call"] or len(retried)>=policy["max_retry_requests"]:
+            return None,"rate_limit_retry_limit"
+        try:
+            delay = retry_delay(json.loads(physical["response_json"]),headers,physical["ordinal"])
+        except ValueError:
+            return None,"rate_limit_cooldown_limit_or_invalid"
+        if sum(r["retry_wait_seconds"] for r in retried)+delay>policy["max_total_wait_seconds"]:
+            return None,"rate_limit_total_cooldown_limit"
+        totals = store.billing_totals(rows)
+        hold = Decimal(str(physical["cost_reservation_usd"])) if physical["cost_usd"] is None else Decimal(0)
+        if hold and (sum(r["held_cost_usd"] is not None for r in rows)>=policy["max_unknown_429_calls"]
+                or Decimal(totals["held_unknown_cost_usd"])+hold>Decimal(policy["max_unknown_reservation_usd"])):
+            return None,"unknown_429_allowance_limit"
+        if len(rows)>=self.limits.max_requests:
+            return None,"request_limit"
+        next_reserve = Decimal(str(self.reservations(deepcopy(request))))
+        if not next_reserve.is_finite() or next_reserve<=0:
+            raise ValueError("Invalid retry reservation.")
+        if Decimal(totals["accounted_exposure_usd"])+hold+next_reserve>Decimal(str(self.limits.budget_usd)):
+            return None,"spending_limit"
+        if any(r["status"]=="running" or (r["cost_usd"] is None and r["held_cost_usd"] is None
+                and r["call_id"]!=physical["call_id"]) for r in rows):
+            return None,"unreconciled_call"
+        return delay,None
+
+    def perform_with_retries(self, attempt_id, role, request, reservation):
+        logical = store.create_call(attempt_id,role,request["model"],request,cost_reservation_usd=float(reservation),database_path=self.db)
+        whole_started = perf_counter()
+        halt = reason = None
+        last_payload = None
+        last_http = None
+        status,error,unexpected = "failed","TransportError",None
+        for ordinal in range(1,4):
+            if ordinal>1:
+                reservation,stop = self.gate(request,ignore_unstarted_call=logical)
+                if stop:
+                    halt,reason = "budget_stopped",stop
+                    break
+            physical = store.create_transport_call(logical,request,float(reservation),database_path=self.db)
+            started = perf_counter()
+            status,error,headers = "completed",None,{}
+            last_payload,last_http = None,None
+            try:
+                response = self.sender(deepcopy(request))
+                last_http,last_payload = response[:2]
+                headers = response[2] if len(response)==3 else {}
+                if not isinstance(headers,dict):
+                    headers = {}
+                    raise ValueError("Invalid response headers.")
+                if not isinstance(last_payload,dict):
+                    last_payload = None
+                    status,error = "failed","InvalidResponse"
+                elif last_http!=200 or "error" in last_payload:
+                    status,error = "failed","ProviderError"
+                elif last_payload.get("model")!=request["model"] or last_payload.get("provider")!=self.providers[request["model"]]:
+                    status,error = "failed","ProviderOrModelMismatch"
+                else:
+                    choices = last_payload.get("choices")
+                    if not isinstance(choices,list) or not choices or not isinstance(choices[0],dict) or choices[0].get("finish_reason")!="stop":
+                        status,error = "failed","IncompleteGeneration"
+            except KeyboardInterrupt:
+                status,error = "interrupted","KeyboardInterrupt"
+            except httpx.HTTPError:
+                status,error = "failed","TransportError"
+            except Exception as exception:
+                status,error,unexpected = "failed",type(exception).__name__,exception
+            store.finish_transport_call(physical,headers=headers,status=status,elapsed_seconds=perf_counter()-started,
+                payload=last_payload,http_status=last_http,error_type=error,database_path=self.db)
+            with closing(store.connect(self.db)) as c:
+                row = dict(c.execute("SELECT * FROM workflow_transport_calls WHERE call_id=?",(physical,)).fetchone())
+            if status=="interrupted":
+                halt,reason = "interrupted","cancelled_billing_may_be_unknown"
+                break
+            if unexpected:
+                break
+            if upstream_429(last_http,last_payload,self.providers[request["model"]],request["model"]):
+                delay,stop = self.retry_decision(row,request,headers)
+                if stop:
+                    halt,reason = "budget_stopped",stop
+                    break
+                store.record_transport_retry(physical,delay,expected_provider=self.providers[request["model"]],database_path=self.db)
+                try:
+                    self.waiter(delay)
+                except KeyboardInterrupt:
+                    status,error,halt,reason = "interrupted","KeyboardInterrupt","interrupted","cancelled_during_cooldown"
+                    break
+                except Exception as exception:
+                    status,error,unexpected = "failed",type(exception).__name__,exception
+                    break
+                continue
+            totals = store.billing_totals(store.billing_rows(self.run_id,database_path=self.db))
+            if row["cost_usd"] is None:
+                halt,reason = "budget_stopped","unknown_cost"
+            elif row["returned_model"]!=request["model"] or row["provider"]!=self.providers[request["model"]]:
+                halt,reason = "budget_stopped","provider_or_model_mismatch"
+            elif row["input_tokens"] is None or row["output_tokens"] is None:
+                halt,reason = "budget_stopped","unknown_token_usage"
+            elif row["reasoning_tokens"] is not None and row["reasoning_tokens"]>row["output_tokens"]:
+                halt,reason = "budget_stopped","inconsistent_reasoning_usage"
+            elif (row["input_tokens"]>input_token_reservation(request) or row["output_tokens"]>request["max_tokens"]
+                    or Decimal(str(row["cost_usd"]))>reservation or Decimal(totals["accounted_exposure_usd"])>Decimal(str(self.limits.budget_usd))):
+                halt,reason = "budget_stopped","reservation_exceeded"
+            break
+        store.finish_call(logical,status=status,elapsed_seconds=perf_counter()-whole_started,payload=last_payload,
+            http_status=last_http,error_type=error,database_path=self.db)
+        if unexpected is not None:
+            raise unexpected
+        with closing(store.connect(self.db)) as c:
+            final = dict(c.execute("SELECT * FROM workflow_calls WHERE call_id=?",(logical,)).fetchone())
+        return final,halt,reason
 
     def execute(self, question, *, repetition=1):
         with closing(store.connect(self.db)) as c:
