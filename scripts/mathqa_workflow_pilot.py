@@ -68,7 +68,7 @@ def validate_endpoint(selected, settings):
 
 
 def routed_endpoint(data, model, settings):
-    """Freeze eligible identities and reserve at ceilings, not cheapest prices.
+    """Freeze compatible identities and reserve at ceilings, not cheapest prices.
 
     The returned pricing object is a budget envelope, not a real endpoint.
     OpenRouter can try providers internally; our request cap counts gateway HTTP
@@ -82,7 +82,9 @@ def routed_endpoint(data, model, settings):
     ceilings = policy["max_price"]
     eligible = []
     for candidate in data["endpoints"]:
-        if candidate.get("status") != 0:
+        # Availability is transient. Recognize compatible metadata endpoints
+        # that become available later without changing the outgoing routing.
+        if type(candidate.get("status")) is not int:
             continue
         try:
             validate_endpoint(candidate, settings)
@@ -97,11 +99,13 @@ def routed_endpoint(data, model, settings):
         except (ValueError, KeyError, TypeError, ArithmeticError):
             continue
         eligible.append(deepcopy(candidate))
-    if not eligible:
+    active = [e for e in eligible if e["status"] == 0]
+    if not active:
         raise ValueError("No active providers satisfy controls and price ceilings.")
     eligible.sort(key=lambda e: e["tag"])
     return {"provider_name": "OpenRouter automatic routing", "tag": "auto", "status": 0,
             "provider_names": sorted({e["provider_name"] for e in eligible}),
+            "active_provider_names": sorted({e["provider_name"] for e in active}),
             "eligible_endpoints": eligible, "routing_policy": policy,
             "pricing": {"prompt": str(Decimal(str(ceilings["prompt"]))/1_000_000),
                         "completion": str(Decimal(str(ceilings["completion"]))/1_000_000), "request": "0"}}

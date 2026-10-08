@@ -4,6 +4,20 @@ Last reviewed: 2026-09-25. This records the current plan, not experimental resul
 
 ## October 6 planning update
 
+Latest October 8 checkpoint: the user requested preparation of the balanced
+27-configuration comparison after the routed check. The
+[routed development proposal](solver-verifier-routed-development-proposal.md)
+freezes the same twenty questions, shuffled schedule and one repetition: 540
+executions. Expected new cost $0.48995280, conservative reservations $3.75507954,
+proposed cap $4.25, at most 3,240 gateway HTTP requests; no client network retries
+or automatic follow-up. Metadata refreshed at 18:57:33 UTC. Provider status had
+changed since the check, so allow known compatible metadata providers to return
+after temporary inactivity while preserving the outgoing routing/price policy;
+require at least one active compatible provider at preflight. This changes only
+response recognition. All 166 offline tests and the read-only scope, arithmetic,
+frozen-plan and database audit pass; preparation consumed no credits. This
+single paid run awaits fresh approval. Historical runs remain separate.
+
 Latest October 8 checkpoint: the user proposed keeping DeepSeek without a
 provider pin and authorized implementation, offline tests, a commit, and a
 fresh small-check proposal. The

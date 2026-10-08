@@ -144,7 +144,7 @@ class RoutingTests(unittest.TestCase):
 
     def test_preflight_excludes_ineligible_endpoints_and_fails_without_candidates(self):
         template = deepcopy(self.metadata["models"][DEEPSEEK]["data"]["endpoints"][0])
-        cases = [{"status":-2},{"supported_parameters":["max_tokens","temperature"]},
+        cases = [{"status":None},{"supported_parameters":["max_tokens","temperature"]},
                  {"max_completion_tokens":256},{"pricing":{"prompt":"0.000001","completion":"0.000001"}},
                  {"pricing":{"prompt":"0.0000003","completion":"0.000002"}},
                  {"pricing":{"prompt":"0.0000003","completion":"0.000001","request":".001"}},
@@ -161,6 +161,20 @@ class RoutingTests(unittest.TestCase):
                 data["endpoints"] = [candidate]
                 with self.assertRaisesRegex(ValueError,"No active providers"):
                     availability.prepare_plan(metadata,self.exposure,dataset_path=self.dataset,deepseek_provider="auto")
+
+    def test_known_compatible_provider_can_return_after_being_inactive(self):
+        endpoints = self.metadata["models"][DEEPSEEK]["data"]["endpoints"]
+        endpoints[1]["status"] = -2
+        self.plan = availability.prepare_plan(self.metadata,self.exposure,dataset_path=self.dataset,deepseek_provider="auto")
+        envelope = self.plan["endpoints"][DEEPSEEK]
+        self.assertIn("Other provider",envelope["provider_names"])
+        self.assertNotIn("Other provider",envelope["active_provider_names"])
+        result = self.run_mock()
+        self.assertTrue(result["complete_coverage"])
+        self.assertTrue(any(r["provider"]=="Other provider" for r in result["provider_costs"]))
+        endpoints[0]["status"] = -2
+        with self.assertRaisesRegex(ValueError,"No active providers"):
+            availability.prepare_plan(self.metadata,self.exposure,dataset_path=self.dataset,deepseek_provider="auto")
 
     def test_plan_freezes_routing_and_disables_client_retry_exception(self):
         availability.validate_plan(self.plan)

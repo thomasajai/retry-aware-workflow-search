@@ -151,6 +151,17 @@ prior rows are preserved. This is availability evidence on two repeated pilot
 questions. The broad development comparison still requires a new cost proposal
 and approval; Milestone 4 remains open.
 
+The user requested the
+[routed development comparison proposal](notes/solver-verifier-routed-development-proposal.md).
+It retains the original twenty questions and all twenty-seven configurations:
+540 executions, approximately **$0.49** estimated spend, a **$4.25 cap**, and
+**3,240 maximum gateway requests**. Fresh metadata showed transient provider
+status changes, so response audits now recognize all known compatible providers
+within the existing ceilings, including temporarily inactive ones; at least one
+must be active at preflight. Outgoing routing and prompts are unchanged.
+All **166 offline tests pass**; the frozen plan and read-only scope/cost/database
+audits pass. Preparation consumed no credits. Paid approval is pending.
+
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:
 

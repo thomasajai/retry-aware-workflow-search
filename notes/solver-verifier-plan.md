@@ -4,6 +4,16 @@ Created: 2026-10-06. Updated: 2026-10-08. Status: Milestones 1–3 completed,
 with a user-selected provisional verifier and a successful live integration pilot.
 Milestone 4 remains. This document alone does not authorize paid calls.
 
+Latest October 8 preparation: the user requested the
+[routed development comparison](solver-verifier-routed-development-proposal.md).
+The final frozen plan retains twenty original questions, all twenty-seven
+sequences, one repetition and the fixed Gemini verifier: 540 executions,
+$0.48995280 estimated new cost, $3.75507954 conservative reservations, proposed
+$4.25 cap and 3,240 maximum gateway HTTP requests. Known compatible DeepSeek
+providers can return after temporary inactivity, within unchanged routing
+price/parameter controls. All 166 offline tests and preparation audits pass.
+No credits consumed; approval for this specific paid run is pending.
+
 October 8 checkpoint: after pinned DeepSeek development runs and bounded
 cooldown recovery encountered upstream throttling, the user chose to keep
 DeepSeek and authorize an opt-in routing implementation. The
