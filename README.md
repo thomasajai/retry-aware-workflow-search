@@ -55,7 +55,9 @@ solution. The user has now chosen **Gemini 2.5 Flash-Lite with recomputation and
 reasoning** as the provisional verifier. Additional verifier selection is
 deferred. The [offline loop milestone](notes/solver-verifier-milestone-3-offline.md)
 implements the three-attempt LangGraph workflow, durable calls, and independent
-option grading. **112 offline tests pass**; a small live loop pilot remains.
+option grading. **123 offline tests pass**. The [live loop pilot proposal](notes/solver-verifier-loop-pilot-proposal.md)
+freezes six executions, a $0.00442248 estimate, $0.04 cap, and 36-request maximum.
+The user instructed us to commit and run this small pilot.
 Paid stages require advance cost disclosure and explicit execution with a
 defined budget.
 
@@ -70,7 +72,12 @@ The demo uses a separate database and simulated responses, with no credentials
 or HTTP. It demonstrates early acceptance, third-attempt acceptance, rejection
 exhaustion, and independent scoring of an accepted wrong option. These commands
 have no paid execution mode. Solver temperature 0.2 and a 512-token output cap
-are proposed loop settings; legacy batch defaults are unchanged.
+are frozen for this pilot; legacy batch defaults are unchanged.
+
+`scripts/mathqa_workflow_pilot.py` adds a separate explicit paid adapter with
+source/data-bound plans, provider price ceilings, and independent scoring.
+The proposal records its advance cost breakdown and scope; a larger evaluation
+requires its own proposal and authorization.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:

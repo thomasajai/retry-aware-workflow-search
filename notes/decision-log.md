@@ -91,6 +91,19 @@ consumed, and the real database still contains 81 prior verifier calls costing
 $0.00784018. Next prepare a separately costed live loop pilot; no stronger
 verifier experiment or live workflow run is automatically authorized.
 
+## October 7 live loop pilot preparation
+
+The user instructed us to commit and then run the pilot. Milestone 2 and the
+offline loop were committed as `0fc1d05`. The [live loop proposal](solver-verifier-loop-pilot-proposal.md)
+freezes two development questions, three cyclic solver sequences, one repetition,
+six executions, temperature 0.2, and the provisional Gemini 2.5 verifier.
+Fresh free provider metadata confirms the requested controls. Estimated cost is
+$0.00442248 for 24 requests; full-cap reservations total $0.03480540. The pilot
+uses a $0.04 spending limit and 36-request maximum, with no transport retries or
+provider fallback. The separate HTTP adapter and provider price ceilings pass
+123 offline tests. Commit this preparation before live execution; report actual
+coverage/cost and checkpoint afterward. Larger evaluation is a later scope.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)

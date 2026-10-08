@@ -84,7 +84,7 @@ class Runner:
     reservations(request) quotes a conservative charge, excluding past spend.
     """
 
-    def __init__(self, run_id, config_id, config, *, database_path, sender, reservations, providers, limits):
+    def __init__(self, run_id, config_id, config, *, database_path, sender, reservations, providers, limits, price_limits=None):
         self.run_id, self.config_id = run_id, config_id
         self.config = deepcopy(config)
         expected = configuration(config["solver_sequence"],
@@ -94,6 +94,14 @@ class Runner:
             raise ValueError("Workflow configuration differs from trusted profile builders.")
         self.db, self.sender, self.reservations = database_path, sender, reservations
         self.providers, self.limits = deepcopy(providers), limits
+        self.price_limits = deepcopy(price_limits)
+        if self.price_limits is not None:
+            for model in {p["model"] for p in self.config["solvers"] + [self.config["verifier"]]}:
+                ceiling = self.price_limits.get(model, {})
+                if (set(ceiling) != {"prompt", "completion", "request"} or ceiling["request"] != 0
+                        or any(isinstance(ceiling[k], bool) or not isinstance(ceiling[k], (int, float))
+                               or not Decimal(str(ceiling[k])).is_finite() or ceiling[k] <= 0 for k in ("prompt", "completion"))):
+                    raise ValueError("Every pilot model needs finite positive token price ceilings and zero per-request charge.")
         with closing(store.connect(self.db)) as c:
             row = c.execute("SELECT * FROM workflow_configs WHERE config_id=? AND run_id=?", (config_id, run_id)).fetchone()
             run = c.execute("SELECT * FROM workflow_runs WHERE run_id=?", (run_id,)).fetchone()
@@ -103,6 +111,11 @@ class Runner:
             raise ValueError("Runner requires an unfinished sequence evaluation.")
         if run["budget_usd"] != limits.budget_usd or run["max_requests"] != limits.max_requests:
             raise ValueError("Limits must match the recorded run budget/request cap.")
+
+    def priced_request(self, request):
+        if self.price_limits is not None:
+            request["provider"]["max_price"] = deepcopy(self.price_limits[request["model"]])
+        return request
 
     def gate(self, request):
         reserve = Decimal(str(self.reservations(deepcopy(request))))
@@ -183,7 +196,7 @@ class Runner:
 
         def solve(state):
             solver = self.config["solvers"][state["position"]-1]
-            request = solver_request(solver, state["question"])
+            request = self.priced_request(solver_request(solver, state["question"]))
             reserve, stop = self.gate(request)
             if stop:
                 return {"halt_status": "budget_stopped", "halt_reason": stop}
@@ -201,7 +214,7 @@ class Runner:
             return {"usability": result}
 
         def verify(state):
-            request = build_request(self.config["verifier_alias"], state["question"], state["usability"]["fields"])
+            request = self.priced_request(build_request(self.config["verifier_alias"], state["question"], state["usability"]["fields"]))
             reserve, stop = self.gate(request)
             if stop:
                 return {"halt_status": "budget_stopped", "halt_reason": stop}

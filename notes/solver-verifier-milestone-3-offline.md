@@ -116,8 +116,10 @@ supports the state, nodes, conditional routing, and compilation used here.
 The offline part of Milestone 3 is complete. A small **live** loop pilot remains,
 so Milestone 3 as a whole is still open. Next prepare the explicit HTTP adapter,
 frozen pilot plan, current solver/verifier endpoint controls and prices, numeric
-spending/request limits, and advance cost breakdown. The runner deliberately
-has no default sender or paid CLI yet. No new live run is authorized by this
-provisional verifier decision. After an approved pilot demonstrates the actual
-integration, proceed to sequence evaluation rather than reopening verifier
-selection automatically.
+spending/request limits, and advance cost breakdown. The graph runner has no
+default sender. The subsequent [live pilot preparation](solver-verifier-loop-pilot-proposal.md)
+adds a separate guarded HTTP adapter, fresh provider metadata, and a frozen
+six-execution schedule. The user explicitly instructed us to commit and run
+that pilot. All 123 offline tests pass at this later checkpoint. After the
+pilot demonstrates actual integration, proceed to sequence evaluation rather
+than reopening verifier selection automatically.
