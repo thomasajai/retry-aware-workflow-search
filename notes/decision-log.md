@@ -104,6 +104,21 @@ provider fallback. The separate HTTP adapter and provider price ceilings pass
 123 offline tests. Commit this preparation before live execution; report actual
 coverage/cost and checkpoint afterward. Larger evaluation is a later scope.
 
+## October 7 completed live loop pilot
+
+The tested pilot adapter/proposal was committed as `00453de` before execution.
+The [live pilot completed](solver-verifier-loop-pilot-results.md): six executions,
+twenty calls, $0.00249524 known cost, zero technical errors or unknown charges,
+59.13 seconds. All six final options match independent keys. Natural routing
+demonstrated first-, second-, and third-attempt acceptance; four wrong proposals
+were rejected. Separate assistant review finds valid accepted calculations and
+invalid rejected calculations. This is two exposed development questions, not
+a verifier reliability estimate or a ranking of 27 sequences. Audits confirm
+exact original-input request reconstruction, independent grading, intact prior
+records and clean code provenance. Milestone 3 is complete. Total known workflow
+spend is $0.01033542 across 101 calls. Checkpoint before Milestone 4; its larger
+evaluation needs a separate scope/cost proposal.
+
 ## Project scope
 
 - Search model assignments for agent workflows that can retry. Evaluate task success, deployment cost, and latency, and account for failed attempts and paths that stop early. Report the cost of finding a configuration separately from the cost of running it. (Project description.)

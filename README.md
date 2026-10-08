@@ -55,9 +55,11 @@ solution. The user has now chosen **Gemini 2.5 Flash-Lite with recomputation and
 reasoning** as the provisional verifier. Additional verifier selection is
 deferred. The [offline loop milestone](notes/solver-verifier-milestone-3-offline.md)
 implements the three-attempt LangGraph workflow, durable calls, and independent
-option grading. **123 offline tests pass**. The [live loop pilot proposal](notes/solver-verifier-loop-pilot-proposal.md)
-freezes six executions, a $0.00442248 estimate, $0.04 cap, and 36-request maximum.
-The user instructed us to commit and run this small pilot.
+option grading. **123 offline tests pass**. The [live loop pilot completed](notes/solver-verifier-loop-pilot-results.md):
+six executions, twenty requests, $0.00249524 actual cost, and no technical errors.
+It naturally demonstrated acceptance at slots one, two, and three; all final
+options match independent keys. Milestone 3 is complete. The two-question pilot
+checks integration and cannot rank all 27 sequences or certify verifier reliability.
 Paid stages require advance cost disclosure and explicit execution with a
 defined budget.
 

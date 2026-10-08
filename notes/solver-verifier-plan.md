@@ -1,8 +1,8 @@
 # Solver-verifier workflow implementation and experiment plan
 
-Created: 2026-10-06. Updated: 2026-10-07. Status: Milestones 1 and 2 completed,
-with a user-selected provisional verifier. Milestone 3's offline loop is complete;
-its live pilot remains. This document alone does not authorize paid calls.
+Created: 2026-10-06. Updated: 2026-10-07. Status: Milestones 1–3 completed,
+with a user-selected provisional verifier and a successful live integration pilot.
+Milestone 4 remains. This document alone does not authorize paid calls.
 
 This plan records the design agreed in the October 5-6 discussion. It covers choosing a verifier, implementing a bounded retry workflow, and evaluating solver sequences. It complements the broader [project description](../PROJECT.md) and [decision log](decision-log.md). Suggested settings and sample sizes below are proposals, not measured results or already agreed experimental choices.
 
@@ -245,7 +245,7 @@ These are implementation/experiment choices to resolve at the relevant milestone
 - [x] Record agreed rules and explicit implementation/experiment plan.
 - [x] Milestone 1: storage, offline screening preview, and reviewed fixtures (2026-10-06; 53 offline tests passed, zero OpenRouter requests).
 - [x] Milestone 2: run budgeted verifier experiments and choose Gemini 2.5 Flash-Lite with reasoning provisionally (user choice, 2026-10-07).
-- [ ] Milestone 3: implement/test the loop and finish a small live pilot.
+- [x] Milestone 3: implement/test the loop and finish a small live pilot (2026-10-07; 123 offline tests, six live executions, $0.00249524).
 - [ ] Milestone 4: evaluate sequences and held-out finalists.
 
 Milestone 1 was committed as `c25aa92` on 2026-10-07. [Milestone 2 offline
@@ -291,5 +291,17 @@ requests. The real experiment database remains unchanged. Next prepare a small
 live loop pilot with fresh endpoint preflight, a frozen numeric budget/request
 cap, an HTTP adapter, and advance cost disclosure. Milestone 3 stays open until
 that approved live integration is demonstrated.
+
+The user subsequently instructed us to commit and run the pilot. The
+implementation checkpoint `0fc1d05` and guarded adapter/proposal checkpoint
+`00453de` were committed first. The [live pilot](solver-verifier-loop-pilot-results.md)
+completed all six executions with twenty calls, $0.00249524 cost, no unknown
+charges or technical errors. Natural decisions reached all three positions;
+six accepted final options match the independent keys. A separate assistant
+reasoning review confirms valid accepted calculations and invalid rejected
+calculations in this small sample. Read-only audits pass; legacy and prior
+workflow records are unchanged. Milestone 3 is complete. Next prepare Milestone
+4's balanced development sweep with fresh rates and a separate advance cost
+proposal; no larger paid run is authorized by completing this pilot.
 
 Reference documentation consulted during design: [LangGraph workflows](https://docs.langchain.com/oss/python/langgraph/workflows-agents), [SQLite use cases](https://www.sqlite.org/whentouse.html), [Alembic](https://alembic.sqlalchemy.org/en/latest/), and [OpenRouter reasoning-token controls](https://openrouter.ai/docs/guides/best-practices/reasoning-tokens). Availability, prices, and provider support must be rechecked at live execution time.
