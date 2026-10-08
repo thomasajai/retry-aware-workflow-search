@@ -211,6 +211,15 @@ partial-report exporter is repaired, all 133 offline tests pass, and prior
 records remain intact. No ranking or automatic continuation; resolve provider
 capacity and propose a new frozen/costed stage before another paid run.
 
+The user then approved the [Venice provider stage](solver-verifier-venice-proposal.md).
+Its [run stopped](solver-verifier-venice-results.md) after 29 requests at another
+upstream 429 with unknown billing: ten finished executions, one incomplete,
+known additional spend $0.00379209782 plus one unresolved charge. No complete
+question block or ranking. All 136 offline tests passed and audit checks hold.
+Next design explicit rate-limit handling and billing safeguards, then propose
+a bounded availability diagnostic before another full evaluation. No automatic
+rerun or settings change is authorized.
+
 - Standing user instruction: before every credit-consuming OpenRouter workflow/script, explain its purpose, proposed scope, estimated total cost, and a small cost breakdown. This applies to live diagnostics/tests, trials, batches, reruns, and retries as well as the main workflow. Follow the [repository spending rule](../README.md#openrouter-spending-rule).
 - The advance breakdown includes models/providers and roles, expected/maximum request counts, input-token and total billed output-token assumptions (including reasoning), current rates, and subtotals. Separate the expected estimate from the spending limit and disclose uncertainty. Reuse saved responses/offline checks where they suffice. Run only within existing user authorization; expansion beyond it needs authorization before execution. Report actual known spend and unknown measurements afterward.
 - Planning, previews, migrations/tests on disposable databases, and offline grading make no model calls.

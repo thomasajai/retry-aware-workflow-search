@@ -10,8 +10,14 @@ freezes the new pin while preserving Gemini and the same twenty questions and
 twenty-seven sequences. All 136 offline tests pass; legacy profiles, old workflow
 builders and the real database are unchanged. No paid calls during preparation.
 The new 540-execution run proposes approximately $0.398 expected spend, $3.50
-cap and 3,240 maximum requests; it awaits authorization. The prior run's
-$0.00555908 known spend and one unresolved charge remain preserved separately.
+cap and 3,240 maximum requests. The user approved that single run. The
+[Venice results](solver-verifier-venice-results.md) record another upstream 429
+after six successful DeepSeek calls: 29 total requests, ten finished executions,
+one incomplete, $0.00379209782 known additional spend plus one unresolved charge.
+No complete question block or ranking; no automatic retry or further provider
+change. The prior run's $0.00555908 known spend and one unresolved charge remain
+preserved separately. Rate-limit handling and a small availability diagnostic
+are recommended before another broad run, each with an explicit budget policy.
 
 The user requested an explicit [solver-verifier implementation and experiment
 plan](solver-verifier-plan.md). It records the newly agreed rules: fresh solver

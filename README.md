@@ -98,8 +98,15 @@ after 45 requests at a DeepInfra HTTP 429 without reported cost: fourteen
 executions finished, one is incomplete, known new spend $0.00555908 plus one
 unknown charge. No question block completed, so there is no sequence ranking.
 The partial-report null-fields bug is fixed and the saved report recovered
-without more model calls. **133 offline tests pass**. No automatic rerun or
-provider change has occurred; Milestone 4 remains open.
+without more model calls. This initial stage passed **133 offline tests**.
+
+The user subsequently approved the [Venice provider proposal](notes/solver-verifier-venice-proposal.md)
+with the same $3.50 / 3,240-request limits. All **136 offline tests pass**.
+The [Venice run stopped](notes/solver-verifier-venice-results.md) after 29 requests:
+six DeepSeek calls succeeded before another upstream 429 with unreported
+billing. Ten executions finished; one is incomplete. Known additional spend
+$0.00379209782 plus one unresolved charge. Both runs remain separate with no
+ranking or automatic continuation; Milestone 4 remains open.
 
 Preview the first 20 questions of the saved 100-question batch against all three
 proposed verifier candidates, with the independently reviewed synthetic diagnostics:

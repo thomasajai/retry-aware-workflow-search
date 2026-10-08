@@ -1,7 +1,9 @@
 # Development evaluation with Venice — October 8, 2026
 
-Status: provider change prepared offline at the user's request; **new paid run
-awaits approval**. DeepInfra's stopped run remains preserved in the
+Status: the user approved this single run with the $3.50 cap / 3,240-request
+maximum. The [Venice execution stopped](solver-verifier-venice-results.md) after
+29 requests at an upstream 429 with unknown billing. No further paid run is
+authorized automatically. DeepInfra's stopped run remains preserved in the
 [partial results](solver-verifier-development-results.md). This proposal keeps
 Gemini 2.5 Flash-Lite with reasoning as the verifier and changes only DeepSeek's
 provider pin to Venice. No more verifier screening is proposed.
