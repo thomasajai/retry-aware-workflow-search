@@ -41,6 +41,34 @@ Afterward, report actual known cost, any missing cost measurements, request
 counts, and what the run established. Offline work does not need a paid-run
 notice. A saved paid response reused offline does not consume credits again.
 
+## Offline experiment tree
+
+Export the completed 27-configuration, 20-question comparison as an interactive,
+self-contained HTML page:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/mathqa_workflow_trie.py
+```
+
+The output is saved under `results/workflow_trees/`. Open the HTML file in a
+browser. Common prefixes share nodes: one question-set root, three first
+solvers, nine second solvers and 27 third-solver leaves. Hover for cumulative
+solver/verifier spend, per-question means, acceptance, independent key accuracy,
+request counts and how often the slot was reached. Each leaf displays the full
+configuration's actual cost and accuracy, including early stops.
+
+Filter by question or click a node/table row to highlight a path. Below the tree
+are saved experiment settings, observed providers and frozen pricing, a
+LangGraph diagram, all questions and exact prompt templates. Recorded question
+quality flags remain separate from scores. Shared-node metrics pool fresh calls
+across matching configurations; calls were not reused across branches.
+
+Use `--run-id ID`, `--database PATH`, `--output PATH.html` or `--grader-version`
+to select another saved comparison. This view requires all 27 three-model
+sequences and their saved evaluation plan. The exporter uses only Python's
+standard library, opens SQLite read-only, and makes **zero model or network
+calls**. It needs no API key and never runs or regrades an experiment.
+
 ## Solver-verifier workflow plan
 
 The [solver-verifier plan](notes/solver-verifier-plan.md) records the agreed retry
