@@ -1,0 +1,3023 @@
+{
+  "version": "workflow-search-comparison-v1",
+  "source": {
+    "database": "data/experiments/mathqa_runs.sqlite3",
+    "database_sha256": "85a779dd74b6dd51772d1131ccae03c3e7002c3f52c12cfa2f2056d42f7599e9",
+    "run_id": "f0c941bc-5479-4e86-ae2d-261b521a3317",
+    "dataset_sha256": "07ec007c4ad73eb40b57d8b494429f73e37e0c2d79cf1c6b90debf3f05ebbaca",
+    "plan_sha256": "c8afff2663e82c7d58476d567134eb1945215200707161173d413acef6fcf365",
+    "grader_version": "workflow-option-v1",
+    "billable_requests": 2194,
+    "question_count": 20,
+    "configuration_count": 27
+  },
+  "exhaustive": {
+    "pairs": 540,
+    "cost_cents": "30.11817598300",
+    "accuracy": 0.65,
+    "optimal_configurations": [
+      "deepseek-deepseek-deepseek",
+      "deepseek-deepseek-qwen25",
+      "deepseek-qwen25-deepseek",
+      "qwen3-qwen3-deepseek"
+    ]
+  },
+  "series": [
+    {
+      "strategy": "vinelm",
+      "version": "vinelm-adapted-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": null,
+        "pseudocount": 0.5,
+        "depth3_rank_one_smoothing": true,
+        "sampling": "uniform unseen pairs, without replacement",
+        "ties": "fixed seeded random priority; accuracy only",
+        "priors": "Dirichlet(alpha,alpha,alpha) at depths 1/2; Beta(alpha,alpha) at depth 3",
+        "missing_depth3": "mean of observed posterior rates in the model column; 0.5 if none",
+        "cost_policy": "full recorded solver and verifier cost; no checkpoint discounts",
+        "band": "10th-90th percentile across profiling orders, not a confidence interval",
+        "origin": "seeded prior-only recommendation before any profiling",
+        "limitations": [
+          "prefix pooling need not recover exact finite-grid column means",
+          "fixed original keys; known question and verifier issues",
+          "one recorded execution per pair; no generation resampling",
+          "no checkpoint reuse or runtime controller"
+        ]
+      },
+      "result_path": "results/workflow_search/vinelm-adapted.json",
+      "result_sha256": "86c71cacadc1eb94dff8c5d127fe2944c9cd4c53e16c79d141b9cade08714529",
+      "curve": [
+        {
+          "strategy": "vinelm",
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 7.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 7.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.29
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 6.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 6.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 5.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 5.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.28
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 5.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 5.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.28
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 4.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 4.900000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 5.150000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 4.500000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 5.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.29
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 4.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.37
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 4.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.38
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 4.250000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 3.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 3.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 3.1500000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.54
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 3.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.52
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 3.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.52
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 3.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 3.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 3.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 3.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.51
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 3.7500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 3.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.54
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 3.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.55
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 2.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.56
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 2.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.55
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 3.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.51
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.54
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 2.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 2.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.56
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 2.3500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 2.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 2.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 2.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 2.5000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 2.5000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 2.3500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.67
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 1.9000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.68
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 1.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.69
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 1.8500000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 1.6500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 1.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 1.7000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 1.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.75
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 1.7500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 1.6500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 1.7500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 1.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.79
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 1.3500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 1.4500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.75
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.77
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 1.1000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.8
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 0.9000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 0.8000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 0.6500000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 0.6500000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 0.6000000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.88
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 0.40000000000000036,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 0.4500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 0.4500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 0.4000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 0.4000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 0.4500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 0.4000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "vinelm",
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ],
+      "implementation_sha256": "890e131880c83414e0c8bcf86f2bca0792ce00f04f5d132d57b7e8b631fe668e",
+      "specification_sha256": "11f635ab753626b9584d4698dc4acbbcd4400b711b0984f3a43b07d29727cb47"
+    },
+    {
+      "strategy": "agentopt",
+      "version": "agentopt-matrix-ucb-e-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": null,
+        "exploration_weight": 1.0,
+        "batch_size": 1,
+        "sampling": "Matrix UCB-E: choose max UCB, then uniform unseen question",
+        "recommendation": "maximum raw mean of observed workflow scores; unobserved excluded",
+        "priors": "none; seeded initial recommendation has null estimated accuracy",
+        "ties": "fixed seeded random priority; accuracy only",
+        "cost_policy": "full recorded solver and verifier cost; no cache discounts",
+        "band": "10th-90th percentile across profiling orders, not a confidence interval",
+        "limitations": [
+          "fixed original keys; known question and verifier issues",
+          "one recorded execution per pair; no generation resampling",
+          "Random is pair sampling, not the paper's full-configuration variant",
+          "seeded ties and Python RNG are replay choices, not library bitwise reproduction"
+        ]
+      },
+      "result_path": "results/workflow_search/agentopt.json",
+      "result_sha256": "e99454e5ca27a69beee3ec42d64c7b0bd31942738c45394aa0f349ff65bbebd4",
+      "curve": [
+        {
+          "strategy": "agentopt",
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 8.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.19
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 8.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 8.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 8.15,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 7.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.2
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.23
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 5.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.37
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 5.750000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 5.750000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 5.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 5.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.36
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 4.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.38
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 4.700000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 4.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 4.300000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 4.550000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 4.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 4.900000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.4
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 4.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 3.9500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 4.250000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 3.9500000000000024,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.43
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 3.6000000000000023,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.4
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 3.7000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 3.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 3.100000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.5
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 3.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 2.7500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 2.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 2.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 2.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.63
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 2.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.67
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 2.000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 1.3500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.77
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.79
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 1.2000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 1.7000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 1.1000000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 0.8000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 0.6000000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.89
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 0.7500000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 1.0500000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 0.7500000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 0.7000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.89
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 0.6000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.91
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 0.30000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 0.30000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.95
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 0.30000000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 0.25000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 0.30000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 0.4000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 0.3500000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 0.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 0.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 0.15000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 0.15000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "agentopt",
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ],
+      "implementation_sha256": "1f93b7296afb78abc1898feef8761344dd680816ae72a5339f60ea9a50622da1",
+      "specification_sha256": "10f9e85d820b38b08a8bd1cf2cc7ff7dc9107dca79b0129358762ecfcbd984af",
+      "shared_implementation_sha256": "21f968e6736f14af57ea5f07ddf9723463b91c36bfaeaf325650a929168ee46d"
+    },
+    {
+      "strategy": "random",
+      "version": "random-pair-search-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": null,
+        "exploration_weight": null,
+        "batch_size": 1,
+        "sampling": "uniform unseen pairs, without replacement; same orders as VineLM",
+        "recommendation": "maximum raw mean of observed workflow scores; unobserved excluded",
+        "priors": "none; seeded initial recommendation has null estimated accuracy",
+        "ties": "fixed seeded random priority; accuracy only",
+        "cost_policy": "full recorded solver and verifier cost; no cache discounts",
+        "band": "10th-90th percentile across profiling orders, not a confidence interval",
+        "limitations": [
+          "fixed original keys; known question and verifier issues",
+          "one recorded execution per pair; no generation resampling",
+          "Random is pair sampling, not the paper's full-configuration variant",
+          "seeded ties and Python RNG are replay choices, not library bitwise reproduction"
+        ]
+      },
+      "result_path": "results/workflow_search/random.json",
+      "result_sha256": "2d9f9f42c72cbe0dcfcbac241b8a9b968643dfebb2d93cce3688f485696331b7",
+      "curve": [
+        {
+          "strategy": "random",
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.14
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 8.65,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.17
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 8.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.16
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 9.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.17
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 9.05,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.19
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 9.200000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.17
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 8.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.2
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 7.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.25
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 8.05,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 8.05,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 7.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 6.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 6.700000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 7.500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 7.5500000000000025,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 7.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 7.500000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 7.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 7.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 6.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.21
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 6.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.22
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 6.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.25
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 6.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 6.650000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.26
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 6.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.27
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 6.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 6.000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 5.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 5.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 5.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.35
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 4.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 4.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 4.550000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 5.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 5.250000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 5.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 5.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 10.50000000000004,
+          "optimal_fraction": 0.29
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 5.5500000000000025,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.3
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 5.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 4.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 5.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 5.150000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 4.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.35
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 4.650000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 4.500000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.37
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 4.250000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 4.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 4.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 4.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 3.9000000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 3.9000000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 4.300000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 3.7500000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 3.9500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 3.5000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 3.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 3.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 3.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.49
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 3.0000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.5
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 2.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.52
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 2.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.51
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 2.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.54
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 2.3500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 2.1500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 2.2500000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 2.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 2.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 2.2500000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 2.5000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 2.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 1.8000000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.66
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 1.500000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 1.5500000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 1.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 1.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 1.2500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 1.1500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 1.2500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 1.0000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.81
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.9000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.82
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.8500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.83
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.5500000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.89
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "strategy": "random",
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ],
+      "implementation_sha256": "1f93b7296afb78abc1898feef8761344dd680816ae72a5339f60ea9a50622da1",
+      "specification_sha256": "10f9e85d820b38b08a8bd1cf2cc7ff7dc9107dca79b0129358762ecfcbd984af",
+      "shared_implementation_sha256": "21f968e6736f14af57ea5f07ddf9723463b91c36bfaeaf325650a929168ee46d"
+    }
+  ],
+  "plotter_sha256": "ae844fa787a7f89d75241e838ae4bd95b2486bab31a147f5a2dba114bb94b5c9",
+  "saved_on": "2026-10-08"
+}

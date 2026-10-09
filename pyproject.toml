@@ -9,5 +9,8 @@ dependencies = [
     "python-dotenv>=1.2.4",
 ]
 
+[project.optional-dependencies]
+profiling = ["numpy>=2.0", "matplotlib>=3.9"]
+
 [tool.uv]
 cache-dir = ".uvcache"

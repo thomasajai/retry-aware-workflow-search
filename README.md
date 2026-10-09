@@ -17,6 +17,47 @@ Always follow these instructions when working in this repository:
 
 This agreement applies to code, documentation, and experiments.
 
+### Offline search comparison
+
+The current VineLM / AgentOpt / Random search task uses **only saved database
+data**. OpenRouter calls and credit spending are out of scope. Search runners
+must open the database read-only and must not invoke paid workflow adapters.
+Keep the exact [experiment specification](notes/workflow-search-experiment-spec.md)
+updated in the same change whenever the implementation changes; version changes
+to numerical semantics and retain source/specification hashes in saved outputs.
+
+The approved **VineLM adapted** baseline shares statistical prefix evidence,
+accounts for incorrect acceptance separately from continuation, applies
+third-attempt rank-one smoothing, and charges every queried pair's full recorded
+cost. It selects one configuration overall; checkpoint discounts and runtime
+model switching are excluded. Run the baseline and scientific figure offline:
+
+```powershell
+uv run --locked --extra profiling python scripts/mathqa_vinelm.py --plot
+```
+
+JSON histories, CSV aggregates, PNG and SVG figures are written under
+`results/workflow_search/`. Run Matrix UCB-E (AgentOpt, a=1, one pair per step)
+and uniform Random pair search, reusing the saved VineLM values in the overlay:
+
+```powershell
+uv run --locked --extra profiling python scripts/mathqa_search.py --plot
+```
+
+Every strategy saves the same curve CSV schema and full per-seed JSON histories.
+The combined `search-comparison.csv` adds a strategy column. Redraw the overlay
+from its saved values without running any search or reading the database:
+
+```powershell
+uv run --locked --extra profiling python scripts/mathqa_search_plot.py results/workflow_search/search-comparison.json
+```
+
+Portable values are also saved in [data/search_baselines](data/search_baselines/README.md),
+including the original VineLM curve. These compact files can travel with the
+project and recreate the overlaid figure without the full histories or database.
+The [comparison results](notes/workflow-search-comparison-results.md) record
+baseline values and their interpretation.
+
 ### OpenRouter spending rule
 
 Apply this rule to every paid workflow or script, including live tests,

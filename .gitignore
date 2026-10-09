@@ -39,6 +39,7 @@ agentopt/
 /results/mathqa_experiments/
 /results/workflow_previews/
 /results/workflow_trees/
+/results/workflow_search/
 /results/backups/
 /results/archive/*/openrouter-current-check.json
 /results/archive/*/openrouter-diagnostic.json
