@@ -1,7 +1,11 @@
 # Offline workflow search experiment specification
 
 Algorithm versions: **vinelm-adapted-v1**, **agentopt-matrix-ucb-e-v1**,
-**random-pair-search-v1**. Comparison format: **workflow-search-comparison-v1**.
+**random-pair-search-v1**, **gittins-equal-cost-finite-v1**,
+**sysrs-synchronized-v1**. Comparison formats: **workflow-search-comparison-v1**
+(original three equal-length strategies), **workflow-search-comparison-v2**
+(additional naturally terminating strategies), **workflow-search-budget-matched-v1**
+(independent SySRs horizons, matched per-seed spend).
 Updated October 8, 2026.
 
 This is the controlling specification for the search comparison. Update this
@@ -24,8 +28,9 @@ the 27 ordered three-model sequences. There is no deployment cost or latency
 constraint. Profiling spend is the horizontal axis, distinct from deployment
 cost. All configurations tied for maximum recorded accuracy are optimal.
 
-The implemented strategies are adapted VineLM, AgentOpt Matrix UCB-E, and uniform
-Random pair search. They share the same source, independent final workflow
+The implemented strategies are adapted VineLM, AgentOpt Matrix UCB-E, uniform
+Random pair search, equal-cost Gittins, and synchronized successive rejects
+(SySRs). They share the same source, independent final workflow
 scores, full recorded costs and evaluator. The sections below define each.
 
 ## Frozen source and admission checks
@@ -340,7 +345,197 @@ hashes. The portable JSON can be rendered without full histories or the database
 Only the full histories allow reaggregation to different arbitrary budgets.
 Update portable baseline snapshots deliberately when experiment versions change.
 
-## Limits and validation
+## Equal-cost Gittins: exact replay algorithm
+
+Version: **gittins-equal-cost-finite-v1**. Reference:
+[BanditGittinsEval](https://github.com/QianJaneXie/BanditGittinsEval), pinned commit
+`a4992e22a48e781327efd5411fb7d0921ad5ab61`, `src/gittins_policy.py`,
+`src/gittins_shrinking_posterior.py`, `src/gittins_lookup.py`,
+`src/q_estimation.py`, and `src/simple_regret_recommend.py`.
+Attribution and MIT license are in `references/BanditGittinsEval-NOTICE.md`.
+
+Use configurations as arms and questions as available observations. One step
+reveals one binary final workflow score, sampled uniformly from unseen questions
+on the configuration with the largest unfinished Gittins index. No prefix
+pooling. Public identities are sorted; Python `Random(seed)` chooses unseen
+questions. Use the existing independent `Random(seed+1_000_003)` configuration
+priority for sampling and recommendation ties within absolute tolerance 1e-12.
+RNG and ties differ from the reference's Torch RNG/first-index ties.
+
+Fixed defaults, selected from the reference before the 100-seed experiment:
+Gaussian latent prior mean **0.5**, variance **0.04**, per-cell observation noise
+variance **0.25**, batch size **1**, no lower-confidence recommendation penalty,
+**1,025** grid points, grid SD bound **5**, grid cost margin **0.01**. The Gaussian
+model approximates binary scores; no data-specific prior is fitted to hidden
+outcomes. Every arm uses the same numerical decision charge **1e-4**, equivalent
+to reference unit charge 1 times its default scale 1e-4. This charge is part of
+the exploration calculation, **not dollars or cents**. Actual recorded costs
+never enter the policy. Cost-aware Gittins is excluded.
+
+For N questions, n queried scores with sum S, compute:
+
+```
+v_n = 1 / (1/v_0 + n/tau_squared)
+mu_n = v_n * (mu_0/v_0 + S/tau_squared)
+M_n = (S + (N-n)*mu_n) / N
+V_n = ((N-n)^2*v_n + (N-n)*tau_squared) / N^2
+sigma_n = (1 + tau_squared/(N*v_0)) * v_n / sqrt(v_n + tau_squared)
+```
+
+`M_n` is the posterior mean of the **entire fixed question set**, distinct from
+the latent population mean. At completion M=S/N and V=0 exactly. Recommend the
+maximum M over all configurations, including unobserved and completed ones.
+An unobserved configuration has mean 0.5, so it can be recommended. Do not clip
+or substitute empirical means for incomplete rows.
+
+Precompute a single shared root table for the N-observation horizon. On a
+uniform float64 grid from `-5*sqrt(sum(sigma_n^2))` to
+`1.01*N*1e-4 + 5*sqrt(sum(sigma_n^2))`, apply the reference backward recurrence:
+
+```
+Q_N(x) = x
+Q_n(x) = E[max(Q_(n+1)(x + sigma_n*Z), 0)] - 1e-4
+r_n = first grid x whose Q_n(x) >= 0
+index_n = M_n - r_n
+r_N = 0 exactly
+```
+
+Compute the Gaussian expectation of the piecewise-linear grid by the reference
+`m_diff` method: slope changes convolved with Gaussian expected improvement,
+left extrapolation slope zero and right slope one. Use NumPy FFT float64 and
+standard-library erfc for the normal CDF. This ports the same grid/root algorithm;
+it does not promise bitwise equality to reference JAX/Torch float32. Reject an
+unbracketed/nonmonotone root. Roots are saved in the result JSON and depend only
+on public question count and fixed parameters, never hidden scores.
+
+Continue until every pair is revealed, as the reference fixed-budget runner
+does with early stopping disabled. Keep completed configurations eligible for
+recommendation but exclude them from sampling. Record first natural stopping
+(a completed arm has the largest index) and first recommendation-aware stopping
+(largest unfinished index below the recommended M) as diagnostics, without
+truncating the anytime history. Actual cumulative cents and evaluator gap are
+recorded after every queried pair. No additional dependencies beyond NumPy.
+
+## SySRs: exact replay algorithm and planned horizon
+
+Version: **sysrs-synchronized-v1**. Port the schedule and finite-question
+reallocation from the pinned reference `src/sysrs_policy.py` (Smart-SR).
+For K arms, the planned pair budget H must be at least K+1 (one arm: at least 1)
+and no larger than K*N. This guard avoids the reference's H=K zero-observation
+eliminations. Default H is `max(K+1, round(0.1*K*N))`, hence **54** in our grid.
+An explicit horizon is prespecified, never chosen by oracle accuracy or costs.
+
+The original cumulative per-active-arm schedule is:
+
+```
+logbar = 0.5 + sum(1/j for j=2..K)
+n_0 = 0
+n_k = ceil((H-K)/(logbar*(K+1-k))), k=1..K-1
+```
+
+Copy the reference's iterative reallocation when n_k>N: mark saturated phases,
+cap them at N, and rescale unsaturated original cumulative targets using the
+remaining planned budget and reference boundary/saturated-round terms. Apply
+ceil and cumulative maximum after convergence or K iterations. Do not replace
+it with a new clipping-only schedule. The code is the controlling arithmetic
+for these terms; the deterministic schedule is saved in every seed's result.
+
+Use NumPy `default_rng(seed)` to choose `min(N,n_(K-1))` distinct shared questions
+in one random order, with the same generator later breaking elimination ties.
+Every active configuration sees that shared order. In phase k, evaluate the next
+`n_k - n_(k-1)` shared questions on every active configuration. Serialize each
+shared-question batch into individual pairs using the existing independent
+seeded configuration priority. **No elimination occurs until every scheduled
+pair in that phase is observed.** Costs are paid independently for all pairs.
+
+After a complete phase, eliminate one arm with the smallest raw observed mean.
+For worst-arm ties use reference NumPy `isclose` defaults and uniform random
+choice. Zero-extra phases eliminate without another query. Eliminated arms are
+never sampled or recommended again. During serial batches, recommend the
+largest raw mean among observed active arms; with no observations recommend the
+first active arm in the seeded priority and estimate null. Recommendation ties
+use absolute tolerance 1e-12 and that fixed priority (a replay adaptation).
+
+Stop upon H queried pairs, one survivor, finished schedule, or exhausted shared
+questions. H is a strict **pair cap**: unlike reference whole-batch budget
+overshoot, a final synchronized batch may be only partly revealed. Do not
+eliminate based on that incomplete phase. Do not force extra observations to
+match another strategy's run length. Save every queried pair plus zero-cost
+recommendation changes caused by eliminations. Zero-cost records have no queried
+question/configuration and retain the previous cumulative step and spend;
+budget lookup uses the last such state. Save schedules, shared question order,
+elimination events, survivors, and stop reason for audit.
+
+With H=540 and N=20 the reference reallocation gives `[0,20,20,...,20]`: the first
+phase reveals the entire grid. That endpoint is effectively exhaustive search,
+not evidence that elimination improved search. The default 54-pair trace is
+saved separately, alongside independently rerun horizons
+**54,108,162,216,270,324,378,432,486,540**, each using seeds **0..99**. These are
+not prefixes of a single larger-horizon search. Rounding and early termination
+can leave some of H unused; charge only actual queried pairs. The sweep summary
+reports terminal recommendation gaps, optimal fractions, actual pair counts,
+and actual costs with ranges. Complete sweep histories and code/spec snapshots
+are saved locally under `results/workflow_search/sysrs-horizons/`.
+
+## Five-strategy figures and budget matching
+
+Preserve all original VineLM/AgentOpt/Random histories and portable values.
+Do not rerun or overwrite them when adding these methods. No generation or DB
+writes are permitted in either new experiment.
+
+Two distinct five-line comparisons are saved:
+
+1. `search-comparison-extended.json`, format **workflow-search-comparison-v2**:
+   the four full-horizon anytime histories and SySRs's **planned 54-pair** history.
+   Each uses its own 121-point grid ending at that strategy's minimum terminal
+   spend across seeds. The short SySRs line stops there, without carrying a
+   stopped policy into imaginary later spend. This format validates the same
+   frozen source, exhaustive reference, seed set and common public grid limit;
+   naturally different history lengths are allowed. The original v1 overlay
+   retains its stricter equal-history-length validation.
+2. `search-comparison-budget-matched.json`, format
+   **workflow-search-budget-matched-v1**: the **main comparison**, using independent
+   SySRs horizons and equal seed-specific monetary budgets. For horizon H and
+   seed s, let B(H,s) be actual SySRs terminal spend. Use SySRs's terminal
+   recommendation and each other strategy's **last completed observation at or
+   below B(H,s)** in its saved full history. Do not interpolate, look ahead, or
+   use the mean spend as an individual seed's cap. Reject unsupported budgets.
+   Plot the mean gaps against `mean_s B(H,s)`, saving p10/p90 and optimal fractions.
+   Include the common zero-spend recommendation and ten horizon endpoints.
+   X is labeled **Mean profiling budget (cents; matched within each seed)**.
+   Joining those points does not imply one continuous SySRs search. For other
+   strategies a small residual cap can be unspent because a pair is indivisible.
+
+The second comparison is a cost-matched evaluation of search policies, not a
+claim that all methods spent exactly the same money or that the horizon was
+known as a dollar amount in advance. The evaluator selects the caps after the
+offline runs; the policies never receive future costs. Saved budget anchors
+retain every seed's actual cap for recomputation and auditing. The zero-spend
+origin uses the same seeded configuration priority for all methods.
+
+Save both comparisons in JSON/CSV and PNG/SVG, along with separate `gittins.csv`,
+`sysrs.csv`, and `sysrs-budget-sweep.csv`. Compact portable copies live in
+`data/search_baselines/`, preserving settings, reference commit, result/code/spec
+hashes and relative paths. Full histories remain in ignored results. The saved
+comparison JSON alone redraws the plot without a database, search or network.
+
+Reproduce the two new methods and ten independent SySRs horizons:
+
+```powershell
+uv run --locked --extra profiling python scripts/mathqa_bandits.py --budget-sweep --plot
+uv run --locked --extra profiling python scripts/mathqa_search_plot.py data/search_baselines/search-comparison-budget-matched.json --output results/workflow_search/search-comparison-budget-matched.png
+```
+
+This requires the original three full-history files for recomputing the overlay,
+but the portable chart JSON needs none of them for redraw. To reaggregate saved
+histories alone use `save_extended_comparison` or `save_budget_matched_comparison`
+in `mathqa_bandits.py`; neither function reads the database or executes policies.
+Add `--portable-dir data/search_baselines` to explicitly export the eight new
+compact files. This never rewrites the original three-strategy snapshots.
+The budget-matched and sweep JSONs also retain hashes/paths of each horizon's
+full-history file. Portable exports include the current plotter hash.
+
+## Limits and validation (all strategies)
 
 Prefix pooling and regularization estimate expected behavior; they can differ
 from individual frozen configuration means even at complete exposure. Thus an
@@ -390,3 +585,9 @@ any search, call `mathqa_search.save_comparison([...result paths...], output)`.
   Random pair baselines. Preserve original VineLM histories and values. Add
   optional explicit budgets to the shared aggregator without changing its
   existing defaults or VineLM numerical semantics, and add saved-data overlays.
+- `gittins-equal-cost-finite-v1`, `sysrs-synchronized-v1`: add the approved
+  equal-decision-cost Gittins and SySRs policies. Preserve previous results.
+  Document reference numerical defaults, serial synchronized phases, strict
+  planned pair caps, finite-set recommendations, 10% default SySRs horizon,
+  ten independent horizons, and seed-specific cost matching. Add extended
+  anytime and budget-matched comparisons without changing original v1 semantics.

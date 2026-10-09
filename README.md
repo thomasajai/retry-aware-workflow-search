@@ -19,7 +19,7 @@ This agreement applies to code, documentation, and experiments.
 
 ### Offline search comparison
 
-The current VineLM / AgentOpt / Random search task uses **only saved database
+The current VineLM / AgentOpt / Random / Gittins / SySRs search task uses **only saved database
 data**. OpenRouter calls and credit spending are out of scope. Search runners
 must open the database read-only and must not invoke paid workflow adapters.
 Keep the exact [experiment specification](notes/workflow-search-experiment-spec.md)
@@ -57,6 +57,34 @@ including the original VineLM curve. These compact files can travel with the
 project and recreate the overlaid figure without the full histories or database.
 The [comparison results](notes/workflow-search-comparison-results.md) record
 baseline values and their interpretation.
+
+Add the approved **equal-cost Gittins** and **SySRs** baselines using the same
+frozen observations. Gittins uses one pair per step and the full fixed-question
+posterior target. SySRs serializes synchronized question rounds and uses a
+prespecified pair budget (default 54). Its budget sweep reruns each of ten
+horizons independently; it does not truncate a single larger-horizon policy.
+
+```powershell
+uv run --locked --extra profiling python scripts/mathqa_bandits.py --budget-sweep --plot --portable-dir data/search_baselines
+```
+
+The main five-line chart is `search-comparison-budget-matched.png`/`.svg`.
+For each seed/horizon, compare all methods at that SySRs run's actual profiling
+spend, using the other methods' last affordable observation. The x-axis shows
+mean matched budgets in cents. `search-comparison-extended.png`/`.svg` separately
+shows anytime traces, with SySRs's short default-horizon trace ending where it
+has support. Cost-aware Gittins is excluded; recorded dollar costs never affect
+either new policy's decisions. See [the new results and validation](notes/workflow-search-bandit-results.md).
+
+Redraw the main chart solely from the saved portable values:
+
+```powershell
+uv run --locked --extra profiling python scripts/mathqa_search_plot.py data/search_baselines/search-comparison-budget-matched.json --output results/workflow_search/search-comparison-budget-matched.png
+```
+
+Previous three-strategy values are preserved. The optional `--portable-dir`
+explicitly updates only the new compact artifacts. Full histories, schedules,
+stop diagnostics and exact code/spec snapshots remain under ignored results.
 
 ### OpenRouter spending rule
 

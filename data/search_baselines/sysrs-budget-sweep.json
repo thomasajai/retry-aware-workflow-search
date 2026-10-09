@@ -1,0 +1,292 @@
+{
+  "version": "sysrs-budget-sweep-v1",
+  "source": {
+    "database": "data/experiments/mathqa_runs.sqlite3",
+    "database_sha256": "85a779dd74b6dd51772d1131ccae03c3e7002c3f52c12cfa2f2056d42f7599e9",
+    "run_id": "f0c941bc-5479-4e86-ae2d-261b521a3317",
+    "dataset_sha256": "07ec007c4ad73eb40b57d8b494429f73e37e0c2d79cf1c6b90debf3f05ebbaca",
+    "plan_sha256": "c8afff2663e82c7d58476d567134eb1945215200707161173d413acef6fcf365",
+    "grader_version": "workflow-option-v1",
+    "billable_requests": 2194,
+    "question_count": 20,
+    "configuration_count": 27
+  },
+  "exhaustive": {
+    "pairs": 540,
+    "cost_cents": "30.11817598300",
+    "accuracy": 0.65,
+    "optimal_configurations": [
+      "deepseek-deepseek-deepseek",
+      "deepseek-deepseek-qwen25",
+      "deepseek-qwen25-deepseek",
+      "qwen3-qwen3-deepseek"
+    ]
+  },
+  "reference": {
+    "repository": "https://github.com/QianJaneXie/BanditGittinsEval",
+    "commit": "a4992e22a48e781327efd5411fb7d0921ad5ab61"
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99
+  ],
+  "semantics": "independent horizon reruns; terminal recommendation and actual spend",
+  "implementation_sha256": "dd8073984c10588e0bb321307d15efcda7994ea42119b35071b3d217520c9e0e",
+  "specification_sha256": "8efe507789a23832258958b4bfa8972da6e4dea390e940ce59aa7e752cdbb4fc",
+  "source_results": [
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-54.json",
+      "sha256": "ccbf4119394c0647eaa3860e23e4e5f0c666b9d8755aa7ddf712d60ae5cf3dd8"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-108.json",
+      "sha256": "0df94ae1e73113ab5d7ff4f899f22d88e280a62b5be057668802f07541ed10a7"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-162.json",
+      "sha256": "db3351fa6d72cceeef7c564a74861c30302ef5894a97d3ee83033a70cec44c29"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-216.json",
+      "sha256": "d10fb09f7ecd1f44fc50545fa723af2703a2410ec05b50d1140c091f97dd6eef"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-270.json",
+      "sha256": "b3075517753e871335871895b558590c0db91c9ac53644796f3526181fbc0d72"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-324.json",
+      "sha256": "319bbc0650ee41faa8cb4ad73892337aa3f76dbc8decda3a4be8b5277dc61f77"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-378.json",
+      "sha256": "be5a8cf1288b19e68877bc678808dd66b3c77088e2cbbd7e5259d038ed5abfdd"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-432.json",
+      "sha256": "4710e02570da9ae8b409ea6a1cf5c5fe7a9c5a1f79dab2cb9541253d9f34cdd1"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-486.json",
+      "sha256": "1f13f3ce62727dd6c6d65b9b02ad166e3a4c708556dcee4e455e1c6396fd79c3"
+    },
+    {
+      "path": "results/workflow_search/sysrs-horizons/sysrs-540.json",
+      "sha256": "0a17c63e697b851d95c555f347d1641e8aa1a9a606eac9e0ede26ca22688b7eb"
+    }
+  ],
+  "points": [
+    {
+      "planned_pairs": 54,
+      "mean_actual_pairs": 39.0,
+      "mean_cost_cents": "2.20746283075",
+      "min_cost_cents": "1.1252336800",
+      "max_cost_cents": "3.4677820800",
+      "mean_gap_pp": 5.500000000000001,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 15.000000000000002,
+      "optimal_fraction": 0.35
+    },
+    {
+      "planned_pairs": 108,
+      "mean_actual_pairs": 91.0,
+      "mean_cost_cents": "5.06903064232",
+      "min_cost_cents": "3.2103736800",
+      "max_cost_cents": "6.9464709600",
+      "mean_gap_pp": 3.2500000000000018,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 9.999999999999998,
+      "optimal_fraction": 0.51
+    },
+    {
+      "planned_pairs": 162,
+      "mean_actual_pairs": 145.0,
+      "mean_cost_cents": "8.30481406010",
+      "min_cost_cents": "6.0881690000",
+      "max_cost_cents": "10.1310990800",
+      "mean_gap_pp": 1.2000000000000008,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 5.000000000000004,
+      "optimal_fraction": 0.78
+    },
+    {
+      "planned_pairs": 216,
+      "mean_actual_pairs": 216.0,
+      "mean_cost_cents": "12.30792320978",
+      "min_cost_cents": "9.5538006800",
+      "max_cost_cents": "14.7135864400",
+      "mean_gap_pp": 0.40000000000000036,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 0.92
+    },
+    {
+      "planned_pairs": 270,
+      "mean_actual_pairs": 270.0,
+      "mean_cost_cents": "15.29615372831",
+      "min_cost_cents": "12.0325655200",
+      "max_cost_cents": "17.9174914400",
+      "mean_gap_pp": 0.40000000000000036,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 0.92
+    },
+    {
+      "planned_pairs": 324,
+      "mean_actual_pairs": 324.0,
+      "mean_cost_cents": "18.25737824307",
+      "min_cost_cents": "15.3558464400",
+      "max_cost_cents": "21.24806170300",
+      "mean_gap_pp": 0.40000000000000036,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 0.92
+    },
+    {
+      "planned_pairs": 378,
+      "mean_actual_pairs": 378.0,
+      "mean_cost_cents": "21.23777565761",
+      "min_cost_cents": "18.6250859200",
+      "max_cost_cents": "23.70121698300",
+      "mean_gap_pp": 0.2500000000000002,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 0.95
+    },
+    {
+      "planned_pairs": 432,
+      "mean_actual_pairs": 432.0,
+      "mean_cost_cents": "24.17620456316",
+      "min_cost_cents": "21.97683366300",
+      "max_cost_cents": "26.24554526300",
+      "mean_gap_pp": 0.0,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 1.0
+    },
+    {
+      "planned_pairs": 486,
+      "mean_actual_pairs": 486.0,
+      "mean_cost_cents": "27.12731162105",
+      "min_cost_cents": "25.66108118300",
+      "max_cost_cents": "28.48843638300",
+      "mean_gap_pp": 0.0,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 1.0
+    },
+    {
+      "planned_pairs": 540,
+      "mean_actual_pairs": 540.0,
+      "mean_cost_cents": "30.11817598300",
+      "min_cost_cents": "30.11817598300",
+      "max_cost_cents": "30.11817598300",
+      "mean_gap_pp": 0.0,
+      "p10_gap_pp": 0.0,
+      "p90_gap_pp": 0.0,
+      "optimal_fraction": 1.0
+    }
+  ],
+  "plotter": {
+    "path": "scripts/mathqa_search_plot.py",
+    "sha256": "084174d659aefc4514236c586e1c4fbe06a4b33753e92c91ff40ceefdc58df94"
+  }
+}

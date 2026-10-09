@@ -1,0 +1,4428 @@
+{
+  "version": "workflow-search-comparison-v2",
+  "source": {
+    "database": "data/experiments/mathqa_runs.sqlite3",
+    "database_sha256": "85a779dd74b6dd51772d1131ccae03c3e7002c3f52c12cfa2f2056d42f7599e9",
+    "run_id": "f0c941bc-5479-4e86-ae2d-261b521a3317",
+    "dataset_sha256": "07ec007c4ad73eb40b57d8b494429f73e37e0c2d79cf1c6b90debf3f05ebbaca",
+    "plan_sha256": "c8afff2663e82c7d58476d567134eb1945215200707161173d413acef6fcf365",
+    "grader_version": "workflow-option-v1",
+    "billable_requests": 2194,
+    "question_count": 20,
+    "configuration_count": 27
+  },
+  "exhaustive": {
+    "pairs": 540,
+    "cost_cents": "30.11817598300",
+    "accuracy": 0.65,
+    "optimal_configurations": [
+      "deepseek-deepseek-deepseek",
+      "deepseek-deepseek-qwen25",
+      "deepseek-qwen25-deepseek",
+      "qwen3-qwen3-deepseek"
+    ]
+  },
+  "aggregation": "per-strategy common-spend grid ending at minimum terminal spend; no extrapolation",
+  "series": [
+    {
+      "strategy": "vinelm",
+      "version": "vinelm-adapted-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": null,
+        "pseudocount": 0.5,
+        "depth3_rank_one_smoothing": true,
+        "sampling": "uniform unseen pairs, without replacement",
+        "ties": "fixed seeded random priority; accuracy only",
+        "priors": "Dirichlet(alpha,alpha,alpha) at depths 1/2; Beta(alpha,alpha) at depth 3",
+        "missing_depth3": "mean of observed posterior rates in the model column; 0.5 if none",
+        "cost_policy": "full recorded solver and verifier cost; no checkpoint discounts",
+        "band": "10th-90th percentile across profiling orders, not a confidence interval",
+        "origin": "seeded prior-only recommendation before any profiling",
+        "limitations": [
+          "prefix pooling need not recover exact finite-grid column means",
+          "fixed original keys; known question and verifier issues",
+          "one recorded execution per pair; no generation resampling",
+          "no checkpoint reuse or runtime controller"
+        ]
+      },
+      "result_path": "results/workflow_search/vinelm-adapted.json",
+      "result_sha256": "86c71cacadc1eb94dff8c5d127fe2944c9cd4c53e16c79d141b9cade08714529",
+      "implementation_sha256": "890e131880c83414e0c8bcf86f2bca0792ce00f04f5d132d57b7e8b631fe668e",
+      "specification_sha256": "11f635ab753626b9584d4698dc4acbbcd4400b711b0984f3a43b07d29727cb47",
+      "curve": [
+        {
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 7.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 7.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 6.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 6.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 5.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 5.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 5.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 5.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 4.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 4.900000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 5.150000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 4.500000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 5.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 4.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.37
+        },
+        {
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 4.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.38
+        },
+        {
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 4.250000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 3.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 3.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 3.1500000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 3.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.52
+        },
+        {
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 3.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.52
+        },
+        {
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 3.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 3.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 3.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 3.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.51
+        },
+        {
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 3.7500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 3.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 3.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.55
+        },
+        {
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 2.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.56
+        },
+        {
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 2.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.55
+        },
+        {
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 3.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.51
+        },
+        {
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 2.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 2.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.56
+        },
+        {
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 2.3500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 2.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 2.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 2.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 2.5000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 2.5000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 2.3500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.67
+        },
+        {
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 1.9000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.68
+        },
+        {
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 1.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.69
+        },
+        {
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 1.8500000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 1.6500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 1.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 1.7000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 1.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.75
+        },
+        {
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 1.7500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 1.6500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 1.7500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 1.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.79
+        },
+        {
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 1.3500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 1.4500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.75
+        },
+        {
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.77
+        },
+        {
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 1.1000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.8
+        },
+        {
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 0.9000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 0.8000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 0.6500000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 0.6500000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 0.6000000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.88
+        },
+        {
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 0.40000000000000036,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 0.4500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 0.4500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 0.4000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 0.4000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 0.4500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 0.4000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ]
+    },
+    {
+      "strategy": "agentopt",
+      "version": "agentopt-matrix-ucb-e-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": null,
+        "exploration_weight": 1.0,
+        "batch_size": 1,
+        "sampling": "Matrix UCB-E: choose max UCB, then uniform unseen question",
+        "recommendation": "maximum raw mean of observed workflow scores; unobserved excluded",
+        "priors": "none; seeded initial recommendation has null estimated accuracy",
+        "ties": "fixed seeded random priority; accuracy only",
+        "cost_policy": "full recorded solver and verifier cost; no cache discounts",
+        "band": "10th-90th percentile across profiling orders, not a confidence interval",
+        "limitations": [
+          "fixed original keys; known question and verifier issues",
+          "one recorded execution per pair; no generation resampling",
+          "Random is pair sampling, not the paper's full-configuration variant",
+          "seeded ties and Python RNG are replay choices, not library bitwise reproduction"
+        ]
+      },
+      "result_path": "results/workflow_search/agentopt.json",
+      "result_sha256": "e99454e5ca27a69beee3ec42d64c7b0bd31942738c45394aa0f349ff65bbebd4",
+      "implementation_sha256": "1f93b7296afb78abc1898feef8761344dd680816ae72a5339f60ea9a50622da1",
+      "specification_sha256": "10f9e85d820b38b08a8bd1cf2cc7ff7dc9107dca79b0129358762ecfcbd984af",
+      "curve": [
+        {
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 8.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.19
+        },
+        {
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 8.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 8.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 8.15,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 7.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.2
+        },
+        {
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 5.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.37
+        },
+        {
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 5.750000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 5.750000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 5.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 5.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.36
+        },
+        {
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 4.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.38
+        },
+        {
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 4.700000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 4.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 4.300000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 4.550000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 4.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 4.900000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.4
+        },
+        {
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 4.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 3.9500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 4.250000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 3.9500000000000024,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 3.6000000000000023,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.4
+        },
+        {
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 3.7000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 3.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 3.100000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 3.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 2.7500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 2.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 2.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 2.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.63
+        },
+        {
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 2.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.67
+        },
+        {
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 2.000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 1.3500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.77
+        },
+        {
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.79
+        },
+        {
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 1.2000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 1.7000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 1.1000000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 0.8000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 0.6000000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.89
+        },
+        {
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 0.7500000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 1.0500000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.84
+        },
+        {
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 0.7500000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.87
+        },
+        {
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 0.7000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.89
+        },
+        {
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 0.6000000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.91
+        },
+        {
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 0.30000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 0.30000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.95
+        },
+        {
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 0.30000000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 0.25000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 0.30000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 0.4000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 0.15000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 0.3500000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 0.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 0.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 0.15000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 0.15000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.20000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.97
+        },
+        {
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.09999999999999998,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ]
+    },
+    {
+      "strategy": "random",
+      "version": "random-pair-search-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": null,
+        "exploration_weight": null,
+        "batch_size": 1,
+        "sampling": "uniform unseen pairs, without replacement; same orders as VineLM",
+        "recommendation": "maximum raw mean of observed workflow scores; unobserved excluded",
+        "priors": "none; seeded initial recommendation has null estimated accuracy",
+        "ties": "fixed seeded random priority; accuracy only",
+        "cost_policy": "full recorded solver and verifier cost; no cache discounts",
+        "band": "10th-90th percentile across profiling orders, not a confidence interval",
+        "limitations": [
+          "fixed original keys; known question and verifier issues",
+          "one recorded execution per pair; no generation resampling",
+          "Random is pair sampling, not the paper's full-configuration variant",
+          "seeded ties and Python RNG are replay choices, not library bitwise reproduction"
+        ]
+      },
+      "result_path": "results/workflow_search/random.json",
+      "result_sha256": "2d9f9f42c72cbe0dcfcbac241b8a9b968643dfebb2d93cce3688f485696331b7",
+      "implementation_sha256": "1f93b7296afb78abc1898feef8761344dd680816ae72a5339f60ea9a50622da1",
+      "specification_sha256": "10f9e85d820b38b08a8bd1cf2cc7ff7dc9107dca79b0129358762ecfcbd984af",
+      "curve": [
+        {
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.14
+        },
+        {
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 8.65,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.17
+        },
+        {
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 8.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.16
+        },
+        {
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 9.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.17
+        },
+        {
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 9.05,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.19
+        },
+        {
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 9.200000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.17
+        },
+        {
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 8.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.2
+        },
+        {
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 7.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 8.4,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.25
+        },
+        {
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 8.05,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 8.05,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 7.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 6.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 6.700000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 7.500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 7.5500000000000025,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 7.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 7.500000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 7.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 7.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.24
+        },
+        {
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 6.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.21
+        },
+        {
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 6.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 6.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.25
+        },
+        {
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 6.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 6.650000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.26
+        },
+        {
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 6.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 6.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 6.000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 5.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 5.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 5.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.35
+        },
+        {
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 4.950000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 4.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 4.550000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 5.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 5.250000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 5.400000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 5.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 10.50000000000004,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 5.5500000000000025,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 5.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 4.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.34
+        },
+        {
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 5.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 5.150000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 5.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 4.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.35
+        },
+        {
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 4.650000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.36
+        },
+        {
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 4.500000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.37
+        },
+        {
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 4.250000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 4.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 4.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.4
+        },
+        {
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 4.200000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 4.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 3.9000000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.42
+        },
+        {
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 3.9000000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 4.300000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 4.050000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 3.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 3.7500000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 3.9500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 3.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 3.5000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 3.600000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 3.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 3.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 3.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 3.0000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 2.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.52
+        },
+        {
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 2.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.51
+        },
+        {
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 2.450000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 2.3500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 2.1500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 2.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 2.2500000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 2.3000000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 2.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 2.350000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.59
+        },
+        {
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 2.2500000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 2.5000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.58
+        },
+        {
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.62
+        },
+        {
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 2.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.64
+        },
+        {
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 2.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 1.8000000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.66
+        },
+        {
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 1.500000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 1.5500000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.71
+        },
+        {
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 1.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 1.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 1.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.72
+        },
+        {
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 1.2500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 1.1500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.78
+        },
+        {
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 1.2500000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 1.0000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.81
+        },
+        {
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.9000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.82
+        },
+        {
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.8500000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.83
+        },
+        {
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.5500000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.89
+        },
+        {
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.20000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.96
+        },
+        {
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ]
+    },
+    {
+      "strategy": "gittins",
+      "version": "gittins-equal-cost-finite-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": 540,
+        "batch_size": 1,
+        "cost_aware_selection": false,
+        "cost_policy": "full recorded cost, evaluator-only",
+        "ties": "fixed seeded random priority; SySRs elimination ties use NumPy isclose and random choice",
+        "curve_semantics": "one fixed-horizon trajectory; truncate at minimum terminal spend across seeds",
+        "limitations": [
+          "fixed original keys and one saved execution per pair",
+          "seeded ties, RNG and float64 NumPy are replay adaptations",
+          "Gaussian approximation to binary scores; fixed prior and numerical charge"
+        ],
+        "prior_mean": 0.5,
+        "prior_variance": 0.04,
+        "noise_variance": 0.25,
+        "transition_charge": 0.0001,
+        "grid_points": 1025,
+        "grid_sd_bound": 5.0,
+        "grid_cost_margin": 0.01,
+        "index_target": "finite_population_mean",
+        "recommendation_std_penalty": 0,
+        "stopping": "continue through full grid; natural stop retained as a diagnostic",
+        "sampling": "maximum unfinished finite-row Gittins index, uniform unseen question"
+      },
+      "result_path": "results/workflow_search/gittins.json",
+      "result_sha256": "86e9e208e73e85296de2d44e5d9a374185c5d4c64a83f4572a8a3b65b626aaeb",
+      "implementation_sha256": "dd8073984c10588e0bb321307d15efcda7994ea42119b35071b3d217520c9e0e",
+      "specification_sha256": "8efe507789a23832258958b4bfa8972da6e4dea390e940ce59aa7e752cdbb4fc",
+      "curve": [
+        {
+          "cost_cents": "0E-11",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.2509847998583333333333333333",
+          "mean_gap_pp": 8.15,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.2
+        },
+        {
+          "cost_cents": "0.5019695997166666666666666667",
+          "mean_gap_pp": 7.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.752954399575",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.22
+        },
+        {
+          "cost_cents": "1.003939199433333333333333333",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "1.254923999291666666666666667",
+          "mean_gap_pp": 7.000000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.21
+        },
+        {
+          "cost_cents": "1.50590879915",
+          "mean_gap_pp": 6.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.2
+        },
+        {
+          "cost_cents": "1.756893599008333333333333333",
+          "mean_gap_pp": 7.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.2
+        },
+        {
+          "cost_cents": "2.007878398866666666666666667",
+          "mean_gap_pp": 6.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.23
+        },
+        {
+          "cost_cents": "2.258863198725",
+          "mean_gap_pp": 6.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.25
+        },
+        {
+          "cost_cents": "2.509847998583333333333333333",
+          "mean_gap_pp": 6.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.25
+        },
+        {
+          "cost_cents": "2.760832798441666666666666667",
+          "mean_gap_pp": 6.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "3.01181759830",
+          "mean_gap_pp": 6.300000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "3.262802398158333333333333333",
+          "mean_gap_pp": 6.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "3.513787198016666666666666667",
+          "mean_gap_pp": 6.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.35
+        },
+        {
+          "cost_cents": "3.764771997875",
+          "mean_gap_pp": 5.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.39
+        },
+        {
+          "cost_cents": "4.015756797733333333333333333",
+          "mean_gap_pp": 5.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "4.266741597591666666666666667",
+          "mean_gap_pp": 5.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "4.51772639745",
+          "mean_gap_pp": 4.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.45
+        },
+        {
+          "cost_cents": "4.768711197308333333333333333",
+          "mean_gap_pp": 5.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "5.019695997166666666666666667",
+          "mean_gap_pp": 4.700000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 10.50000000000004,
+          "optimal_fraction": 0.41
+        },
+        {
+          "cost_cents": "5.270680797025",
+          "mean_gap_pp": 4.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.44
+        },
+        {
+          "cost_cents": "5.521665596883333333333333333",
+          "mean_gap_pp": 4.250000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.47
+        },
+        {
+          "cost_cents": "5.772650396741666666666666667",
+          "mean_gap_pp": 4.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.44
+        },
+        {
+          "cost_cents": "6.02363519660",
+          "mean_gap_pp": 3.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "6.274619996458333333333333333",
+          "mean_gap_pp": 3.9000000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.45
+        },
+        {
+          "cost_cents": "6.525604796316666666666666667",
+          "mean_gap_pp": 3.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "6.776589596175",
+          "mean_gap_pp": 3.5000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.52
+        },
+        {
+          "cost_cents": "7.027574396033333333333333333",
+          "mean_gap_pp": 3.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "7.278559195891666666666666667",
+          "mean_gap_pp": 3.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.51
+        },
+        {
+          "cost_cents": "7.52954399575",
+          "mean_gap_pp": 4.000000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.43
+        },
+        {
+          "cost_cents": "7.780528795608333333333333333",
+          "mean_gap_pp": 3.4000000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "8.031513595466666666666666667",
+          "mean_gap_pp": 3.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "8.282498395325",
+          "mean_gap_pp": 3.5000000000000018,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.46
+        },
+        {
+          "cost_cents": "8.533483195183333333333333333",
+          "mean_gap_pp": 3.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.48
+        },
+        {
+          "cost_cents": "8.784467995041666666666666667",
+          "mean_gap_pp": 3.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "9.03545279490",
+          "mean_gap_pp": 2.7000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.55
+        },
+        {
+          "cost_cents": "9.286437594758333333333333333",
+          "mean_gap_pp": 3.2000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.5
+        },
+        {
+          "cost_cents": "9.537422394616666666666666667",
+          "mean_gap_pp": 2.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "9.788407194475",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.53
+        },
+        {
+          "cost_cents": "10.03939199433333333333333333",
+          "mean_gap_pp": 2.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.53
+        },
+        {
+          "cost_cents": "10.29037679419166666666666667",
+          "mean_gap_pp": 3.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.51
+        },
+        {
+          "cost_cents": "10.54136159405",
+          "mean_gap_pp": 2.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.53
+        },
+        {
+          "cost_cents": "10.79234639390833333333333333",
+          "mean_gap_pp": 2.9000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.56
+        },
+        {
+          "cost_cents": "11.04333119376666666666666667",
+          "mean_gap_pp": 2.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "11.294315993625",
+          "mean_gap_pp": 2.7500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.55
+        },
+        {
+          "cost_cents": "11.54530079348333333333333333",
+          "mean_gap_pp": 3.100000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.49
+        },
+        {
+          "cost_cents": "11.79628559334166666666666667",
+          "mean_gap_pp": 3.0000000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 9.999999999999998,
+          "optimal_fraction": 0.52
+        },
+        {
+          "cost_cents": "12.04727039320",
+          "mean_gap_pp": 2.9500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.500000000000046,
+          "optimal_fraction": 0.51
+        },
+        {
+          "cost_cents": "12.29825519305833333333333333",
+          "mean_gap_pp": 2.850000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.52
+        },
+        {
+          "cost_cents": "12.54923999291666666666666667",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.56
+        },
+        {
+          "cost_cents": "12.800224792775",
+          "mean_gap_pp": 2.5500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "13.05120959263333333333333333",
+          "mean_gap_pp": 2.6500000000000017,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "13.30219439249166666666666667",
+          "mean_gap_pp": 2.7000000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.54
+        },
+        {
+          "cost_cents": "13.55317919235",
+          "mean_gap_pp": 2.1000000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.63
+        },
+        {
+          "cost_cents": "13.80416399220833333333333333",
+          "mean_gap_pp": 2.4500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.57
+        },
+        {
+          "cost_cents": "14.05514879206666666666666667",
+          "mean_gap_pp": 2.2500000000000013,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.6
+        },
+        {
+          "cost_cents": "14.306133591925",
+          "mean_gap_pp": 1.9500000000000015,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "cost_cents": "14.55711839178333333333333333",
+          "mean_gap_pp": 2.0500000000000016,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.61
+        },
+        {
+          "cost_cents": "14.80810319164166666666666667",
+          "mean_gap_pp": 1.8500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "cost_cents": "15.05908799150",
+          "mean_gap_pp": 1.8500000000000014,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.65
+        },
+        {
+          "cost_cents": "15.31007279135833333333333333",
+          "mean_gap_pp": 2.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.66
+        },
+        {
+          "cost_cents": "15.56105759121666666666666667",
+          "mean_gap_pp": 1.4000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.73
+        },
+        {
+          "cost_cents": "15.812042391075",
+          "mean_gap_pp": 1.3000000000000012,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.74
+        },
+        {
+          "cost_cents": "16.06302719093333333333333333",
+          "mean_gap_pp": 1.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "cost_cents": "16.31401199079166666666666667",
+          "mean_gap_pp": 1.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.76
+        },
+        {
+          "cost_cents": "16.56499679065",
+          "mean_gap_pp": 1.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.8
+        },
+        {
+          "cost_cents": "16.81598159050833333333333333",
+          "mean_gap_pp": 1.2000000000000008,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.79
+        },
+        {
+          "cost_cents": "17.06696639036666666666666667",
+          "mean_gap_pp": 1.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.81
+        },
+        {
+          "cost_cents": "17.317951190225",
+          "mean_gap_pp": 1.0000000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.82
+        },
+        {
+          "cost_cents": "17.56893599008333333333333333",
+          "mean_gap_pp": 0.7500000000000007,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.85
+        },
+        {
+          "cost_cents": "17.81992078994166666666666667",
+          "mean_gap_pp": 0.7000000000000006,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.86
+        },
+        {
+          "cost_cents": "18.07090558980",
+          "mean_gap_pp": 0.6000000000000005,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 5.000000000000004,
+          "optimal_fraction": 0.88
+        },
+        {
+          "cost_cents": "18.32189038965833333333333333",
+          "mean_gap_pp": 0.4500000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.91
+        },
+        {
+          "cost_cents": "18.57287518951666666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "18.823859989375",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "19.07484478923333333333333333",
+          "mean_gap_pp": 0.5500000000000004,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.91
+        },
+        {
+          "cost_cents": "19.32582958909166666666666667",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "19.57681438895",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "19.82779918880833333333333333",
+          "mean_gap_pp": 0.40000000000000036,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.92
+        },
+        {
+          "cost_cents": "20.07878398866666666666666667",
+          "mean_gap_pp": 0.3500000000000003,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.93
+        },
+        {
+          "cost_cents": "20.329768788525",
+          "mean_gap_pp": 0.30000000000000027,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.94
+        },
+        {
+          "cost_cents": "20.58075358838333333333333333",
+          "mean_gap_pp": 0.2500000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.95
+        },
+        {
+          "cost_cents": "20.83173838824166666666666667",
+          "mean_gap_pp": 0.2500000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.95
+        },
+        {
+          "cost_cents": "21.08272318810",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "21.33370798795833333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "21.58469278781666666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "21.835677587675",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "22.08666238753333333333333333",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "22.33764718739166666666666667",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "22.58863198725",
+          "mean_gap_pp": 0.050000000000000044,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.99
+        },
+        {
+          "cost_cents": "22.83961678710833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "23.09060158696666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "23.341586386825",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "23.59257118668333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "23.84355598654166666666666667",
+          "mean_gap_pp": 0.10000000000000009,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 0.98
+        },
+        {
+          "cost_cents": "24.09454078640",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "24.34552558625833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "24.59651038611666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "24.847495185975",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "25.09847998583333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "25.34946478569166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "25.60044958555",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "25.85143438540833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "26.10241918526666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "26.353403985125",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "26.60438878498333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "26.85537358484166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "27.10635838470",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "27.35734318455833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "27.60832798441666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "27.859312784275",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.11029758413333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.36128238399166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.61226718385",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "28.86325198370833333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.11423678356666666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.365221583425",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.61620638328333333333333333",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "29.86719118314166666666666667",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        },
+        {
+          "cost_cents": "30.11817598300",
+          "mean_gap_pp": 0.0,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 0.0,
+          "optimal_fraction": 1.0
+        }
+      ],
+      "reference": {
+        "repository": "https://github.com/QianJaneXie/BanditGittinsEval",
+        "commit": "a4992e22a48e781327efd5411fb7d0921ad5ab61"
+      }
+    },
+    {
+      "strategy": "sysrs",
+      "version": "sysrs-synchronized-v1",
+      "settings": {
+        "seeds": 100,
+        "first_seed": 0,
+        "max_pairs": 540,
+        "batch_size": 1,
+        "cost_aware_selection": false,
+        "cost_policy": "full recorded cost, evaluator-only",
+        "ties": "fixed seeded random priority; SySRs elimination ties use NumPy isclose and random choice",
+        "curve_semantics": "one fixed-horizon trajectory; truncate at minimum terminal spend across seeds",
+        "limitations": [
+          "fixed original keys and one saved execution per pair",
+          "seeded ties, RNG and float64 NumPy are replay adaptations",
+          "budget-dependent schedule; trace is not a smaller-budget rerun"
+        ],
+        "planned_budget": 54,
+        "sampling": "shared unseen question across active arms; successive rejects after full phases",
+        "stopping": "planned pair budget or natural schedule termination; no forced post-stop pulls",
+        "recommendation": "maximum raw mean among observed active configurations"
+      },
+      "result_path": "results/workflow_search/sysrs.json",
+      "result_sha256": "ccbf4119394c0647eaa3860e23e4e5f0c666b9d8755aa7ddf712d60ae5cf3dd8",
+      "implementation_sha256": "dd8073984c10588e0bb321307d15efcda7994ea42119b35071b3d217520c9e0e",
+      "specification_sha256": "8efe507789a23832258958b4bfa8972da6e4dea390e940ce59aa7e752cdbb4fc",
+      "curve": [
+        {
+          "cost_cents": "0E-10",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.009376947333333333333333333333",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.01875389466666666666666666667",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.0281308420",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.03750778933333333333333333333",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.04688473666666666666666666667",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.0562616840",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.06563863133333333333333333333",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.07501557866666666666666666667",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.0843925260",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.09376947333333333333333333333",
+          "mean_gap_pp": 9.200000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.27
+        },
+        {
+          "cost_cents": "0.1031464206666666666666666667",
+          "mean_gap_pp": 8.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.1125233680",
+          "mean_gap_pp": 8.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.1219003153333333333333333333",
+          "mean_gap_pp": 8.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.1312772626666666666666666667",
+          "mean_gap_pp": 8.65,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.1406542100",
+          "mean_gap_pp": 8.750000000000002,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.1500311573333333333333333333",
+          "mean_gap_pp": 8.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "0.1594081046666666666666666667",
+          "mean_gap_pp": 8.65,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.1687850520",
+          "mean_gap_pp": 8.65,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.1781619993333333333333333333",
+          "mean_gap_pp": 8.65,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.1875389466666666666666666667",
+          "mean_gap_pp": 8.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.1969158940",
+          "mean_gap_pp": 8.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2062928413333333333333333333",
+          "mean_gap_pp": 8.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2156697886666666666666666667",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2250467360",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2344236833333333333333333333",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2438006306666666666666666667",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2531775780",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2625545253333333333333333333",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2719314726666666666666666667",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2813084200",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.2906853673333333333333333333",
+          "mean_gap_pp": 8.3,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.3000623146666666666666666667",
+          "mean_gap_pp": 8.15,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3094392620",
+          "mean_gap_pp": 8.15,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3188162093333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3281931566666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3375701040",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3469470513333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3563239986666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3657009460",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3750778933333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3844548406666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.3938317880",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4032087353333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4125856826666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4219626300",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4313395773333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4407165246666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4500934720",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4594704193333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4688473666666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4782243140",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4876012613333333333333333333",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.4969782086666666666666666667",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5063551560",
+          "mean_gap_pp": 8.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5157321033333333333333333333",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5251090506666666666666666667",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5344859980",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5438629453333333333333333333",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5532398926666666666666666667",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5626168400",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5719937873333333333333333333",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5813707346666666666666666667",
+          "mean_gap_pp": 7.900000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.5907476820",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6001246293333333333333333333",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6095015766666666666666666667",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6188785240",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6282554713333333333333333333",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6376324186666666666666666667",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6470093660",
+          "mean_gap_pp": 7.800000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6563863133333333333333333333",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.6657632606666666666666666667",
+          "mean_gap_pp": 7.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6751402080",
+          "mean_gap_pp": 7.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6845171553333333333333333333",
+          "mean_gap_pp": 7.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.6938941026666666666666666667",
+          "mean_gap_pp": 7.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.7032710500",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.34
+        },
+        {
+          "cost_cents": "0.7126479973333333333333333333",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.34
+        },
+        {
+          "cost_cents": "0.7220249446666666666666666667",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "0.7314018920",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "0.7407788393333333333333333333",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "0.7501557866666666666666666667",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.7595327340",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.7689096813333333333333333333",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.7782866286666666666666666667",
+          "mean_gap_pp": 7.600000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.7876635760",
+          "mean_gap_pp": 7.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.7970405233333333333333333333",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.8064174706666666666666666667",
+          "mean_gap_pp": 7.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.8157944180",
+          "mean_gap_pp": 7.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.8251713653333333333333333333",
+          "mean_gap_pp": 7.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.8345483126666666666666666667",
+          "mean_gap_pp": 7.650000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.8439252600",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.31
+        },
+        {
+          "cost_cents": "0.8533022073333333333333333333",
+          "mean_gap_pp": 7.250000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.32
+        },
+        {
+          "cost_cents": "0.8626791546666666666666666667",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "0.8720561020",
+          "mean_gap_pp": 6.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "0.8814330493333333333333333333",
+          "mean_gap_pp": 6.950000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.33
+        },
+        {
+          "cost_cents": "0.8908099966666666666666666667",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.9001869440",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.9095638913333333333333333333",
+          "mean_gap_pp": 7.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.9189408386666666666666666667",
+          "mean_gap_pp": 7.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "0.9283177860",
+          "mean_gap_pp": 7.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9376947333333333333333333333",
+          "mean_gap_pp": 7.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9470716806666666666666666667",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9564486280",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9658255753333333333333333333",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9752025226666666666666666667",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9845794700",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "0.9939564173333333333333333333",
+          "mean_gap_pp": 7.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.003333364666666666666666667",
+          "mean_gap_pp": 7.250000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.0127103120",
+          "mean_gap_pp": 7.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "1.022087259333333333333333333",
+          "mean_gap_pp": 7.450000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.031464206666666666666666667",
+          "mean_gap_pp": 7.400000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 20.0,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.0408411540",
+          "mean_gap_pp": 7.250000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.050218101333333333333333333",
+          "mean_gap_pp": 7.150000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.059595048666666666666666667",
+          "mean_gap_pp": 7.100000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.3
+        },
+        {
+          "cost_cents": "1.0689719960",
+          "mean_gap_pp": 7.350000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "1.078348943333333333333333333",
+          "mean_gap_pp": 7.250000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.500000000000044,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "1.087725890666666666666666667",
+          "mean_gap_pp": 6.750000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.29
+        },
+        {
+          "cost_cents": "1.0971028380",
+          "mean_gap_pp": 6.700000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "1.106479785333333333333333333",
+          "mean_gap_pp": 6.550000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "1.115856732666666666666666667",
+          "mean_gap_pp": 6.850000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        },
+        {
+          "cost_cents": "1.1252336800",
+          "mean_gap_pp": 7.050000000000001,
+          "p10_gap_pp": 0.0,
+          "p90_gap_pp": 15.000000000000002,
+          "optimal_fraction": 0.28
+        }
+      ],
+      "reference": {
+        "repository": "https://github.com/QianJaneXie/BanditGittinsEval",
+        "commit": "a4992e22a48e781327efd5411fb7d0921ad5ab61"
+      }
+    }
+  ],
+  "plotter": {
+    "path": "scripts/mathqa_search_plot.py",
+    "sha256": "084174d659aefc4514236c586e1c4fbe06a4b33753e92c91ff40ceefdc58df94"
+  }
+}
